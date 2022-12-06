@@ -15,11 +15,11 @@ namespace AoCLibrary
     {
         static string _cookieString = "53616c7465645f5f3b43899863152185d2d59143fe9023d92a6d55ab884b6f6f680eb77a696a29670c5ce9d701f913454f82916b42d7bf759aeb3c84cfceefaa";
         static public string Dir { get; } = @"c:\temp\data";
-        static public async Task<Tuple<string, bool>> Read(string url)
+        static public async Task<Tuple<string, bool>> Read(string url, bool overrideThrottle = false)
         {
             Directory.CreateDirectory(Dir);
             var filename = Path.Combine(Dir, FileName());
-            if (File.Exists(filename))
+            if (overrideThrottle == false &&  File.Exists(filename))
             {
                 return new Tuple<string, bool>(File.ReadAllText(filename), false);
             }

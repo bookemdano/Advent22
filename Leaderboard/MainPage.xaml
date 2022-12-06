@@ -5,15 +5,26 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <ListView Grid.Row="0" x:Name="lst"/>
-        <HorizontalStackLayout Grid.Row="1">
-            <Label>Next:</Label>
-            <Label>LastReal:</Label>
-            <Button Text="Refresh"/>
-            <Button Text="Hard Refresh"/>
+        <ListView Grid.Row="0" x:Name="lst" Margin="5">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <TextCell
+                        Text = "{Binding Name}"
+                        Detail = "{Binding Detail}"/>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <ListView Grid.Row="1" x:Name="lstLog"/>
+        <HorizontalStackLayout Grid.Row="2">
+            <Button Text="Refresh" Clicked="Refresh_Clicked"/>
+            <Button Text="Force" Clicked="Force_Clicked"/>
+            <Button Text="Export" Clicked="Export_Clicked"/>
+            <Label x:Name="staLast" VerticalTextAlignment="Center"/>
+            <Label x:Name="staNext" VerticalTextAlignment="Center"/>
         </HorizontalStackLayout>
     </Grid>
 
