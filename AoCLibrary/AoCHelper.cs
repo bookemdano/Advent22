@@ -34,7 +34,7 @@ namespace AoCLibrary
                             stars.Add(key, new List<StarScore>());
                         stars[key].Add(new StarScore(member.Name, day.Star2.StarTime()));
                         var delta = day.Star2.StarTime() - day.Star1.StarTime();
-                        bestDeltas.Add($"{member.Name} Day {iDay}", delta);
+                        bestDeltas.Add($"{Member.GetName(member.Name)} Day {iDay}", delta);
                     }
                     iDay++;
                 }
@@ -42,7 +42,7 @@ namespace AoCLibrary
 
             var bests = new List<string>();
             foreach (var order in bestDeltas.OrderBy(kvp => kvp.Value).Take(10))
-                bests.Add($"{order.Key}: {order.Value.TotalSeconds.ToString("0.00")}s");
+                bests.Add($"{order.Key}: {order.Value.TotalSeconds.ToString("0")}s");
             File.WriteAllLines(Path.Combine(Communicator.Dir, "BestDelta.csv"), bests);
 
             var allStars = new List<StarScore>();
