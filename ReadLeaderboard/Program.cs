@@ -12,7 +12,7 @@ internal class Program : ILogger
     }
     async Task Runner()
     { 
-        var last = AoCHelper.Export(this);
+        var last = AoCHelper.OldExport(this);
         var first = true;
         while (true)
         {
@@ -27,7 +27,7 @@ internal class Program : ILogger
             }
             if (realRead)
             {
-                AoCHelper.Export(this);
+                AoCHelper.OldExport(this);
                 Log("Real read!");
             }
             //Log(json);

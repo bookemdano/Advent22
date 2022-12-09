@@ -1,156 +1,10 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using Microsoft.Win32;
-using System.Text.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace AoCLibrary
 {
-    public class AoCHelper
-    {
-        class CalcScore
-        {
-            public CalcScore(string line)
-            {
-                var parts = line.Split(",");
-                Hour = DateTime.ParseExact(parts[0], "M/d H:mm", null);
-                Name = parts[1];
-                Score = int.Parse(parts[3]);
-            }
-            public DateTime Hour { get; set; }
-            public string Name { get; set; }
-            public int Score { get; set; }
-        }
-        // returns last
-        static public AoCResult Export(ILogger logger)
-        {
-            {
-                var inlines = File.ReadAllLines(Path.Combine(Communicator.Dir, "CalcScore.csv"));
-                var scores = new Dictionary<DateTime, List<CalcScore>>();
-                foreach(var line in inlines)
-                {
-                    if (line.StartsWith("Hour"))
-                        continue;
-                    var c = new CalcScore(line);
-                    if (!scores.ContainsKey(c.Hour))
-                        scores.Add(c.Hour, new List<CalcScore>());
-                    var score = scores[c.Hour].FirstOrDefault(s => s.Name == c.Name);
-                    if (score == null)
-                        scores[c.Hour].Add(c);
-                    else
-                        score.Score = c.Score;
-                }
-            }
-
-
-            var outs = new List<string>();
-            var all = ReadAll();
-            var finalResult = all.Last().Value;
-            var lines = new List<string>();
-            foreach (var member in finalResult.AllMembers())
-            {
-                if (member.LocalScore == 0)
-                    continue;
-                var partScore = member.GuessScore();
-                lines.Add(string.Join(",", partScore));
-            }
-            File.WriteAllLines(Path.Combine(Communicator.Dir, "times.csv"), lines);
-            // header
-            var parts = new List<string>();
-            parts.Add("");
-            parts.Add("url");
-            foreach (var key in all.Keys)
-                parts.Add(key.ToString("M/d H:mm"));
-            outs.Add(string.Join(",", parts));
-
-            // export for graph
-            var firstMember = all.First().Value;
-            foreach (var member in firstMember.AllMembers())
-            {
-                var name = member.Name;
-                if (finalResult.FindbyName(name).LocalScore == 0)
-                    continue;
-                parts = new List<string>();
-                parts.Add(member.GetName());
-                parts.Add(member.GetUrl());
-                foreach (var kvp in all)
-                    parts.Add(kvp.Value.FindbyName(name).LocalScore.ToString());
-                outs.Add(string.Join(",", parts));
-            }
-            File.WriteAllLines(Path.Combine(Communicator.Dir, "UserByRow.csv"), outs);
-
-
-            outs = new List<string>();
-            AoCResult prevResult = null;
-            foreach (var kvp in all)
-            {
-                var date = kvp.Key;
-                var aocResult = kvp.Value;
-                if (!outs.Any())
-                {
-                    var headerParts = new List<string>();
-                    headerParts.Add("Date");
-                    foreach (var member in aocResult.AllMembers())
-                    {
-                        if (finalResult.FindbyName(member.Name).LocalScore > 0)
-                            headerParts.Add(member.GetName());
-                    }
-                    outs.Add(string.Join(",", headerParts));
-                }
-
-                parts = new List<string>();
-                parts.Add(date.ToString());
-                foreach (var member in aocResult.AllMembers())
-                {
-                    if (finalResult.FindbyName(member.Name).LocalScore > 0)
-                    {
-                        //parts.Add(member.LocalScore.ToString());
-                        var prev = prevResult?.FindbyName(member.Name);
-                        if (prev == null)
-                            parts.Add(member.LocalScore.ToString());
-                        else
-                            parts.Add((member.LocalScore - prev.LocalScore).ToString());
-                    }
-                }
-                prevResult = aocResult;
-                outs.Add(string.Join(",", parts));
-            }
-            try
-            {
-                File.WriteAllLines(Path.Combine(Communicator.Dir, "scores.csv"), outs);
-            }
-            catch (Exception ex)
-            {
-                logger.Log("Error " + ex.Message);
-            }
-            return finalResult;
-        }
-        static Dictionary<DateTime, AoCResult> ReadAll()
-        {
-            if (!Directory.Exists(Communicator.Dir))
-                return null;
-            var files = Directory.GetFiles(Communicator.Dir, "url*.json").Order();
-            if (!files.Any())
-                return null;
-            AoCResult last = null;
-            var rv = new Dictionary<DateTime, AoCResult>();
-            foreach (var file in files)
-            {
-                var json = File.ReadAllText(file);
-                var res = Deserialize(json);
-                if (res.HasChanges(last, null))
-                {
-                    rv.Add(Communicator.TimeFromFile(file), res);
-                    last = res;
-                }
-            }
-            return rv;
-        }
-        public static AoCResult Deserialize(string json)
-        {
-            var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<AoCResult>(json, options);
-        }
-    }
     public class AoCResult
     {
 
@@ -159,9 +13,9 @@ namespace AoCLibrary
             return AllMembers().First(m => m.Name == name);
         }
         public MemberGroup Members { get; set; }
-        public Member[] AllMembers()
+        public Member[] AllMembers(bool hideZeros = true)
         {
-            return Members.AllMembers();
+            return Members.AllMembers(hideZeros);
         }
         public bool HasChanges(AoCResult last, ILogger logger)
         {
@@ -185,12 +39,17 @@ namespace AoCLibrary
     }
     public class MemberGroup
     {
-        public Member[] AllMembers()
+        public Member[] AllMembers(bool hideZeros = true)
         {
-            return new Member[] {
+            if (Member08.Name == null)
+                Member08.Name = "-";
+            var rv = new Member[] {
                 Member00, Member01, Member02, Member03, Member04, Member05, Member06, Member07, Member08, Member09,
                 Member10, Member11, Member12, Member13, Member14, Member15, Member16, Member17, Member18, Member19,
                 Member20, Member21};
+            if (hideZeros)
+                rv = rv.Where(m => m.LocalScore  != 0).ToArray();
+            return rv;
         }
 
         [JsonPropertyName("2428221")]
@@ -255,6 +114,7 @@ namespace AoCLibrary
                 { "jfitzsimmons2", "https://ca.slack-edge.com/TB4KLF92L-U02FRLVN8JF-e488e637c410-512" },
                 { "jtruit", "https://ca.slack-edge.com/TB4KLF92L-UB58QHN6Q-19f86b8e5625-512" },
                 { "Jesse Rakowski", "https://ca.slack-edge.com/TB4KLF92L-U020KKDNX5K-d8b8f0cfa119-512" },
+                { "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" }
             };
         static readonly Dictionary<string, string> _shortnames =
             new Dictionary<string, string>() {
@@ -271,7 +131,10 @@ namespace AoCLibrary
             };
         public string GetName()
         {
-            var name = Name;
+            return GetName(Name);
+        }
+        static public string GetName(string name)
+        {
             if (string.IsNullOrWhiteSpace(name))
                 name = "-";
 
@@ -282,7 +145,10 @@ namespace AoCLibrary
         }
         public string GetUrl()
         {
-            var name = Name;
+            return GetUrl(Name);
+        }
+        static public string GetUrl(string name)
+        {
             if (string.IsNullOrWhiteSpace(name))
                 name = "-";
 
@@ -292,6 +158,7 @@ namespace AoCLibrary
             return _urls[name];
         }
         public string Name { get; set; }
+        public int Id { get; set; }
         public int Stars { get; set; }
 
         [JsonPropertyName("Local_Score")]

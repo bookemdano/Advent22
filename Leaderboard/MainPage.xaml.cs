@@ -25,11 +25,12 @@ namespace Leaderboard
             var now = DateTime.Now;
             var start = new DateTime(2022, 12, 1);
             var minutes = (now - start).TotalMinutes;
-            var nextBlockMinute = (int) (1 + (minutes / 5)) * 5;
+            var rate = 15;
+            var nextBlockMinute = (int) (1 + (minutes / rate)) * rate;
 
             var intervalMinutes = nextBlockMinute - minutes;
             if (intervalMinutes < 1)
-                intervalMinutes += 5;
+                intervalMinutes += rate;
             _timer.Interval = TimeSpan.FromMinutes(intervalMinutes);
             staNext.Text = "Next: " + now.AddMinutes(intervalMinutes).ToString("H:mm:ss");
         }
@@ -72,9 +73,11 @@ namespace Leaderboard
             LogCollection.Insert(0, DateTime.Now.ToString() + ": " + str);
         }
 
-        private void Export_Clicked(object sender, EventArgs e)
+        private async void Export_Clicked(object sender, EventArgs e)
         {
-            AoCHelper.Export(this);
+            if (_last == null)
+                await Refresh(false);
+            AoCHelper.Export(_last, this);
             Log("Exported");
         }
 
