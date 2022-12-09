@@ -1,4 +1,6 @@
-﻿
-using Advent22;
+﻿using Advent22;
 
-Day8.Run();
+Day9.Run();
+
+        
+    
