@@ -5,7 +5,7 @@
         static public void Run()
         {
             var input = File.ReadAllLines("Day9-input.txt");
-            input = new string[] {
+            /*input = new string[] {
                 "R 4",
                 "U 4",
                 "L 3",
@@ -15,7 +15,16 @@
                 "L 5",
                 "R 2",
             };
-
+            input = new string[] {
+                "R 5",
+                "U 8",
+                "L 8",
+                "D 3",
+                "R 17",
+                "D 10",
+                "L 25",
+                "U 20",
+            };*/
             var h = new Point();
             var ts = new List<Point>();
             int nTails = 9;
@@ -34,7 +43,7 @@
                     ts[0].MoveTo(h);
                     for (int j = 1; j < nTails; j++)
                         ts[j].MoveTo(ts[j - 1]);
-                    Draw(dir, h, ts);
+                    //Draw(dir, h, ts);
                     //var oldT = new Point(ts[0]);
                     // Console.WriteLine(dir + " h:" + h + " oldt:" + oldT + " to t:" + t);
                     if (!tailVisited.Contains(ts[0].ToString()))
@@ -42,9 +51,11 @@
                     if (!tail10Visited.Contains(ts[nTails - 1].ToString()))
                         tail10Visited.Add(ts[nTails - 1].ToString());
                 }
+                Draw(line, h, ts);
             }
             File.WriteAllLines("visited1.log", tailVisited);
             Console.WriteLine("Score1 = " + tailVisited.Count());   // not 3295
+            Console.WriteLine("Score2 = " + tail10Visited   .Count());   // not 3295
         }
         static public void Draw(string dir, Point h, List<Point> ts)
         {
@@ -61,32 +72,32 @@
             }
             minX--;
             minY--;
-            if (maxX - minX < 5)
-                maxX += 5;
-            if (maxY - minY < 5)
-                maxY += 5;
+            //if (maxX - minX < 5)
+            //    maxX += 5;
+            // if (maxY - minY < 5)
+            //    maxY += 5;
             maxX++;
             maxY++;
             var lines = new List<string>();
             lines.Add(dir);
-            for (int y = minY; y < maxY; y++)
+            for (int y = minY; y <= maxY; y++)
             {
                 var line = "";
-                for (int x = minX; x < maxX; x++)
+                for (int x = minX; x <= maxX; x++)
                 {
                     var c = '.';
 
                     var iT = 1;
                     foreach (var t in ts)
                     {
-                        if (t.X - minX == x && t.Y - minY == y)
+                        if (t.X == x && t.Y == y)
                         {
                             c = (char)(iT + '0');
                             break;
                         }
                         iT++;
                     }
-                    if (h.X - minX == x && h.Y - minY == y)
+                    if (h.X == x && h.Y == y)
                         c = 'H';
                     line += c;
                 }
