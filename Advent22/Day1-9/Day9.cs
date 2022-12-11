@@ -86,7 +86,6 @@
                 for (int x = minX; x <= maxX; x++)
                 {
                     var c = '.';
-
                     var iT = 1;
                     foreach (var t in ts)
                     {

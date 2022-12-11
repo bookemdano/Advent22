@@ -104,40 +104,23 @@ namespace Advent22
             var input = File.ReadAllLines("Day10.txt");
             var reg = 1;
             var cycle = 0;
-            var breakAt = 20;
+            var nextBreak = 20;
+            var size = 40;
             var score = 0;
             foreach (var line in input)
             {
-                if (line == "noop")
+                var parts = line.Split(' ');
+                for (int i = 0; i < parts.Count(); i++)
                 {
-                    cycle++;
-                    if (cycle >= breakAt)
+                    if (++cycle >= nextBreak)
                     {
-                        score += breakAt * reg;
-                        breakAt += 40;
+                        score += nextBreak * reg;
+                        nextBreak += size;
                     }
                 }
-                else
-                {
-                    var parts = line.Split(' ');
-                    var add = int.Parse(parts[1]);
-                    // cycle 1
-                    cycle++;
-                    if (cycle >= breakAt)
-                    {
-                        score += breakAt * reg;
-                        breakAt += 40;
-                    }
-                    cycle++;
-                    if (cycle >= breakAt)
-                    {
-                        score += breakAt * reg;
-                        breakAt += 40;
-                    }
-                    reg += add;
-                }
+                if (parts.Count() > 1)
+                    reg += int.Parse(parts[1]);
             }
-            //score += breakAt * reg;
             Console.WriteLine("Score: " + score);
         }
     }

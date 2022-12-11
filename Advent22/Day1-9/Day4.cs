@@ -24,7 +24,6 @@ namespace Advent22
                 var firstParts = new int[] { int.Parse(first[0]), int.Parse(first[1]) };
                 var secondParts = new int[] { int.Parse(second[0]), int.Parse(second[1]) };
 
-
                 if (firstParts[0] <= secondParts[0] && firstParts[1] >= secondParts[1])
                 {
                     score1++;
