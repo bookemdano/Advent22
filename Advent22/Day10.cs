@@ -4,6 +4,8 @@ namespace Advent22
 {
     internal class Day10
     {
+        static char _light = '█';
+        static char _dark = ' ';
         static public void Run()
         {
             Star1();
@@ -13,12 +15,12 @@ namespace Advent22
         {
             var input = File.ReadAllLines("Day10.txt");
             var sprite = 1;
-            var outline = new string('.', 240);
+            var outline = new string(_dark, 240);
             var pixel = 0;
             var nextRow = 39;
             foreach (var line in input)
             {
-                Draw(outline, sprite, pixel);
+                //Draw(outline, sprite, pixel);
                 if (pixel > nextRow)
                 {
                     nextRow += 40;
@@ -43,7 +45,7 @@ namespace Advent22
                         sprite += 40;
                     }
 
-                    Draw(outline, sprite, pixel);
+                    //Draw(outline, sprite, pixel);
                     //cycle 2
                     outline = MaybeLight(outline, sprite, pixel);
                     pixel++;
@@ -51,7 +53,7 @@ namespace Advent22
                 }
             }
 
-            Draw(outline, sprite, pixel); // not BACEKLHF
+            Draw(outline, -1, -1); 
         }
         static string MaybeLight(string line, int sprite, int pixel)
         {
@@ -64,9 +66,9 @@ namespace Advent22
         static void Draw(string line, int sprite, int pixel)
         {
             /*char replaceC;
-            if (line[sprite] == '#')
+            if (line[sprite] == _light)
                 replaceC = 'S';
-            else //if (line[sprite] == '.')
+            else //if (line[sprite] == _dark)
                 replaceC = 's';
             line = ReplaceChar(line, sprite-1, replaceC);
             line = ReplaceChar(line, sprite, replaceC);
@@ -74,22 +76,22 @@ namespace Advent22
             */
             if (pixel >= 0 && pixel < line.Length)
             {
-                if (line[pixel] == '#' || line[pixel] == 'S')
+                if (line[pixel] == _light || line[pixel] == 'S')
                     line = ReplaceChar(line, pixel, 'P');
                 else
                     line = ReplaceChar(line, pixel, 'p');
             }
 
-            Console.WriteLine($"Sprite:{sprite} Pixel:{pixel}");
+            Helper.Log($"Sprite:{sprite} Pixel:{pixel}");
             for (int i = 0; i < 6; i++) 
             {
-                Console.WriteLine(line.Substring(i * 40, 40));
+                Helper.Log(line.Substring(i * 40, 40));
             }
 
         }
         static string LightChar(string str, int i)
         {
-            return ReplaceChar(str, i, '#');
+            return ReplaceChar(str, i, _light);
         }
         static string ReplaceChar(string str, int i, char c)
         {
@@ -105,7 +107,6 @@ namespace Advent22
             var reg = 1;
             var cycle = 0;
             var nextBreak = 20;
-            var size = 40;
             var score = 0;
             foreach (var line in input)
             {
@@ -115,13 +116,13 @@ namespace Advent22
                     if (++cycle >= nextBreak)
                     {
                         score += nextBreak * reg;
-                        nextBreak += size;
+                        nextBreak += 40;
                     }
                 }
                 if (parts.Count() > 1)
                     reg += int.Parse(parts[1]);
             }
-            Console.WriteLine("Score: " + score);
+            Helper.Log("Score: " + score);
         }
     }
 }

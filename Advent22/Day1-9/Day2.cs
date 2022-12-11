@@ -80,8 +80,6 @@ namespace Advent22
         static int Score(ShapeEnum them, ShapeEnum you)
         {
             var rv = (int)you;
-
-
             var result = ResultEnum.None;
             if (you == them)
             {
@@ -102,8 +100,9 @@ namespace Advent22
         }
         static ResultEnum Slow(ShapeEnum them, ShapeEnum you)
         {
-            if (you == ShapeEnum.Rock && them == ShapeEnum.Rock)
+            if (you == them)
                 return ResultEnum.Draw;
+
             if (you == ShapeEnum.Paper && them == ShapeEnum.Rock)
                 return ResultEnum.Win;
             if (you == ShapeEnum.Scissors && them == ShapeEnum.Rock)
@@ -111,8 +110,6 @@ namespace Advent22
 
             if (you == ShapeEnum.Rock && them == ShapeEnum.Paper)
                 return ResultEnum.Loss;
-            if (you == ShapeEnum.Paper && them == ShapeEnum.Paper)
-                return ResultEnum.Draw;
             if (you == ShapeEnum.Scissors && them == ShapeEnum.Paper)
                 return ResultEnum.Win;
 
@@ -120,8 +117,6 @@ namespace Advent22
                 return ResultEnum.Win;
             if (you == ShapeEnum.Paper && them == ShapeEnum.Scissors)
                 return ResultEnum.Loss;
-            if (you == ShapeEnum.Scissors && them == ShapeEnum.Scissors)
-                return ResultEnum.Draw;
 
             return ResultEnum.None;
         }

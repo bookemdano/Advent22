@@ -1,29 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace Advent22
+﻿namespace Advent22
 {
     internal class Day3
     {
-        public enum ShapeEnum
-        {
-            None,
-            Rock,
-            Paper,
-            Scissors
-        }
-        public enum ResultEnum
-        {
-            None,
-            Loss,
-            Draw,
-            Win
-        }
         static public void Run()
         {
             var lines = File.ReadAllLines("Day3-input.txt");
@@ -77,31 +55,6 @@ namespace Advent22
                 return c - 'A' + 27;
             else
                 return c - 'a' + 1;
-        }
-        static ResultEnum Slow(ShapeEnum them, ShapeEnum you)
-        {
-            if (you == ShapeEnum.Rock && them == ShapeEnum.Rock)
-                return ResultEnum.Draw;
-            if (you == ShapeEnum.Paper && them == ShapeEnum.Rock)
-                return ResultEnum.Win;
-            if (you == ShapeEnum.Scissors && them == ShapeEnum.Rock)
-                return ResultEnum.Loss;
-
-            if (you == ShapeEnum.Rock && them == ShapeEnum.Paper)
-                return ResultEnum.Loss;
-            if (you == ShapeEnum.Paper && them == ShapeEnum.Paper)
-                return ResultEnum.Draw;
-            if (you == ShapeEnum.Scissors && them == ShapeEnum.Paper)
-                return ResultEnum.Win;
-
-            if (you == ShapeEnum.Rock && them == ShapeEnum.Scissors)
-                return ResultEnum.Win;
-            if (you == ShapeEnum.Paper && them == ShapeEnum.Scissors)
-                return ResultEnum.Loss;
-            if (you == ShapeEnum.Scissors && them == ShapeEnum.Scissors)
-                return ResultEnum.Draw;
-
-            return ResultEnum.None;
         }
     }
 }

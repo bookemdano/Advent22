@@ -1,6 +1,6 @@
 ﻿using Advent22;
 
-Day10.Run();
+Day11.Run();
 
         
     
