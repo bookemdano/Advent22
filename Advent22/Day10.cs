@@ -6,40 +6,116 @@ namespace Advent22
     {
         static public void Run()
         {
-            var input = File.ReadAllLines("Day10fake.txt");
-            var score1 = 0;
-            var score2 = 0;
-            var cycle = 1;
-            var x = 1;
-            var spriteStart = 0;
-            var spriteEnd = 2;
-            var stopAt = 20;
-            var endRow =20;
-            var outlines = new List<string>();
-            for (int i = 0; i < 6; i++)
-                outlines.Add(new string('.', 40));
-            var drawPixel = 0;
-            int iLine = 0;
+            Star1();
+            Star2();
+        }
+        static public void Star2()
+        {
+            var input = File.ReadAllLines("Day10.txt");
+            var sprite = 1;
+            var outline = new string('.', 240);
+            var pixel = 0;
+            var nextRow = 39;
             foreach (var line in input)
             {
-                if (drawPixel > endRow)
+                Draw(outline, sprite, pixel);
+                if (pixel > nextRow)
                 {
-                    endRow += 40;
-                    //drawPixel = endRow;
-                    iLine++;
-                    drawPixel -= 40;
-                    //x += endRow;
-                    //spriteStart = x - 1;
-                    //spriteEnd = x + 1;
-
+                    nextRow += 40;
+                    sprite += 40;
                 }
-
                 if (line == "noop")
                 {
-                    if (cycle >= spriteStart && cycle <= spriteEnd)
-                        outlines[iLine] = LightChar(outlines[iLine], drawPixel);
+                    outline = MaybeLight(outline, sprite, pixel);
+                    pixel++;
+                }
+                else
+                {
+                    var parts = line.Split(' ');
+                    var add = int.Parse(parts[1]);
+                    // cycle 1
+                    outline = MaybeLight(outline, sprite, pixel);
+                    pixel++;
+
+                    if (pixel > nextRow)
+                    {
+                        nextRow += 40;
+                        sprite += 40;
+                    }
+
+                    Draw(outline, sprite, pixel);
+                    //cycle 2
+                    outline = MaybeLight(outline, sprite, pixel);
+                    pixel++;
+                    sprite += add;
+                }
+            }
+
+            Draw(outline, sprite, pixel); // not BACEKLHF
+        }
+        static string MaybeLight(string line, int sprite, int pixel)
+        {
+            if (pixel >= sprite - 1 && pixel <= sprite + 1)
+                return LightChar(line, pixel);
+            else
+                return line;
+
+        }
+        static void Draw(string line, int sprite, int pixel)
+        {
+            /*char replaceC;
+            if (line[sprite] == '#')
+                replaceC = 'S';
+            else //if (line[sprite] == '.')
+                replaceC = 's';
+            line = ReplaceChar(line, sprite-1, replaceC);
+            line = ReplaceChar(line, sprite, replaceC);
+            line = ReplaceChar(line, sprite+1, replaceC);
+            */
+            if (pixel >= 0 && pixel < line.Length)
+            {
+                if (line[pixel] == '#' || line[pixel] == 'S')
+                    line = ReplaceChar(line, pixel, 'P');
+                else
+                    line = ReplaceChar(line, pixel, 'p');
+            }
+
+            Console.WriteLine($"Sprite:{sprite} Pixel:{pixel}");
+            for (int i = 0; i < 6; i++) 
+            {
+                Console.WriteLine(line.Substring(i * 40, 40));
+            }
+
+        }
+        static string LightChar(string str, int i)
+        {
+            return ReplaceChar(str, i, '#');
+        }
+        static string ReplaceChar(string str, int i, char c)
+        {
+            if (i < 0)
+                return str;
+            var chars = str.ToCharArray();
+            chars[i] = c;
+            return new string(chars);
+        }
+        static public void Star1()
+        {
+            var input = File.ReadAllLines("Day10.txt");
+            var reg = 1;
+            var cycle = 0;
+            var breakAt = 20;
+            var score = 0;
+            foreach (var line in input)
+            {
+                if (line == "noop")
+                {
                     cycle++;
-                    drawPixel++;
+                    if (cycle >= breakAt)
+                    {
+                        score += breakAt * reg;
+                        breakAt += 40;
+                    }
                 }
                 else
                 {
@@ -47,34 +123,22 @@ namespace Advent22
                     var add = int.Parse(parts[1]);
                     // cycle 1
                     cycle++;
-                    if (drawPixel >= spriteStart && drawPixel <= spriteEnd)
-                        outlines[iLine] = LightChar(outlines[iLine], drawPixel);
-                    drawPixel++;
-
-                    //cycle 2
+                    if (cycle >= breakAt)
+                    {
+                        score += breakAt * reg;
+                        breakAt += 40;
+                    }
                     cycle++;
-                    if (drawPixel >= spriteStart && drawPixel <= spriteEnd)
-                        outlines[iLine] = LightChar(outlines[iLine], drawPixel);
-                    drawPixel++;
-
-                    x += add;
-                    spriteStart = x - 1;
-                    spriteEnd = x + 1;
+                    if (cycle >= breakAt)
+                    {
+                        score += breakAt * reg;
+                        breakAt += 40;
+                    }
+                    reg += add;
                 }
-
             }
-
-            foreach(var outline in outlines)
-                Console.WriteLine(outline);
-
-            Console.WriteLine("Score1 = " + score1);
-            Console.WriteLine("Score2 = " + score2);
-        }
-        static string LightChar(string str, int i)
-        {
-            var chars = str.ToCharArray();
-            chars[i] = '#';
-            return new string(chars);
+            //score += breakAt * reg;
+            Console.WriteLine("Score: " + score);
         }
     }
 }
