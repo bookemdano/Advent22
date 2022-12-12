@@ -25,7 +25,7 @@
                 Helper.Log("No winners " + score + " checking " + grids.Count() + " grids");
                 foreach (var grid in grids)
                 {
-                    var deltas = grid.Deltas();
+                    var deltas = grid.Deltas(ignoreA: false);
                     if (deltas.Count() == 0 || currents.Any(c => c.Same(grid.Current)))
                         // deadend
                         removes.Add(grid);
@@ -82,8 +82,7 @@
         static public void Star2()
         {
             var input = File.ReadAllLines("Day12.txt");
-            //var e = grid.Find('E');
-
+            // create a set of grids for each starting point, all the 'a's and 'S'
             var grids = new Dictionary<RC, List<Grid>>();
             var grid0 = new Grid(input);
             grids.Add(grid0.Current, new List<Grid>() { new Grid(input) });
@@ -91,15 +90,17 @@
             foreach (var a in all)
                 grids.Add(a, new List<Grid>() { new Grid(grid0, a) });
       
-            var score = 0;
-            bool winner = false;
+            // add all the starting points to list of ones we have tried already
             var currents = new Dictionary<RC, List<RC>>();
             foreach (var grid in grids)
                 currents.Add(grid.Key, new List<RC>());
+
+            var score = 0;
+            bool winner = false;
             while (winner == false)
             {
                 score++;
-                Helper.Log("No winners " + score + " checking " + grids.Count() + " grids");
+                Helper.Log("No winner " + score + " checking " + grids.Sum(g => g.Value.Count()) + " grids");
                 foreach (var kvp in grids)
                 {
                     var removes = new List<Grid>();
@@ -107,14 +108,15 @@
                     var starting = kvp.Key;
                     foreach (var grid in kvp.Value)
                     {
-                        var deltas = grid.Deltas();
+                        var deltas = grid.Deltas(true);
                         if (deltas.Count() == 0 || currents[starting].Any(c => c.Same(grid.Current)))
-                            // deadend
+                            // deadend or loop
                             removes.Add(grid);
                         else
                         {
                             var first = true;
                             var cur = grid.Current;
+                            // set the current one as X and add to list so we ignore it going forward to avoid loops
                             grid.Set(cur, 'X');
                             if (!currents[starting].Any(c => c.Same(cur)))
                                 currents[starting].Add(cur);
@@ -135,12 +137,14 @@
                                 }
                                 if (first)
                                 {
+                                    // extend current grid
                                     grid.Current = delta.Key;
                                     //Helper.Log(grid.ToString());
                                     first = false;
                                 }
                                 else
                                 {
+                                    // make a new grid
                                     var add = new Grid(grid, delta.Key);
                                     //Helper.Log(add.ToString());
                                     adds.Add(add);
@@ -160,10 +164,6 @@
                 // go through the grids and get only allow lowest current
                 if (winner)
                     break;
-                //var uniques = currents.DistinctBy(c => c.ToString()).ToArray();
-                //foreach (var current in uniques)
-                //    foreach (var grid in grids)
-                //        grid.Set(current, 'X');
             }
             Helper.Log("Star2Score: " + score);
         }
@@ -205,7 +205,7 @@
         {
             return 1;
         }
-        public Dictionary<RC, int> Deltas()
+        public Dictionary<RC, int> Deltas(bool ignoreA)
         {
             var val = Get(Current);
             var deltas = new Dictionary<RC, int>();
@@ -213,6 +213,8 @@
             foreach (var kvp in options.OrderByDescending(k => k.Value))
             {
                 if (kvp.Value < 0)
+                    break;
+                if (ignoreA && kvp.Value == 0)
                     break;
                 if (kvp.Value - val > 1)
                     continue;
