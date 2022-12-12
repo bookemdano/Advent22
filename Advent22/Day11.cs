@@ -46,12 +46,12 @@ namespace Advent22
         }
         static public void Star2()
         {
-            var input = File.ReadAllLines("DayFake11.txt");
+            var input = File.ReadAllLines("Day11.txt");
             var monkeys = new List<Monkey>();
             for (int i = 0; i < input.Count(); i += 7)
                 monkeys.Add(new Monkey(input[i + 1], input[i + 2], input[i + 3], input[i + 4], input[i + 5]));
 
-            for (int round = 0; round < 20; round++)
+            for (int round = 0; round < 10000; round++)
             {
                 Helper.Log("Round " + round);
                 for (int i = 0; i < monkeys.Count(); i++)
@@ -72,6 +72,53 @@ namespace Advent22
             var ordered = monkeys.OrderByDescending(m => m.InspectionCount).Take(2).ToArray();
             var score = ordered[0].InspectionCount * ordered[1].InspectionCount;
             Helper.Log("Star2 Score: " + score);
+        }
+    }
+    class Item // bi slide
+    {
+        public Item(long worryLevel)
+        {
+            _bi = new BigInteger(worryLevel);
+            Slide();
+        }
+        public override string ToString()
+        {
+            return _bi.ToString();
+        }
+
+        void Slide()
+        {
+            
+            var lcm = 9699690;
+            if (_bi > lcm)
+            {
+                var raw = _bi / lcm;
+                _bi = _bi - (raw * lcm);
+            }
+        }
+        private BigInteger _bi;
+
+        internal bool IsDivisible(int denominator)
+        {
+            return _bi % denominator == 0;
+        }
+        internal void Square()
+        {
+            _bi = _bi * _bi;
+            Slide();
+        }
+        internal void Multiply(int prime)
+        {
+            _bi = _bi * prime;
+            Slide();
+        }
+        internal void DivideBy3()
+        {
+            _bi = _bi / 3;
+        }
+        internal void Add(int n)
+        {
+            _bi = _bi + n;
         }
     }
     class ItemBi
@@ -99,9 +146,9 @@ namespace Advent22
         {
             _bi = _bi * prime;
         }
-        internal void Divide(int denominator)
+        internal void DivideBy3()
         {
-            _bi = _bi / denominator;
+            _bi = _bi / 3;
         }
         internal void Add(int n)
         {
@@ -109,11 +156,11 @@ namespace Advent22
         }
     }
 
-    class Item
+    class ItemPrime
     {
         //private BigInteger _bi;
         static List<int> _primes = new List<int>();
-        static Item()
+        static ItemPrime()
         {
             int next = 2;
             while(_primes.Count() < 1000)
@@ -133,7 +180,7 @@ namespace Advent22
             }
         }
 
-        public Item(long worryLevel)
+        public ItemPrime(long worryLevel)
         {
             _dict = Factor(worryLevel);
             //_bi = worryLevel;
