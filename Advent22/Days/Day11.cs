@@ -1,11 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Runtime.Intrinsics.X86;
-using static System.Formats.Asn1.AsnWriter;
-using static System.Net.Mime.MediaTypeNames;
+﻿using System.Numerics;
 
 namespace Advent22
 {
