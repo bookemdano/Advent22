@@ -7,61 +7,48 @@ namespace Advent22
         static public void Run()
         {
             var input = File.ReadAllLines("Day13.txt");
-            var pairs = new List<Pair>();
             int score = 0;
             var iPair = 1;
+            var startItem = new ItemOrList("[[2]]");
+            var endItem = new ItemOrList("[[6]]");
+            var startI = 1;
+            var endI = 1;
             for (int i = 0; i < input.Count(); i += 3)
             {
-                var pair = new Pair();
-                pair.Left = new ItemOrList(input[i]);
-                pair.Right = new ItemOrList(input[i + 1]);
-                pairs.Add(pair);
-                var c = pair.Compare();
+                var left = new ItemOrList(input[i]);
+                var right = new ItemOrList(input[i + 1]);
+                var c = Compare(left, right);
                 if (c == true)
                     score += iPair;
                 Helper.Log($"{iPair} {score}");
                 //Helper.Log($"{pair.Left}, {pair.Right} is {c} {score}");
                 iPair++;
-            }
-            Helper.Log("Star1 Score: " + score); // 5910 is too high, 0 is different than -1
-
-            var masterList = new List<ItemOrList>();
-            masterList.AddRange(pairs.Select(p => p.Left));
-            masterList.AddRange(pairs.Select(p => p.Right));
-            var startItem = new ItemOrList("[[2]]");
-            var endItem = new ItemOrList("[[6]]");
-
-            var startI = 1;
-            var endI = 1;
-            foreach (var item in masterList)
-            {
-                if (item.Compare(endItem) == CompareEnum.Less)
+    
+                // part 2
+                if (left.Compare(endItem) == CompareEnum.Less)
                 {
                     endI++;
-                    if (item.Compare(startItem) == CompareEnum.Less)
+                    if (left.Compare(startItem) == CompareEnum.Less)
+                        startI++;
+                }
+                if (right.Compare(endItem) == CompareEnum.Less)
+                {
+                    endI++;
+                    if (right.Compare(startItem) == CompareEnum.Less)
                         startI++;
                 }
             }
+            Helper.Log("Star1 Score: " + score); // 5910 is too high, 0 is different than []
             Helper.Log("Star2 Score: " + (startI * (endI + 1)));  // 23868 too low, off by one
         }
-    }
-    public enum CompareEnum
-    {
-        NA,
-        Less,
-        More,
-        Same
-    }
-    public class Pair
-    {
-        public bool Compare()
+        static bool Compare(ItemOrList left, ItemOrList right)
         {
-            var leftItems = Left.Items;
-            if (!Left.HasItems)
-                leftItems = new ItemOrList[] { Left };
-            var rightItems = Right.Items;
-            if (!Right.HasItems)
-                rightItems = new ItemOrList[] { Right };
+            var leftItems = left.Items;
+            if (!left.HasItems)
+                leftItems = new ItemOrList[] { left };
+            var rightItems = right.Items;
+            if (!right.HasItems)
+                rightItems = new ItemOrList[] { right };
 
             for (int i = 0; i < leftItems.Length; i++)
             {
@@ -78,25 +65,33 @@ namespace Advent22
                 return true;
             return false;
         }
-        public ItemOrList Left { get; set; }
-        public ItemOrList Right { get; set; }
     }
+    public enum CompareEnum
+    {
+        NA,
+        Less,
+        More,
+        Same
+    }
+
     public class ItemOrList
     {
-        public bool HasItems
+        public ItemOrList(string str)
         {
-            get
+            if (str == "[]")
             {
-                return (Items != null);
+                Val = -1;   // we want this to be less than [0]
+                return; 
             }
-        }
-        public bool HasVal
-        {
-            get
+            if (str.StartsWith('['))
             {
-                return !HasItems;
+                var parts = Split(str.Substring(1, str.Length - 2));
+                Items = parts.Select(p => new ItemOrList(p)).ToArray();
             }
+            else
+                Val = int.Parse(str);
         }
+
         public CompareEnum Compare(ItemOrList right)
         {
             if (HasVal && right.HasVal)
@@ -133,20 +128,11 @@ namespace Advent22
                 return CompareEnum.Same;
         }
 
-        public ItemOrList(string str)
-        {
-            if (str == "[]")
-                return;
-            if (str.StartsWith('['))
-            {
-                var parts = Split(str.Substring(1, str.Length - 2));
-                Items = parts.Select(p => new ItemOrList(p)).ToArray();
-            }
-            else
-                Val = int.Parse(str);
-        }
         public ItemOrList[] Items { get; set; }
-        public int Val { get; set; } = -1;
+        public int Val { get; set; }
+
+        public bool HasItems => (Items != null);
+        public bool HasVal => !HasItems;
 
         public override string ToString()
         {
@@ -176,7 +162,6 @@ namespace Advent22
             rv.Add(str.Substring(start, str.Length - start));
             return rv.ToArray();
         }
-
     }
 }
 
