@@ -1,6 +1,4 @@
-﻿using Advent22;
-
-namespace Advent22
+﻿namespace Advent22.Days
 {
     internal class Day13
     {
@@ -23,7 +21,7 @@ namespace Advent22
                 Helper.Log($"{iPair} {score}");
                 //Helper.Log($"{pair.Left}, {pair.Right} is {c} {score}");
                 iPair++;
-    
+
                 // part 2
                 if (left.Compare(endItem) == CompareEnum.Less)
                 {
@@ -39,7 +37,7 @@ namespace Advent22
                 }
             }
             Helper.Log("Star1 Score: " + score); // 5910 is too high, 0 is different than []
-            Helper.Log("Star2 Score: " + (startI * (endI + 1)));  // 23868 too low, off by one
+            Helper.Log("Star2 Score: " + startI * (endI + 1));  // 23868 too low, off by one
         }
         static bool Compare(ItemOrList left, ItemOrList right)
         {
@@ -56,7 +54,7 @@ namespace Advent22
                 {
                     var comp = leftItems[i].Compare(rightItems[i]);
                     if (comp != CompareEnum.Same)
-                        return (comp == CompareEnum.Less);
+                        return comp == CompareEnum.Less;
                 }
                 else
                     return false;
@@ -81,7 +79,7 @@ namespace Advent22
             if (str == "[]")
             {
                 Val = -1;   // we want this to be less than [0]
-                return; 
+                return;
             }
             if (str.StartsWith('['))
             {
@@ -131,7 +129,7 @@ namespace Advent22
         public ItemOrList[] Items { get; set; }
         public int Val { get; set; }
 
-        public bool HasItems => (Items != null);
+        public bool HasItems => Items != null;
         public bool HasVal => !HasItems;
 
         public override string ToString()
@@ -146,7 +144,7 @@ namespace Advent22
             var rv = new List<string>();
             var depth = 0;
             var start = 0;
-            for(int i = 0; i < str.Length; i++)
+            for (int i = 0; i < str.Length; i++)
             {
                 var c = str[i];
                 if (c == '[')

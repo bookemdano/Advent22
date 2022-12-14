@@ -1,4 +1,4 @@
-﻿namespace Advent22
+﻿namespace Advent22.Days
 {
     internal class Day12
     {
@@ -89,7 +89,7 @@
             var all = grid0.FindAll('a');
             foreach (var a in all)
                 grids.Add(a, new List<Grid>() { new Grid(grid0, a) });
-      
+
             // add all the starting points to list of ones we have tried already
             var currents = new Dictionary<RC, List<RC>>();
             foreach (var grid in grids)
@@ -191,7 +191,7 @@
             _rows = lines.Count();
             _cols = lines[1].Length;
             _lines = new List<char[]>();
-            foreach(var line in lines)
+            foreach (var line in lines)
                 _lines.Add(line.ToCharArray());
             Current = CalcCurrent();
 
@@ -298,8 +298,8 @@
     }
     class RC
     {
-        public int Row { get;}
-        public int Col { get;}
+        public int Row { get; }
+        public int Col { get; }
         public RC(RC other)
         {
             Row = other.Row;
