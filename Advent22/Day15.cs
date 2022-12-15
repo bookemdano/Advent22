@@ -138,8 +138,10 @@ namespace Advent22
             surface.MarkImpossibles();
             surface.Draw();
             var ones = surface.Impossibles.Where(p => p.Y == target).OrderBy(p => p.X).ToArray();
-            var score = surface.Impossibles.Count(p => p.Y == target) - surface.Pairs.Count(p => p.Beacon.Y == target) - surface.Pairs.Count(p => p.Sensor.Y == target);
-            Helper.Log("Star1 Score: " + score); 
+            var beaconsInRow = surface.Pairs.Where(p => p.Beacon.Y == target).DistinctBy(p => p.Beacon.ToString()).Count();// beacons can overlap, P1 failure
+            var sensorsInRow = surface.Pairs.Count(p => p.Sensor.Y == target);
+            var score = surface.Impossibles.Count(p => p.Y == target) - beaconsInRow - sensorsInRow;
+            Helper.Log("Star1 Score: " + score); // not 5508231 too low
         }
     }
 }
