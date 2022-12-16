@@ -11,7 +11,7 @@ namespace Advent22
         static public void Log(object o)
         {
             Console.WriteLine(o?.ToString());
-            File.AppendAllText($"endless{DateTime.Today.ToString("yyyyMMdd")}.log", $"{DateTime.Now} {o}\n");
+            File.AppendAllText($"endless{DateTime.Today.ToString("yyyyMMdd")}.log", $"{DateTime.Now.ToString("HH:mm:ss.fff")} {o}\n");
         }
     }
     internal class BasePoint
