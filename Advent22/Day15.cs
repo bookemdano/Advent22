@@ -190,7 +190,7 @@ namespace Advent22
                             continue;
                         if (!ImpossibleRanges.ContainsKey(absY))
                             ImpossibleRanges[absY] = new List<Range>();
-
+                        // for the impossible, just save the center and radius for that row
                         var offset = dist - Math.Abs(y);
                         var range = new Range(pair.Sensor.X, offset + 1);
                         ImpossibleRanges[absY].Add(range);
