@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.Design;
 
-namespace Advent22
+namespace Advent22.Days
 {
     internal class Day16
     {
@@ -12,7 +12,7 @@ namespace Advent22
                 Name = name;
             }
             public string Name { get; }
-            public int Distance { get; set;  }
+            public int Distance { get; set; }
             public int Index
             {
                 get
@@ -60,14 +60,14 @@ namespace Advent22
                     }
                 }
                 Distances = FloydWarshall(Graph, Valves.Count);
-                foreach(var valve in Valves)
+                foreach (var valve in Valves)
                 {
-                    foreach(var conn in valve.Connections)
+                    foreach (var conn in valve.Connections)
                         conn.Distance = Distances[valve.Index, conn.Index];
                 }
                 Draw();
             }
-            
+
             // https://www.csharpstar.com/floyd-warshall-algorithm-csharp/
             public static int[,] FloydWarshall(int[,] graph, int verticesCount)
             {
@@ -163,7 +163,7 @@ namespace Advent22
             int _total = 0;
             public DFSGraph(int size, List<int> vals)
             {
-                _edges= new LinkedList<int>[size];
+                _edges = new LinkedList<int>[size];
                 _vals = vals;
             }
             public void AddEdge(int from, int to)
@@ -182,10 +182,10 @@ namespace Advent22
             public void InternalDoIt(int from, bool[] seen)
             {
                 seen[from] = true;
-                
+
                 if (_edges[from] != null)
                 {
-                    foreach(var v in _edges[from])
+                    foreach (var v in _edges[from])
                     {
                         if (seen[v] != true)
                         {
@@ -250,7 +250,7 @@ namespace Advent22
             var pressure = valveList.GetFlow(30,
                                    valveList.GetUseful(),
                                    valveList.Valves[0]);
-            Helper.Log("Star1 Score: " + pressure); 
+            Helper.Log("Star1 Score: " + pressure);
         }
         static void Day2()
         {

@@ -1,19 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Dynamic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
-using static Advent22.Day16;
-using static Advent22.Days.Day14;
-using static System.Net.Mime.MediaTypeNames;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
-namespace Advent22
+﻿namespace Advent22.Days
 {
     internal class Day16b
     {
@@ -115,13 +100,13 @@ namespace Advent22
             }
 
             public bool Prune(List<Valve> valves)
-            { 
+            {
                 if (!Connections.Any())
                     return false;
 
                 var removes = new List<Valve>();
                 bool change = false;
-                foreach(var conn in Connections)
+                foreach (var conn in Connections)
                 {
                     if (!valves.Contains(conn))
                         removes.Add(conn);
@@ -136,7 +121,7 @@ namespace Advent22
             }
             public override string ToString()
             {
-                var rv = $"{Name} r:{Rate} {(Opened?"O":"X")}";
+                var rv = $"{Name} r:{Rate} {(Opened ? "O" : "X")}";
                 if (Connections?.Any() == true)
                     rv += $" to:{string.Join(",", Connections.Select(c => c.Name))}";
                 return rv;
@@ -146,7 +131,7 @@ namespace Advent22
             internal Valve Move(int daysRemaining)
             {
                 var options = new List<ValveOption>();
-                var rate = Rate * (daysRemaining);
+                var rate = Rate * daysRemaining;
                 options.Add(new ValveOption(this, rate));
                 int level = 5;
                 foreach (var conn in Connections)
@@ -159,7 +144,7 @@ namespace Advent22
                             option.Rate = rate;
                     }
                     options.Add(option);
-                    
+
                 }
                 return this;
                 //return Connections.FirstOrDefault(c => !c.Opened);
@@ -234,7 +219,7 @@ namespace Advent22
             //valveList.Prune();
             var currentValve = valveList.Valves.First(v => v.Name == "AA");
             var flow = 0;
-            for(int i = 0; i < 30; i++)
+            for (int i = 0; i < 30; i++)
             {
                 flow += valveList.Flow();
                 if (currentValve.Rate == 0 || currentValve.Opened)
@@ -257,7 +242,7 @@ namespace Advent22
                 }
                 Helper.Log($"Flow at {i} = {flow} on {currentValve?.Name}");
             }
-            Helper.Log("Star1 Score: " + flow); 
+            Helper.Log("Star1 Score: " + flow);
         }
         static void Day2()
         {
