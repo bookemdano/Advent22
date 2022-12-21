@@ -23,100 +23,108 @@
     <None Remove="DayFake11 %28copy%29.txt" />
     <None Remove="DayFake14.txt" />
     <None Remove="DayFake18.txt" />
-    <None Remove="Days\Day10.txt" />
-    <None Remove="Days\Day10Fake.txt" />
-    <None Remove="Days\Day11.txt" />
-    <None Remove="Days\Day16 - Copy.txt" />
-    <None Remove="Days\DayFake11.txt" />
+    <None Remove="Days1-9\Day10.txt" />
+    <None Remove="Days1-9\Day10Fake.txt" />
+    <None Remove="Days1-9\Day11.txt" />
+    <None Remove="Days1-9\Day16 - Copy.txt" />
+    <None Remove="Days1-9\Day18 - Copy.txt" />
+    <None Remove="Days1-9\DayFake11.txt" />
     <None Remove="Day12 %28copy%29.txt" />
     <None Remove="DayFake12 %28copy%29.txt" />
     <None Remove="Day15 %28copy%29.txt" />
     <None Remove="DayFake15 %28copy%29.txt" />
-    <None Remove="Days\Day15.txt" />
-    <None Remove="Days\DayFake15.txt" />
-    <None Remove="Days\DayFake16 - Copy.txt" />
+    <None Remove="Days1-9\Day15.txt" />
+    <None Remove="Days1-9\DayFake15.txt" />
+    <None Remove="Days1-9\DayFake16 - Copy.txt" />
+    <None Remove="Days1-9\DayFake18 - Copy.txt" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Day18.txt">
+    <Content Include="Day20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="DayFake18.txt">
+    <Content Include="Days10-19\Day18.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day14.txt">
+    <Content Include="DayFake20.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Day17.txt">
+    <Content Include="Days10-19\DayFake18.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake14.txt">
+    <Content Include="Days10-19\Day14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day8-input.txt">
+    <Content Include="Days10-19\Day17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day7-input.txt">
+    <Content Include="Days10-19\DayFake14.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day6-input.txt">
+    <Content Include="Days1-9\Day8-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day5-input.txt">
+    <Content Include="Days1-9\Day7-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day4-input.txt">
+    <Content Include="Days1-9\Day6-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day3-input.txt">
+    <Content Include="Days1-9\Day5-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day2-input.txt">
+    <Content Include="Days1-9\Day4-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day1-input.txt">
+    <Content Include="Days1-9\Day3-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day9-input.txt">
+    <Content Include="Days1-9\Day2-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day12.txt">
+    <Content Include="Days1-9\Day1-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake12.txt">
+    <Content Include="Days1-9\Day9-input.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day10.txt">
+    <Content Include="Days10-19\Day12.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day10Fake.txt">
+    <Content Include="Days10-19\DayFake12.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day11.txt">
+    <Content Include="Days10-19\Day10.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake11.txt">
+    <Content Include="Days10-19\Day10Fake.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day13.txt">
+    <Content Include="Days10-19\Day11.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake13.txt">
+    <Content Include="Days10-19\DayFake11.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day16.txt">
+    <Content Include="Days10-19\Day13.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="DayFake17.txt">
+    <Content Include="Days10-19\DayFake13.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake16.txt">
+    <Content Include="Days10-19\Day16.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\Day15.txt">
+    <Content Include="Days10-19\DayFake17.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Days\DayFake15.txt">
+    <Content Include="Days10-19\DayFake16.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Days10-19\Day15.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Days10-19\DayFake15.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

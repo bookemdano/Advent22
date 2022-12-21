@@ -1,13 +1,4 @@
-﻿using Advent22.Days;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.Design;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Xml.Schema;
-using static Advent22.Day18;
-
-namespace Advent22
+﻿namespace Advent22.Days
 {
     internal class Day18
     {
@@ -37,7 +28,7 @@ namespace Advent22
             }
             public bool Bump(Cube other)
             {
-                if (Distance(other) == 1) 
+                if (Distance(other) == 1)
                 {
                     if (other.X - X == 1)
                     {
@@ -75,7 +66,7 @@ namespace Advent22
                 return false;
             }
             public int Exposed { get; set; } = 6;
-            
+
             // true if covered
             // +x, -x, +y, -y, +z, -z
             public bool[] Sides { get; set; } = new bool[6];
@@ -103,14 +94,14 @@ namespace Advent22
             var input = File.ReadAllLines("Day18.txt");
             //input = new string[] { "1,1,1", "1,1,2" };
             var cubes = new List<Cube>();
-            foreach(var line in input)
+            foreach (var line in input)
                 cubes.Add(new Cube(line));
 
             Helper.Log("Star start: " + cubes.Sum(c => c.Exposed));
             for (int i = 0; i < cubes.Count - 1; i++)
             {
                 var iCube = cubes[i];
-                for (int j = i+1; j < cubes.Count; j++)
+                for (int j = i + 1; j < cubes.Count; j++)
                 {
                     var jCube = cubes[j];
                     if (iCube.Distance(jCube) == 1)
@@ -200,9 +191,9 @@ namespace Advent22
                         }
                     }
                 }
-                foreach(var t in bubbles.Where(b => b.Item1 == false))
+                foreach (var t in bubbles.Where(b => b.Item1 == false))
                 {
-                    foreach(var b in t.Item2)
+                    foreach (var b in t.Item2)
                     {
                         foreach (var c in Cubes)
                             c.Bump(b);
@@ -224,7 +215,7 @@ namespace Advent22
 
             private bool Inbounds(Cube cube)
             {
-                return (MinX <= cube.X && MaxX >= cube.X && MinY <= cube.Y && MaxY >= cube.Y && MinZ <= cube.Z && MaxZ >= cube.Z);
+                return MinX <= cube.X && MaxX >= cube.X && MinY <= cube.Y && MaxY >= cube.Y && MinZ <= cube.Z && MaxZ >= cube.Z;
             }
             private bool Occupied(Cube cube)
             {
