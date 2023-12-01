@@ -1,4 +1,3 @@
-// See https://aka.ms/new-console-template for more information
 using AoCLibrary;
 using System.Data;
 using System.Diagnostics;
@@ -16,11 +15,14 @@ internal class Program : ILogger
 		var next = DateTime.MinValue;
         while (true)
         {
-            Log("Checking");
+            Log("Checking Next-" + next);
 			if (DateTime.Now < next)
+			{
+				Thread.Sleep(TimeSpan.FromMinutes(1));
 				continue;
+			}
             var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
-			next = DateTime.Now.AddMinutes(10);
+			next = DateTime.Now.AddMinutes(15);
 
             var aocResult = AoCHelper.Deserialize(res.Json);
 			Debug.Assert(aocResult != null);
@@ -33,8 +35,10 @@ internal class Program : ILogger
                 foreach (var showable in showables)
                     Log($"{++i}. {showable}");
             }
-            last = aocResult;
-            Thread.Sleep(TimeSpan.FromMinutes(1));
+			else
+				Log("Data unchanged.");
+
+			last = aocResult;
         }
     }
 

@@ -24,7 +24,9 @@ namespace AoCLibrary
             bool rv = false;
             var allMembers = AllMembers();
             var lastAllMembers = last.AllMembers();
-            for (int i = 0; i < allMembers.Length; i++)
+			if (lastAllMembers == null)
+				return true;
+			for (int i = 0; i < allMembers.Length; i++)
             {
                 var m = allMembers[i];
                 var lastM = lastAllMembers[i];
@@ -183,7 +185,7 @@ namespace AoCLibrary
             parts.Add(GetName());
             foreach (var day in days)
             {
-                var startOfDay = new DateTime(2022, 12, i);
+                var startOfDay = new DateTime(AoCHelper.Year, 12, i);
                 double hours;
                 if (day?.Star1 == null)
                     parts.Add("");
@@ -207,14 +209,14 @@ namespace AoCLibrary
         {
             var avg = "-";
             if (Stars > 0)
-                avg = ((double)LocalScore / (Stars / 2.0)).ToString("0.0");
+                avg = ((double)LocalScore / Stars).ToString("0.0");
             var timeString = LastTime().ToString("M/d HH:mm");
             if (DateTime.Today == LastTime().Date)
                 timeString = LastTime().ToString("HH:mm");
-            var days = (DateTime.Today - new DateTime(2022, 11, 30)).TotalDays;
+			var days = (DateTime.Today - new DateTime(AoCHelper.Year, 11, 30)).TotalDays;
             if (days > 25)
                 days = 25;
-            var starString = Stars.ToString();
+            var starString = "½";
             if (Stars == days * 2)
                 starString = "*";   //⭐";
 

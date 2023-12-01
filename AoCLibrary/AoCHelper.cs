@@ -286,6 +286,9 @@ namespace AoCLibrary
 			return JsonSerializer.Deserialize<AoCResult>(json, _jsonOptions);
 		}
 		static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, WriteIndented = true };
+
+		public static readonly int Year = DateTime.Today.Year;
+
 		public static string Serialize(AoCResult result)
 		{
 			return JsonSerializer.Serialize(result, _jsonOptions);
