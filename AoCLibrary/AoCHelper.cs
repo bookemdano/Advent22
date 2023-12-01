@@ -1,4 +1,3 @@
-// See https://aka.ms/new-console-template for more information
 using System.Text.Json;
 
 namespace AoCLibrary
@@ -282,10 +281,14 @@ namespace AoCLibrary
             }
             return rv;
         }
-        public static AoCResult Deserialize(string json)
-        {
-            var options = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
-            return JsonSerializer.Deserialize<AoCResult>(json, options);
-        }
-    }
+		public static AoCResult? Deserialize(string json)
+		{
+			return JsonSerializer.Deserialize<AoCResult>(json, _jsonOptions);
+		}
+		static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, WriteIndented = true };
+		public static string Serialize(AoCResult result)
+		{
+			return JsonSerializer.Serialize(result, _jsonOptions);
+		}
+	}
 }

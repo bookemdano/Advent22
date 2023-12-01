@@ -1,7 +1,7 @@
 // See https://aka.ms/new-console-template for more information
 using AoCLibrary;
 using System.Data;
-using System.Text.Json;
+using System.Diagnostics;
 
 internal class Program : ILogger
 {
@@ -12,35 +12,27 @@ internal class Program : ILogger
     }
     async Task Runner()
     { 
-        var last = AoCHelper.OldExport(this);
-        var first = true;
+        AoCResult? last = null;
+		var next = DateTime.MinValue;
         while (true)
         {
             Log("Checking");
+			if (DateTime.Now < next)
+				continue;
             var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
-            if (!res.RealRead && !first)
-            {
-                Thread.Sleep(TimeSpan.FromMinutes(1));
-                continue;
-            }
-            if (res.RealRead)
-            {
-                AoCHelper.OldExport(this);
-                Log("Real read!");
-            }
-            //Log(json);
-            var aocResult = AoCHelper.Deserialize(res.Json);
+			next = DateTime.Now.AddMinutes(10);
 
-            if (aocResult.HasChanges(last, this) || res.RealRead == true || first == true)
+            var aocResult = AoCHelper.Deserialize(res.Json);
+			Debug.Assert(aocResult != null);
+			File.WriteAllText(@"c:\temp\data\aoc.json", AoCHelper.Serialize(aocResult));
+            if (aocResult.HasChanges(last, this))
             {
-                //var showables = aocResult.AllMembers.OrderByDescending(m => m.LocalScore).Take(10).ToArray();
                 var ordered = aocResult.AllMembers().OrderByDescending(m => m.LocalScore);
                 var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
                 int i = 0;
                 foreach (var showable in showables)
                     Log($"{++i}. {showable}");
             }
-            first = false;
             last = aocResult;
             Thread.Sleep(TimeSpan.FromMinutes(1));
         }

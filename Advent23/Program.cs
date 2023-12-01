@@ -1,13 +1,22 @@
 using System.Diagnostics;
 using System.Reflection;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Advent23
 {
 	internal class Program
 	{
+		static internal string[] GetLines(StarEnum star, bool real)
+		{
+			if (!_starLines.Any())
+				Read(real);
 
-		static internal bool Real = false;
+			if (real)
+				return _starLines[StarEnum.Star1];
+			else
+				return _starLines[star];
+		}
+		static Dictionary<StarEnum, string[]> _starLines = [];
+
 		static void Main(string[] args)
 		{
 			//for(int i = 1; i < 26; i++)
@@ -19,7 +28,7 @@ namespace Advent23
 			else
 			{
 				Stopwatch.StartNew();
-				Log(runner.Run(Read()), sw);
+				Log(runner.Run(), sw);
 			}
 		}
 		static IDayRunner? GetDayRunner()
@@ -50,7 +59,8 @@ namespace Advent23
 			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
 			File.WriteAllText(Path.Combine(dir, $"Day{strDay}.cs"), cs);
 			File.Copy("assets\\Day01.txt", Path.Combine(dir, $"Day{strDay}.txt"), true);
-			File.Copy("assets\\DayFake01.txt", Path.Combine(dir, $"DayFake{strDay}.txt"), true);
+			File.Copy("assets\\Day01FakeStar1.txt", Path.Combine(dir, $"Day{strDay}FakeStar1.txt"), true);
+			File.Copy("assets\\Day01FakeStar2.txt", Path.Combine(dir, $"Day{strDay}FakeStar2.txt"), true);
 		}
 
 		static string DayString()
@@ -61,26 +71,44 @@ namespace Advent23
 		{
 			return 2;// (int) (DateTime.Today - new DateTime(2023, 11, 30)).TotalDays;
 		}
-		static string[] Read()
+		static void Read(bool real)
 		{
-			var stub = "Day";
-			if (!Real)
-				stub += "Fake";
-			var filename = $"{stub}{Day():00}.txt";
-			Log("Read" + filename);
-			return File.ReadAllLines(Path.Combine("Assets", filename));
-			
+			if (real)
+			{
+				var filename = $"Day{Day():00}.txt";
+				Log("Read" + filename);
+				_starLines.Add(StarEnum.Star1, Read(filename));
+			}
+			else
+			{
+				for(int i = 0; i < 2; i++)
+				{
+					var filename = $"Day{Day():00}FakeStar{i + 1}.txt";
+					Log("Read" + filename);
+					var star = StarEnum.Star1;
+					if (i == 1)
+						star = StarEnum.Star2;
+					_starLines.Add(star, Read(filename));
+				}
+			}
+		}
+		static string[] Read(string filename)
+		{
+			return File.ReadAllLines(Path.Combine("Assets", filename)).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
 		}
 		internal static void Log(object o, Stopwatch? sw = null)
 		{
-			var reality = "REAL";
-			if (!Real)
-				reality = "FAKE";
 			var str = o?.ToString()??"";
 			if (sw != null)
 				str += $" {sw.ElapsedMilliseconds:0}ms";
-			File.AppendAllText($"c:\\temp\\data\\endless{DateTime.Today.Year}.log", $"{DateTime.Now} {reality} {str}{Environment.NewLine}");
-			Console.WriteLine(reality + " " + o);
+			File.AppendAllText($"c:\\temp\\data\\endless{DateTime.Today.Year}.log", $"{DateTime.Now} {str}{Environment.NewLine}");
+			Console.WriteLine(o);
 		}
+	}
+	public enum StarEnum
+	{
+		NA,
+		Star1,
+		Star2
 	}
 }
