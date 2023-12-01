@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 using Microsoft.Win32;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
@@ -17,7 +17,7 @@ namespace AoCLibrary
         {
             return Members.AllMembers(hideZeros);
         }
-        public bool HasChanges(AoCResult last, ILogger logger)
+        public bool HasChanges(AoCResult? last, ILogger logger)
         {
             if (last == null)
                 return true;

@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 using AoCLibrary;
 using System.Data;
 using System.Text.Json;
@@ -17,23 +17,21 @@ internal class Program : ILogger
         while (true)
         {
             Log("Checking");
-            var result = await Communicator.Read("https://adventofcode.com/2022/leaderboard/private/view/1403088.json");
-            var json = result.Item1;
-            var realRead = result.Item2;
-            if (!realRead && !first)
+            var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
+            if (!res.RealRead && !first)
             {
                 Thread.Sleep(TimeSpan.FromMinutes(1));
                 continue;
             }
-            if (realRead)
+            if (res.RealRead)
             {
                 AoCHelper.OldExport(this);
                 Log("Real read!");
             }
             //Log(json);
-            var aocResult = AoCHelper.Deserialize(json);
+            var aocResult = AoCHelper.Deserialize(res.Json);
 
-            if (aocResult.HasChanges(last, this) || realRead == true || first == true)
+            if (aocResult.HasChanges(last, this) || res.RealRead == true || first == true)
             {
                 //var showables = aocResult.AllMembers.OrderByDescending(m => m.LocalScore).Take(10).ToArray();
                 var ordered = aocResult.AllMembers().OrderByDescending(m => m.LocalScore);

@@ -1,4 +1,4 @@
-﻿// See https://aka.ms/new-console-template for more information
+// See https://aka.ms/new-console-template for more information
 using System.Text.Json;
 
 namespace AoCLibrary
@@ -150,10 +150,13 @@ namespace AoCLibrary
             public int Score { get; set; }
             public int Stars { get; set; }
         }
-        public static AoCResult OldExport(ILogger logger)
+        public static AoCResult? OldExport(ILogger logger)
         {
             {
-                var inlines = File.ReadAllLines(Path.Combine(Communicator.Dir, "CalcScore.csv"));
+				var file = Path.Combine(Communicator.Dir, "CalcScore.csv");
+				if (!File.Exists(file))
+					return null;
+				var inlines = File.ReadAllLines(Path.Combine(Communicator.Dir, "CalcScore.csv"));
                 var scores = new Dictionary<DateTime, List<StarScore>>();
                 foreach(var line in inlines)
                 {
