@@ -1,10 +1,5 @@
 namespace Advent23
 {
-	interface IDayRunner
-	{
-		object Run(string[] lines);
-	}
-
 	internal class Day01 : IDayRunner
 	{
 		public object Run(string[] lines)

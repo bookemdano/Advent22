@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Reflection;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Advent23
 {
@@ -9,18 +10,23 @@ namespace Advent23
 		static internal bool Real = false;
 		static void Main(string[] args)
 		{
+			//for(int i = 1; i < 26; i++)
+			//	WriteStubFiles(i);
 			var sw = Stopwatch.StartNew();
 			var runner = GetDayRunner();
 			if (runner == null)
 				Log("No runner found for Day" + DayString());
 			else
+			{
+				Stopwatch.StartNew();
 				Log(runner.Run(Read()), sw);
+			}
 		}
 		static IDayRunner? GetDayRunner()
 		{
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			var advent = assemblies[1];
-			if (advent == null)
+			if (advent == null || !advent.FullName.Contains("Advent23"))
 			{
 				Log("No assembly[1] found!");
 				return null;
@@ -30,10 +36,23 @@ namespace Advent23
 			if (dayClass == null)
 			{
 				Log($"No class {className} found in {advent}");
+				WriteStubFiles(Day());
 				return null;
 			}
 			return (IDayRunner) Activator.CreateInstance(dayClass);
 		}
+
+		private static void WriteStubFiles(int day)
+		{
+			var strDay = $"{day:00}";
+			var dir = @"c:\temp\data";
+			var cs = File.ReadAllText("assets\\DayCS.txt");
+			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
+			File.WriteAllText(Path.Combine(dir, $"Day{strDay}.cs"), cs);
+			File.Copy("assets\\Day01.txt", Path.Combine(dir, $"Day{strDay}.txt"), true);
+			File.Copy("assets\\DayFake01.txt", Path.Combine(dir, $"DayFake{strDay}.txt"), true);
+		}
+
 		static string DayString()
 		{
 			return $"{Day():00}";
@@ -49,7 +68,7 @@ namespace Advent23
 				stub += "Fake";
 			var filename = $"{stub}{Day():00}.txt";
 			Log("Read" + filename);
-			return File.ReadAllLines(filename);
+			return File.ReadAllLines(Path.Combine("Assets", filename));
 			
 		}
 		internal static void Log(object o, Stopwatch? sw = null)

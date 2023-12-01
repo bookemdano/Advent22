@@ -1,0 +1,10 @@
+namespace Advent23
+{
+	internal class Day : IDayRunner
+	{
+		public object Run(string[] lines)
+		{
+			return 0;
+		}
+	}
+}
