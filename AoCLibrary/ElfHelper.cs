@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace AoCLibrary
@@ -6,7 +7,7 @@ namespace AoCLibrary
     {
 
         // returns last
-        static public void Export(AoCResult res, ILogger logger)
+        static public void Export(ElfResult res, ILogger logger)
         {
 
             var stars = new Dictionary<string, List<StarScore>>();
@@ -22,7 +23,7 @@ namespace AoCLibrary
                     {
                         key = $"{iDay}.{1}";
                         if (!stars.ContainsKey(key))
-                            stars.Add(key, new List<StarScore>());
+                            stars.Add(key, []);
                         stars[key].Add(new StarScore(member.Name, day.Star1.StarTime()));
                     }
 
@@ -30,7 +31,7 @@ namespace AoCLibrary
                     {
                         key = $"{iDay}.{2}";
                         if (!stars.ContainsKey(key))
-                            stars.Add(key, new List<StarScore>());
+                            stars.Add(key, []);
                         stars[key].Add(new StarScore(member.Name, day.Star2.StarTime()));
                         var delta = day.Star2.StarTime() - day.Star1.StarTime();
                         bestDeltas.Add($"{Member.GetName(member.Name)} Day {iDay}", delta);
@@ -41,7 +42,7 @@ namespace AoCLibrary
 
             var bests = new List<string>();
             foreach (var order in bestDeltas.OrderBy(kvp => kvp.Value).Take(10))
-                bests.Add($"{order.Key}: {order.Value.TotalSeconds.ToString("0")}s");
+                bests.Add($"{order.Key}: {order.Value.TotalSeconds:0}s");
             File.WriteAllLines(Path.Combine(Communicator.Dir, "BestDelta.csv"), bests);
 
             var allStars = new List<StarScore>();
@@ -78,8 +79,8 @@ namespace AoCLibrary
             var outs2 = new Dictionary<string, List<string>>();
             foreach (var member in res.AllMembers())
             {
-                outs.Add(member.Name, new List<string>());
-                outs2.Add(member.Name, new List<string>());
+                outs.Add(member.Name, new ());
+                outs2.Add(member.Name, new ());
             }
             var hours = new List<string>();
             foreach (var kvp in groups)
@@ -149,7 +150,17 @@ namespace AoCLibrary
             public int Score { get; set; }
             public int Stars { get; set; }
         }
-        public static AoCResult? OldExport(ILogger logger)
+		public static void Log(object o, Stopwatch? sw = null)
+		{
+			var str = o?.ToString() ?? "";
+			if (sw != null)
+				str += $" {sw.ElapsedMilliseconds:0}ms";
+			str = $"{DateTime.Now} {str}";
+			File.AppendAllText(Path.Combine(Communicator.Dir, $"endless{DateTime.Today.Year}.log"), str + Environment.NewLine);
+			Console.WriteLine(str);
+		}
+
+		public static ElfResult? OldExport(ILogger logger)
         {
             {
 				var file = Path.Combine(Communicator.Dir, "CalcScore.csv");
@@ -209,7 +220,7 @@ namespace AoCLibrary
                     continue;
                 parts = new List<string>();
                 parts.Add(member.GetName());
-                parts.Add(member.GetUrl());
+                parts.Add(member.GetUrl()??"");
                 foreach (var kvp in all)
                     parts.Add(kvp.Value.FindbyName(name).LocalScore.ToString());
                 outs.Add(string.Join(",", parts));
@@ -217,8 +228,8 @@ namespace AoCLibrary
             File.WriteAllLines(Path.Combine(Communicator.Dir, "UserByRow.csv"), outs);
 
 
-            outs = new List<string>();
-            AoCResult? prevResult = null;
+            outs = [];
+            ElfResult? prevResult = null;
             foreach (var kvp in all)
             {
                 var date = kvp.Key;
@@ -262,15 +273,15 @@ namespace AoCLibrary
             }
             return finalResult;
         }
-        static Dictionary<DateTime, AoCResult>? ReadAll()
+        static Dictionary<DateTime, ElfResult>? ReadAll()
         {
             if (!Directory.Exists(Communicator.Dir))
                 return null;
             var files = Directory.GetFiles(Communicator.Dir, "url*.json").Order();
             if (!files.Any())
                 return null;
-            AoCResult? last = null;
-            var rv = new Dictionary<DateTime, AoCResult>();
+            ElfResult? last = null;
+            var rv = new Dictionary<DateTime, ElfResult>();
             foreach (var file in files)
             {
                 var json = File.ReadAllText(file);
@@ -283,11 +294,11 @@ namespace AoCLibrary
             }
             return rv;
         }
-		public static AoCResult? Deserialize(string json)
+		public static ElfResult? Deserialize(string json)
 		{
-			return JsonSerializer.Deserialize<AoCResult>(json, _jsonOptions);
+			return JsonSerializer.Deserialize<ElfResult>(json, _jsonOptions);
 		}
-		static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, WriteIndented = true };
+		static readonly JsonSerializerOptions _jsonOptions = new () { PropertyNameCaseInsensitive = true, WriteIndented = true };
 
 		public static readonly int Year = DateTime.Today.Year;
 		public static string DayString()
@@ -302,7 +313,7 @@ namespace AoCLibrary
 		{
 			return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
 		}
-		public static string Serialize(AoCResult result)
+		public static string Serialize(ElfResult result)
 		{
 			return JsonSerializer.Serialize(result, _jsonOptions);
 		}
@@ -319,15 +330,37 @@ namespace AoCLibrary
 			File.Copy(Path.Combine(assetDir, "Day01FakeStar1.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), true);
 			File.Copy(Path.Combine(assetDir, "Day01FakeStar2.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), true);
 
-			var block = "\r\n    <Content Include=\"Assets\\Day|DD|.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar1.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar2.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>";
-			block = block.Replace("|DD|", strDay);
-			var prj = File.ReadAllText(Path.Combine(codeDir, "Advent23.csproj"));
-			var i = prj.IndexOf("<ItemGroup>");
-			if (i == -1)
-				return;
-			i += "<ItemGroup>".Length;
-			;
-			File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
+			if (updatePrj)
+			{
+				var block = "\r\n    <Content Include=\"Assets\\Day|DD|.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar1.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar2.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>";
+				block = block.Replace("|DD|", strDay);
+				var prj = File.ReadAllText(Path.Combine(codeDir, "Advent23.csproj"));
+				var i = prj.IndexOf("<ItemGroup>");
+				if (i == -1)
+					return;
+				i += "<ItemGroup>".Length;
+				File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
+			}
+		}
+
+		public static async Task<ElfResult?> Read(bool force)
+		{
+			var jsonFile = Path.Combine(Communicator.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
+			ElfResult? rv = null;
+			if (File.Exists(jsonFile) && !force)
+			{
+				var json = File.ReadAllText(jsonFile);
+				rv = Deserialize(json);
+			}
+			if (rv != null && rv.Timestamp + TimeSpan.FromMinutes(15) > DateTime.Now)
+				return rv;
+			
+			var str = await Communicator.Read($"https://adventofcode.com/{Year}/leaderboard/private/view/1403088.json", overrideThrottle: true);
+			rv = Deserialize(str);
+			if (rv == null)
+				return rv;
+			File.WriteAllText(jsonFile, Serialize(rv));
+			return rv;
 		}
 	}
 }

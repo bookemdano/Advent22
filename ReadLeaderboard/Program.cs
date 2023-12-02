@@ -11,7 +11,7 @@ internal class Program : ILogger
     }
     async Task Runner()
     { 
-        AoCResult? last = null;
+        ElfResult? last = null;
 		var next = DateTime.MinValue;
         while (true)
         {
@@ -21,15 +21,14 @@ internal class Program : ILogger
 				Thread.Sleep(TimeSpan.FromMinutes(1));
 				continue;
 			}
-            var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
-			next = DateTime.Now.AddMinutes(15);
-
-            var aocResult = ElfHelper.Deserialize(res.Json);
-			Debug.Assert(aocResult != null);
-			File.WriteAllText(@"c:\temp\data\aoc.json", ElfHelper.Serialize(aocResult));
-            if (aocResult.HasChanges(last, this))
+			var elfResult = await ElfHelper.Read(false);
+			Debug.Assert(elfResult != null);
+			//var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
+			next = elfResult.Timestamp.AddMinutes(15);
+			Log("Read " + elfResult.Timestamp);
+            if (elfResult.HasChanges(last, this))
             {
-                var ordered = aocResult.AllMembers().OrderByDescending(m => m.LocalScore);
+                var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
                 var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
                 int i = 0;
                 foreach (var showable in showables)
@@ -38,14 +37,12 @@ internal class Program : ILogger
 			else
 				Log("Data unchanged.");
 
-			last = aocResult;
+			last = elfResult;
         }
     }
-
-
     public void Log(string str)
     {
-        Console.WriteLine(DateTime.Now.ToString() + ": " + str);
+		ElfHelper.Log(str);
     }
 }
 

@@ -11,13 +11,13 @@ namespace Leaders
 	/// </summary>
 	public partial class MainWindow : Window, ILogger
 	{
-		private AoCResult? _last = null;
+		private ElfResult? _last = null;
 		private DateTime _next = DateTime.MinValue;
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			DispatcherTimer timer = new DispatcherTimer();
+			DispatcherTimer timer = new ();
 			timer.Tick += Timer_Tick;
 			timer.Interval = TimeSpan.FromMinutes(1);
 			timer.Start();
@@ -25,12 +25,12 @@ namespace Leaders
 
 		private async void Timer_Tick(object? sender, EventArgs e)
 		{
-			if (DateTime.Now > _next)
-				await Tick(false);
+			await Tick(false);
 		}
 
 		public void Log(string str)
 		{
+			ElfHelper.Log("LEAD " + str);
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 
@@ -47,9 +47,6 @@ namespace Leaders
 			{
 				Log(ex.ToString());
 			}
-
-			_next = DateTime.Now.AddMinutes(15);
-			Log("Next update " + _next);
 		}
 
 		private void UpdateNextButton()
@@ -69,12 +66,13 @@ namespace Leaders
 		}
 
 		async Task Read(bool force)
-		{ 
-			var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json", overrideThrottle: force);
-			Log("Updating real: " + res.RealRead);
-			var aocResult = ElfHelper.Deserialize(res.Json);
+		{
+			if (!force && DateTime.Now < _next)
+				return;
+
+			var aocResult = await ElfHelper.Read(force);
 			Debug.Assert(aocResult != null);
-			File.WriteAllText(@"c:\temp\data\aoc.json", ElfHelper.Serialize(aocResult));
+			Log("Updating from: " + aocResult.Timestamp);
 			if (aocResult.HasChanges(_last, this) || force)
 			{
 				lstResults.Items.Clear();
@@ -87,6 +85,8 @@ namespace Leaders
 			else
 				Log("Data unchanged.");
 
+			_next = aocResult.Timestamp.AddMinutes(15);
+			Log("Next update " + _next);
 			_last = aocResult;
 		}
 
@@ -100,7 +100,7 @@ namespace Leaders
 			await Tick(true);
 		}
 
-		private async void AddNext_Click(object sender, RoutedEventArgs e)
+		private void AddNext_Click(object sender, RoutedEventArgs e)
 		{
 			var day = (int) btnAddNext.Tag;
 			ElfHelper.WriteStubFiles(day, true);

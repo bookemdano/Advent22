@@ -1,6 +1,7 @@
 using AoCLibrary;
 using System.Diagnostics;
 using System.Reflection;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Advent23
 {
@@ -16,7 +17,7 @@ namespace Advent23
 			else
 				return _starLines[star];
 		}
-		static Dictionary<StarEnum, string[]> _starLines = [];
+		static readonly Dictionary<StarEnum, string[]> _starLines = [];
 
 		static void Main(string[] args)
 		{
@@ -25,11 +26,11 @@ namespace Advent23
 			var sw = Stopwatch.StartNew();
 			var runner = GetDayRunner();
 			if (runner == null)
-				Log("No runner found for Day" + ElfHelper.DayString());
+				ElfHelper.Log("No runner found for Day" + ElfHelper.DayString());
 			else
 			{
 				Stopwatch.StartNew();
-				Log(runner.Run(), sw);
+				ElfHelper.Log(runner.Run(), sw);
 			}
 		}
 		static IDayRunner? GetDayRunner()
@@ -38,14 +39,14 @@ namespace Advent23
 			var advent = assemblies[1];
 			if (advent?.FullName?.Contains("Advent23") != true)
 			{
-				Log("No assembly[1] found!");
+				ElfHelper.Log("No assembly[1] found!");
 				return null;
 			}
 			var className = $"Advent23.Day{ElfHelper.DayString()}";
 			var dayClass = advent.GetType(className);
 			if (dayClass == null)
 			{
-				Log($"No class {className} found in {advent}");
+				ElfHelper.Log($"No class {className} found in {advent}");
 				ElfHelper.WriteStubFiles(ElfHelper.Day(), false);
 				return null;
 			}
@@ -62,7 +63,7 @@ namespace Advent23
 			if (real)
 			{
 				var filename = $"Day{ElfHelper.Day():00}.txt";
-				Log("Read" + filename);
+				ElfHelper.Log("Read" + filename);
 				_starLines.Add(StarEnum.Star1, Read(filename));
 			}
 			else
@@ -70,7 +71,7 @@ namespace Advent23
 				for(int i = 0; i < 2; i++)
 				{
 					var filename = $"Day{ElfHelper.Day():00}FakeStar{i + 1}.txt";
-					Log("Read" + filename);
+					ElfHelper.Log("Read" + filename);
 					var star = StarEnum.Star1;
 					if (i == 1)
 						star = StarEnum.Star2;
@@ -81,14 +82,6 @@ namespace Advent23
 		static string[] Read(string filename)
 		{
 			return File.ReadAllLines(Path.Combine("Assets", filename)).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-		}
-		internal static void Log(object o, Stopwatch? sw = null)
-		{
-			var str = o?.ToString()??"";
-			if (sw != null)
-				str += $" {sw.ElapsedMilliseconds:0}ms";
-			File.AppendAllText($"c:\\temp\\data\\endless{DateTime.Today.Year}.log", $"{DateTime.Now} {str}{Environment.NewLine}");
-			Console.WriteLine(o);
 		}
 	}
 	public enum StarEnum

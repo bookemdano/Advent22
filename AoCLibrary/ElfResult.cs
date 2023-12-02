@@ -5,19 +5,24 @@ using System.Text.Json.Serialization;
 
 namespace AoCLibrary
 {
-    public class AoCResult
+    public class ElfResult
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+		public MemberGroup Members { get; set; }    // read through json
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        public Member FindbyName(string name)
+		// just for our app to use
+		public DateTime Timestamp { get; set; } = DateTime.Now;    
+
+		public Member FindbyName(string name)
         {
             return AllMembers().First(m => m.Name == name);
         }
-        public MemberGroup Members { get; set; }
         public Member[] AllMembers(bool hideZeros = true)
         {
             return Members.AllMembers(hideZeros);
         }
-        public bool HasChanges(AoCResult? last, ILogger? logger)
+        public bool HasChanges(ElfResult? last, ILogger? logger)
         {
             if (last == null)
                 return true;
@@ -53,8 +58,9 @@ namespace AoCLibrary
                 rv = rv.Where(m => m.LocalScore  != 0).ToArray();
             return rv;
         }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-        [JsonPropertyName("2428221")]
+		[JsonPropertyName("2428221")]
         public Member Member00 { get; set; }    // Greg
         [JsonPropertyName("2497986")]
         public Member Member01 { get; set; }    // Jesse
@@ -98,15 +104,16 @@ namespace AoCLibrary
         public Member Member20 { get; set; }    // Francis
         [JsonPropertyName("2500712")]
         public Member Member21 { get; set; }    // Michael Roy
-    }
-    public class Member
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+	}
+	public class Member
     {
         public Member()
         {
         }
 
         static readonly Dictionary<string, string> _urls =
-            new Dictionary<string, string>() {
+            new() {
                 { "Dan Francis", "https://ca.slack-edge.com/TB4KLF92L-U0389RE97GR-e3c92abca80a-512" },
                 { "alihacks", "https://ca.slack-edge.com/TB4KLF92L-UB57REZTM-97b89a97447f-512" },
                 { "FafaPaku", "https://ca.slack-edge.com/TB4KLF92L-UB6C5KWMV-f993b687636b-512" },
@@ -119,7 +126,7 @@ namespace AoCLibrary
                 { "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" }
             };
         static readonly Dictionary<string, string> _shortnames =
-            new Dictionary<string, string>() {
+            new () {
                 { "Dan Francis", "Dano" },
                 { "alihacks", "Ali" },
                 { "FafaPaku", "Fafa" },
@@ -140,12 +147,12 @@ namespace AoCLibrary
             if (string.IsNullOrWhiteSpace(name))
                 name = "-";
 
-            if (!_shortnames.ContainsKey(name))
+            if (!_shortnames.TryGetValue(name, out string? value))
                 return name;
 
-            return _shortnames[name];
+            return value;
         }
-        public string GetUrl()
+        public string? GetUrl()
         {
             return GetUrl(Name);
         }
@@ -154,12 +161,12 @@ namespace AoCLibrary
             if (string.IsNullOrWhiteSpace(name))
                 name = "-";
 
-            if (!_urls.ContainsKey(name))
+			if (!_urls.TryGetValue(name, out string? value))
                 return null;
 
-            return _urls[name];
+            return value;
         }
-        public string Name { get; set; }
+		public string Name { get; set; } = "-noname-";
         public int Id { get; set; }
         public int Stars { get; set; }
 
@@ -170,13 +177,17 @@ namespace AoCLibrary
         [JsonPropertyName("last_star_ts")]
         public int LastStarTs { get; set; }
         [JsonPropertyName("completion_day_level")]
-        public DayLevels CompetitionDayLevel { get; set; }
-        
-        public DateTime LastTime()
-        {
-            return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(LastStarTs)).AddHours(-5);
-        }
-        public List<string> GuessScore()
+        public DayLevels CompetitionDayLevel { get; set; } = new();
+
+		public DateTime LastTime()
+		{
+			return GetTime(LastStarTs);
+		}
+		static public DateTime GetTime(int ts)
+		{
+			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
+		}
+		public List<string> GuessScore()
         {
             var days = CompetitionDayLevel.AllDays();
             int i = 1;
@@ -224,16 +235,15 @@ namespace AoCLibrary
     }
     public class DayLevels
     {
-        public DayLevel[] AllDays()
-        {
-            return new DayLevel[] {
-                       Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09,
-                Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19,
-                Day20, Day21, Day22, Day23, Day24, Day25};
-        }
-        [JsonPropertyName("1")]
-        public DayLevel Day01 { get; set; }
-        [JsonPropertyName("2")]
+		public DayLevel[] AllDays() => new DayLevel[] {
+					   Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09,
+				Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19,
+				Day20, Day21, Day22, Day23, Day24, Day25};
+
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+		[JsonPropertyName("1")]
+		public DayLevel Day01 { get; set; }
+		[JsonPropertyName("2")]
         public DayLevel Day02 { get; set; }
         [JsonPropertyName("3")]
         public DayLevel Day03 { get; set; }
@@ -281,16 +291,19 @@ namespace AoCLibrary
         public DayLevel Day24 { get; set; }
         [JsonPropertyName("25")]
         public DayLevel Day25 { get; set; }
-    }
-    public class DayLevel
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+
+	}
+	public class DayLevel
     {
-        [JsonPropertyName("1")]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+		[JsonPropertyName("1")]
         public StarLevel Star1 { get; set; }
         [JsonPropertyName("2")]
         public StarLevel Star2 { get; set; }
-
-    }
-    public class StarLevel
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+	}
+	public class StarLevel
     {
         [JsonPropertyName("get_star_ts")]
         public int StarTs { get; set; }
