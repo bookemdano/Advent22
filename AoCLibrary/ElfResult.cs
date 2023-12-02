@@ -174,65 +174,74 @@ namespace AoCLibrary
         public int LocalScore { get; set; }
         [JsonPropertyName("Global_Score")]
         public int GlobalScore { get; set; }
-        [JsonPropertyName("last_star_ts")]
+		public DateTime LastStarTime
+		{
+			get
+			{
+				return ElfHelper.GetTime(LastStarTs);
+			}
+		}
+
+		[JsonPropertyName("last_star_ts")]
         public int LastStarTs { get; set; }
         [JsonPropertyName("completion_day_level")]
         public DayLevels CompetitionDayLevel { get; set; } = new();
 
-		public DateTime LastTime()
+		public override string ToString()
 		{
-			return GetTime(LastStarTs);
+			return $"{GetStarString()} {GetName()} {LocalScore} {GetAverageString()} {TimeString(LastStarTs)} {GapString()}";
 		}
-		static public DateTime GetTime(int ts)
-		{
-			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
-		}
-		public List<string> GuessScore()
-        {
-            var days = CompetitionDayLevel.AllDays();
-            int i = 1;
-            var parts = new List<string>();
-            parts.Add(GetName());
-            foreach (var day in days)
-            {
-                var startOfDay = new DateTime(ElfHelper.Year, 12, i);
-                double hours;
-                if (day?.Star1 == null)
-                    parts.Add("");
-                else
-                {
-                    hours = (day.Star1.StarTime() - startOfDay).TotalHours;
-                    parts.Add(hours.ToString("0.00"));
-                }
-                if (day?.Star2 == null)
-                    parts.Add("");
-                else
-                {
-                    hours = (day.Star2.StarTime() - startOfDay).TotalHours;
-                    parts.Add(hours.ToString("0.00"));
-                }
-                i++;
-            }
-            return parts;
-        }
-        public override string ToString()
-        {
-            var avg = "-";
-            if (Stars > 0)
-                avg = ((double)LocalScore / Stars).ToString("0.0");
-            var timeString = LastTime().ToString("M/d HH:mm");
-            if (DateTime.Today == LastTime().Date)
-                timeString = LastTime().ToString("HH:mm");
-			var days = (DateTime.Today - new DateTime(ElfHelper.Year, 11, 30)).TotalDays;
-            if (days > 25)
-                days = 25;
-            var starString = "½";
-            if (Stars == days * 2)
-                starString = "*";   //⭐";
 
-            return $"{starString} {GetName()} {LocalScore} {avg} {timeString}";
-        }
-    }
+		private string GapString()
+		{
+			var times = AllTimes();
+			if (times.Count() < 2)
+				return "";
+			return ElfHelper.DeltaString(times[0] - times[1]);
+		}
+		
+		private List<DateTime> AllTimes()
+		{
+			List<DateTime> times = [];
+			foreach (var day in CompetitionDayLevel.AllDays())
+			{
+				if (day == null)
+					continue;
+				if (day.Star1 != null)
+					times.Add(day.Star1.StarTime);
+				if (day.Star2 != null)
+					times.Add(day.Star2.StarTime);
+			}
+			return times.OrderByDescending(t => t).ToList();
+		}
+
+		string GetAverageString()
+		{
+			var avg = "-";
+			if (Stars > 0)
+				avg = ElfHelper.Fraction((double)LocalScore / Stars, 8);
+			return avg;
+		}
+		private string GetStarString()
+		{
+			var days = (DateTime.Today - new DateTime(ElfHelper.Year, 11, 30)).TotalDays;
+			if (days > 25)
+				days = 25;
+			var starString = "½";
+			if (Stars == days * 2)
+				starString = "*";   //⭐";
+			return starString;
+		}
+
+		static private string TimeString(int ts)
+		{
+			var time = ElfHelper.GetTime(ts);
+			if (DateTime.Today == time.Date)
+				return time.ToString("HH:mm");
+			else
+				return time.ToString("M/d HH:mm");
+		}
+	}
     public class DayLevels
     {
 		public DayLevel[] AllDays() => new DayLevel[] {
@@ -307,9 +316,12 @@ namespace AoCLibrary
     {
         [JsonPropertyName("get_star_ts")]
         public int StarTs { get; set; }
-        public DateTime StarTime()
-        {
-            return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(StarTs)).AddHours(-5);
-        }
+		public DateTime StarTime
+		{
+			get
+			{
+				return ElfHelper.GetTime(StarTs);
+			}
+		}
     }
 }

@@ -24,7 +24,7 @@ namespace AoCLibrary
                         key = $"{iDay}.{1}";
                         if (!stars.ContainsKey(key))
                             stars.Add(key, []);
-                        stars[key].Add(new StarScore(member.Name, day.Star1.StarTime()));
+                        stars[key].Add(new StarScore(member.Name, day.Star1.StarTime));
                     }
 
                     if (day?.Star2 != null)
@@ -32,8 +32,8 @@ namespace AoCLibrary
                         key = $"{iDay}.{2}";
                         if (!stars.ContainsKey(key))
                             stars.Add(key, []);
-                        stars[key].Add(new StarScore(member.Name, day.Star2.StarTime()));
-                        var delta = day.Star2.StarTime() - day.Star1.StarTime();
+                        stars[key].Add(new StarScore(member.Name, day.Star2.StarTime));
+                        var delta = day.Star2.StarTime - day.Star1.StarTime;
                         bestDeltas.Add($"{Member.GetName(member.Name)} Day {iDay}", delta);
                     }
                     iDay++;
@@ -160,140 +160,6 @@ namespace AoCLibrary
 			Console.WriteLine(str);
 		}
 
-		public static ElfResult? OldExport(ILogger logger)
-        {
-            {
-				var file = Path.Combine(Communicator.Dir, "CalcScore.csv");
-				if (!File.Exists(file))
-					return null;
-				var inlines = File.ReadAllLines(Path.Combine(Communicator.Dir, "CalcScore.csv"));
-                var scores = new Dictionary<DateTime, List<StarScore>>();
-                foreach(var line in inlines)
-                {
-                    if (line.StartsWith("Hour"))
-                        continue;
-                    var c = new StarScore(line);
-                    if (!scores.ContainsKey(c.Timestamp))
-                        scores.Add(c.Timestamp, new List<StarScore>());
-                    var score = scores[c.Timestamp].FirstOrDefault(s => s.Name == c.Name);
-                    if (score == null)
-                        scores[c.Timestamp].Add(c);
-                    else
-                        score.Score = c.Score;
-                }
-                var rows = new Dictionary<string, List<int>>();
-                //foreach(var name in names)
-                //{
-                 //   row
-                //}
-            }
-
-
-            var outs = new List<string>();
-            var all = ReadAll();
-			if (all == null)
-				return null;
-            var finalResult = all.Last().Value;
-            var lines = new List<string>();
-            foreach (var member in finalResult.AllMembers())
-            {
-                if (member.LocalScore == 0)
-                    continue;
-                var partScore = member.GuessScore();
-                lines.Add(string.Join(",", partScore));
-            }
-            File.WriteAllLines(Path.Combine(Communicator.Dir, "times.csv"), lines);
-            // header
-            var parts = new List<string>();
-            parts.Add("");
-            parts.Add("url");
-            foreach (var key in all.Keys)
-                parts.Add(key.ToString("M/d H:mm"));
-            outs.Add(string.Join(",", parts));
-
-            // export for graph
-            var firstMember = all.First().Value;
-            foreach (var member in firstMember.AllMembers())
-            {
-                var name = member.Name;
-                if (finalResult.FindbyName(name).LocalScore == 0)
-                    continue;
-                parts = new List<string>();
-                parts.Add(member.GetName());
-                parts.Add(member.GetUrl()??"");
-                foreach (var kvp in all)
-                    parts.Add(kvp.Value.FindbyName(name).LocalScore.ToString());
-                outs.Add(string.Join(",", parts));
-            }
-            File.WriteAllLines(Path.Combine(Communicator.Dir, "UserByRow.csv"), outs);
-
-
-            outs = [];
-            ElfResult? prevResult = null;
-            foreach (var kvp in all)
-            {
-                var date = kvp.Key;
-                var aocResult = kvp.Value;
-                if (!outs.Any())
-                {
-                    var headerParts = new List<string>();
-                    headerParts.Add("Date");
-                    foreach (var member in aocResult.AllMembers())
-                    {
-                        if (finalResult.FindbyName(member.Name).LocalScore > 0)
-                            headerParts.Add(member.GetName());
-                    }
-                    outs.Add(string.Join(",", headerParts));
-                }
-
-                parts = new List<string>();
-                parts.Add(date.ToString());
-                foreach (var member in aocResult.AllMembers())
-                {
-                    if (finalResult.FindbyName(member.Name).LocalScore > 0)
-                    {
-                        //parts.Add(member.LocalScore.ToString());
-                        var prev = prevResult?.FindbyName(member.Name);
-                        if (prev == null)
-                            parts.Add(member.LocalScore.ToString());
-                        else
-                            parts.Add((member.LocalScore - prev.LocalScore).ToString());
-                    }
-                }
-                prevResult = aocResult;
-                outs.Add(string.Join(",", parts));
-            }
-            try
-            {
-                File.WriteAllLines(Path.Combine(Communicator.Dir, "scores.csv"), outs);
-            }
-            catch (Exception ex)
-            {
-                logger.Log("Error " + ex.Message);
-            }
-            return finalResult;
-        }
-        static Dictionary<DateTime, ElfResult>? ReadAll()
-        {
-            if (!Directory.Exists(Communicator.Dir))
-                return null;
-            var files = Directory.GetFiles(Communicator.Dir, "url*.json").Order();
-            if (!files.Any())
-                return null;
-            ElfResult? last = null;
-            var rv = new Dictionary<DateTime, ElfResult>();
-            foreach (var file in files)
-            {
-                var json = File.ReadAllText(file);
-                var res = Deserialize(json);
-				if (res != null && res.HasChanges(last, null))
-                {
-                    rv.Add(Communicator.TimeFromFile(file), res);
-                    last = res;
-                }
-            }
-            return rv;
-        }
 		public static ElfResult? Deserialize(string json)
 		{
 			return JsonSerializer.Deserialize<ElfResult>(json, _jsonOptions);
@@ -361,6 +227,82 @@ namespace AoCLibrary
 				return rv;
 			File.WriteAllText(jsonFile, Serialize(rv));
 			return rv;
+		}
+
+		static public string Fraction(double origD, int denom)
+		{
+			var rv = "";
+			var d = origD;
+			if (d >= 1)
+			{
+				rv = ((int)d).ToString();
+				d -= (int)d;
+			}
+
+			if (d == 0)
+				return rv;
+			else if (d <= 1 / 8.0 && denom > 8)
+				return rv + "⅛";
+			else if (d <= 1 / 4.0 && denom >= 4)
+				return rv + "¼";
+			else if (d <= 1 / 3.0 && denom >= 6)
+				return rv + "⅓";
+			else if (d <= 3 / 8.0 && denom >= 8)
+				return rv + "⅜";
+			else if (d <= 1 / 2.0 && denom >= 2)
+				return rv + "½";
+			else if (d <= 5 / 8.0 && denom >= 8)
+				return rv + "⅝";
+			else if (d <= 2 / 3.0 && denom >= 6)
+				return rv + "⅔";
+			else if (d <= 3 / 4.0 && denom >= 4)
+				return rv + "¾";
+			else if (d <= 7 / 8.0 && denom >= 8)
+				return rv + "⅞";
+			else
+				return ((int)origD + 1).ToString(); ;
+		}
+		static internal string DeltaString(TimeSpan delta)
+		{
+			int n;
+			string unit;
+			var years = delta.TotalDays / 365.24;
+			if (years > 5)
+			{
+				n = (int)years;
+				unit = "year";
+			}
+			else if (years > 2)
+			{
+				return $"{Fraction(years, 2)} years";
+			}
+			else if (delta.TotalDays > 1)
+			{
+				unit = "day";
+				n = (int)delta.TotalDays;
+			}
+			else if (delta.TotalHours > 1.5)
+			{
+				unit = "hour";
+				n = (int)delta.TotalHours;
+			}
+			else if (delta.TotalMinutes > 1.5)
+			{
+				unit = "min";
+				n = (int)delta.TotalMinutes;
+			}
+			else
+			{
+				unit = "sec";
+				n = (int)delta.TotalSeconds;
+			}
+			if (n != 1)
+				unit += "s";
+			return $"{n} {unit}";
+		}
+		static public DateTime GetTime(int ts)
+		{
+			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
 		}
 	}
 }
