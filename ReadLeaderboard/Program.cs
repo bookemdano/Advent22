@@ -2,7 +2,7 @@ using AoCLibrary;
 using System.Data;
 using System.Diagnostics;
 
-internal class Program : ILogger
+internal class Program
 {
     private static async Task Main(string[] args)
     {
@@ -26,13 +26,16 @@ internal class Program : ILogger
 			//var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
 			next = elfResult.Timestamp.AddMinutes(15);
 			Log("Read " + elfResult.Timestamp);
-            if (elfResult.HasChanges(last, this))
+			var changes = elfResult.HasChanges(last);
+			if (last == null || changes.Any())
             {
                 var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
                 var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
                 int i = 0;
                 foreach (var showable in showables)
                     Log($"{++i}. {showable}");
+				foreach (var change in changes)
+					Log(change);
             }
 			else
 				Log("Data unchanged.");
@@ -40,7 +43,7 @@ internal class Program : ILogger
 			last = elfResult;
         }
     }
-    public void Log(string str)
+    void Log(string str)
     {
 		ElfHelper.Log(str);
     }

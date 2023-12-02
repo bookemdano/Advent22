@@ -1,6 +1,8 @@
 using AoCLibrary;
+using Finder2020Win;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -9,7 +11,7 @@ namespace Leaders
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : Window, ILogger
+	public partial class MainWindow : Window
 	{
 		private ElfResult? _last = null;
 		private DateTime _next = DateTime.MinValue;
@@ -28,7 +30,7 @@ namespace Leaders
 			await Tick(false);
 		}
 
-		public void Log(string str)
+		void Log(string str)
 		{
 			ElfHelper.Log("LEAD " + str);
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
@@ -70,24 +72,35 @@ namespace Leaders
 			if (!force && DateTime.Now < _next)
 				return;
 
-			var aocResult = await ElfHelper.Read(force);
-			Debug.Assert(aocResult != null);
-			Log("Updating from: " + aocResult.Timestamp);
-			if (aocResult.HasChanges(_last, this) || force)
+			var elfResult = await ElfHelper.Read(force);
+			Debug.Assert(elfResult != null);
+			Log("Updating from: " + elfResult.Timestamp);
+			var changes = elfResult.HasChanges(_last);
+			if (changes.Any() || grd.Items.Count == 0 || force)
 			{
-				lstResults.Items.Clear();
-				var ordered = aocResult.AllMembers().OrderByDescending(m => m.LocalScore);
+				if (changes.Any())
+				{
+					foreach (var change in changes)
+						Log(change);
+					Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + string.Join(Environment.NewLine, changes));
+				}
+
+				staLeft.Text = "Points left today: " + elfResult.PointsLeftToday();
+				var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
 				var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
 				int i = 0;
+				var vms = new List<MemberViewModel>();
 				foreach (var showable in showables)
-					lstResults.Items.Add($"{++i}. {showable}");
+				{
+					++i;
+					vms.Add(new MemberViewModel(showable, i));
+				}
+				grd.ItemsSource = vms;
 			}
-			else
-				Log("Data unchanged.");
 
-			_next = aocResult.Timestamp.AddMinutes(15);
-			Log("Next update " + _next);
-			_last = aocResult;
+			_next = elfResult.Timestamp.AddMinutes(15);
+			staNext.Text = "Next update " + _next;
+			_last = elfResult;
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)

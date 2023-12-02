@@ -12,7 +12,11 @@
 			<Button Click="Now_Click" Margin="3" Padding="3">Now</Button>
 			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>
 		</StackPanel>
-		<ListBox x:Name="lstResults"/>
+		<DataGrid x:Name="grd"/>
+		<StackPanel Orientation="Horizontal">
+			<TextBlock x:Name="staNext"/>
+			<TextBlock x:Name="staLeft"/>
+		</StackPanel>
 		<ListBox x:Name="lst"/>
 	</StackPanel>
 </Window>

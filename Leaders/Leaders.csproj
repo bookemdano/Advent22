@@ -10,7 +10,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\privatestash\TwilioStash.cs" Link="TwilioStash.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="elf.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Twilio" Version="6.15.1" />
   </ItemGroup>
 
   <ItemGroup>
