@@ -46,7 +46,7 @@ namespace Advent23
 			if (dayClass == null)
 			{
 				Log($"No class {className} found in {advent}");
-				ElfHelper.WriteStubFiles(ElfHelper.Day());
+				ElfHelper.WriteStubFiles(ElfHelper.Day(), false);
 				return null;
 			}
 			var o = Activator.CreateInstance(dayClass);

@@ -26,7 +26,7 @@ namespace Leaders
 		private async void Timer_Tick(object? sender, EventArgs e)
 		{
 			if (DateTime.Now > _next)
-				await Read(false);
+				await Tick(false);
 		}
 
 		public void Log(string str)
@@ -34,9 +34,26 @@ namespace Leaders
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 
-		async Task Read(bool force)
+		async Task Tick(bool force)
 		{
 			Title = "Day" + ElfHelper.DayString();
+			UpdateNextButton();
+
+			try
+			{
+				await Read(force);
+			}
+			catch (Exception ex)
+			{
+				Log(ex.ToString());
+			}
+
+			_next = DateTime.Now.AddMinutes(15);
+			Log("Next update " + _next);
+		}
+
+		private void UpdateNextButton()
+		{
 			btnAddNext.IsEnabled = false;
 			for (int day = ElfHelper.Day(); day <= 25; day++)
 			{
@@ -49,7 +66,10 @@ namespace Leaders
 					break;
 				}
 			}
+		}
 
+		async Task Read(bool force)
+		{ 
 			var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json", overrideThrottle: force);
 			Log("Updating real: " + res.RealRead);
 			var aocResult = ElfHelper.Deserialize(res.Json);
@@ -68,26 +88,24 @@ namespace Leaders
 				Log("Data unchanged.");
 
 			_last = aocResult;
-			_next = DateTime.Now.AddMinutes(15);
-			Log("Next update " + _next);
 		}
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
-			await Read(false);
+			await Tick(false);
 		}
 
 		private async void Now_Click(object sender, RoutedEventArgs e)
 		{
-			await Read(true);
+			await Tick(true);
 		}
 
 		private async void AddNext_Click(object sender, RoutedEventArgs e)
 		{
 			var day = (int) btnAddNext.Tag;
-			ElfHelper.WriteStubFiles(day);
-			Log("Created next");
-			await Read(false);
+			ElfHelper.WriteStubFiles(day, true);
+			Log("Created next day" + day);
+			UpdateNextButton();
 		}
 	}
 }

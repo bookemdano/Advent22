@@ -307,16 +307,27 @@ namespace AoCLibrary
 			return JsonSerializer.Serialize(result, _jsonOptions);
 		}
 
-		public static void WriteStubFiles(int day)
+		public static void WriteStubFiles(int day, bool updatePrj)
 		{
 			var strDay = $"{day:00}";
-			var dir = ElfHelper.CodeDir();
-			var cs = File.ReadAllText("assets\\DayCS.txt");
+			var codeDir = ElfHelper.CodeDir();
+			var assetDir = Path.Combine(codeDir, "assets");
+			var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
 			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
-			File.WriteAllText(Path.Combine(dir, $"Day{strDay}.cs"), cs);
-			File.Copy("assets\\Day01.txt", Path.Combine(dir, $"assets\\Day{strDay}.txt"), true);
-			File.Copy("assets\\Day01FakeStar1.txt", Path.Combine(dir, $"assets\\Day{strDay}FakeStar1.txt"), true);
-			File.Copy("assets\\Day01FakeStar2.txt", Path.Combine(dir, $"assets\\Day{strDay}FakeStar2.txt"), true);
+			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
+			File.Copy(Path.Combine(assetDir, "Day01.txt"), Path.Combine(assetDir, $"Day{strDay}.txt"), true);
+			File.Copy(Path.Combine(assetDir, "Day01FakeStar1.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), true);
+			File.Copy(Path.Combine(assetDir, "Day01FakeStar2.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), true);
+
+			var block = "\r\n    <Content Include=\"Assets\\Day|DD|.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar1.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|FakeStar2.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>";
+			block = block.Replace("|DD|", strDay);
+			var prj = File.ReadAllText(Path.Combine(codeDir, "Advent23.csproj"));
+			var i = prj.IndexOf("<ItemGroup>");
+			if (i == -1)
+				return;
+			i += "<ItemGroup>".Length;
+			;
+			File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
 		}
 	}
 }
