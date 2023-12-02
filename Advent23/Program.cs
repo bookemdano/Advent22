@@ -69,7 +69,7 @@ namespace Advent23
 		}
 		static int Day()
 		{
-			return 2;// (int) (DateTime.Today - new DateTime(2023, 11, 30)).TotalDays;
+			return (int) (DateTime.Today - new DateTime(2023, 11, 30)).TotalDays;
 		}
 		static void Read(bool real)
 		{
