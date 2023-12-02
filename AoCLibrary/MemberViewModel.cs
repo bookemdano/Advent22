@@ -1,4 +1,4 @@
-﻿namespace AoCLibrary
+namespace AoCLibrary
 {
 	public class MemberViewModel
 	{
@@ -23,10 +23,16 @@
 				var days = (DateTime.Today - new DateTime(ElfHelper.Year, 11, 30)).TotalDays;
 				if (days > 25)
 					days = 25;
+
 				if (_member.Stars == days * 2)
-					return "*";
+					return "🌟";
 				else
-					return ElfHelper.Fraction(_member.Stars / (days * 2.0), 8);
+				{
+					var rv = ElfHelper.Fraction(_member.Stars / (days * 2.0), 8);
+					if (_member.GetDay(ElfHelper.DayIndex())?.Stars() == 2)
+						rv += "*";
+					return rv;
+				}
 			}
 		}
 

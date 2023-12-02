@@ -234,6 +234,16 @@ namespace AoCLibrary
 		public StarLevel Star1 { get; set; }
 		[JsonPropertyName("2")]
 		public StarLevel Star2 { get; set; }
+
+		internal int Stars()
+		{
+			var rv = 0;
+			if (Star1 != null)
+				rv++;
+			if (Star2 != null)
+				rv++;
+			return rv;
+		}
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 	}
 	public class StarLevel

@@ -13,9 +13,9 @@
 			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>
 		</StackPanel>
 		<DataGrid x:Name="grd"/>
-		<StackPanel Orientation="Horizontal">
-			<TextBlock x:Name="staNext"/>
-			<TextBlock x:Name="staLeft"/>
+		<StackPanel Orientation="Horizontal"  Background="Black">
+			<TextBlock x:Name="staNext" Margin="3" Foreground="PaleGreen" FontFamily="Courier New"/>
+			<TextBlock x:Name="staLeft" Margin="3" Background="Black" Foreground="PaleGreen" FontFamily="Courier New"/>
 		</StackPanel>
 		<ListBox x:Name="lst"/>
 	</StackPanel>
