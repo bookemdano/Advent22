@@ -11,13 +11,8 @@ namespace AoCLibrary
 		{
 			Directory.CreateDirectory(Dir);
 		}
-        static public async Task<string> Read(string url, bool overrideThrottle = false)
+        static public async Task<string> Read(string url)
         {
-			var cacheDir = Path.Combine(Dir, "cache");
-			Directory.CreateDirectory(Dir);
-			var filename = Path.Combine(cacheDir, Filename());
-            if (overrideThrottle == false &&  File.Exists(filename))
-                return File.ReadAllText(filename);
             var uri = new Uri(url);
             var cookieContainer = new CookieContainer();
             using (var handler  = new HttpClientHandler() { CookieContainer = cookieContainer }) 
@@ -29,7 +24,12 @@ namespace AoCLibrary
                     {
                         var rv =  await client.GetStringAsync(uri);
 						if (rv.StartsWith("{"))
+						{
+							var cacheDir = Path.Combine(Dir, "cache");
+							Directory.CreateDirectory(Dir);
+							var filename = Path.Combine(cacheDir, $"url{DateTime.Now:yyyyMMdd HHmmss}.json");
 							File.WriteAllText(filename, rv);
+						}
 						return rv;
                     }
                     catch (Exception ex)
@@ -47,12 +47,6 @@ namespace AoCLibrary
             */
         }
 
-        static string Filename()
-        {
-            var now = DateTime.Now;
-            int quarter =  15 * (int) (now.Minute / 15.0);
-            return $"url{now.ToString("yyyyMMdd HH")}{quarter.ToString("00")}.json";
-        }
         static public DateTime TimeFromFile(string filename)
         {
             var str = StringBetween(filename, "url", ".json");

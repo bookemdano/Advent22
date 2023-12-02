@@ -355,7 +355,7 @@ namespace AoCLibrary
 			if (rv != null && rv.Timestamp + TimeSpan.FromMinutes(15) > DateTime.Now)
 				return rv;
 			
-			var str = await Communicator.Read($"https://adventofcode.com/{Year}/leaderboard/private/view/1403088.json", overrideThrottle: true);
+			var str = await Communicator.Read($"https://adventofcode.com/{Year}/leaderboard/private/view/1403088.json");
 			rv = Deserialize(str);
 			if (rv == null)
 				return rv;
