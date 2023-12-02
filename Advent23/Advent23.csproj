@@ -8,17 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Day01FakeStar2.txt" />
-    <None Remove="Assets\Day02.txt" />
-    <None Remove="Assets\Day02FakeStar1.txt" />
-    <None Remove="Assets\Day02FakeStar2.txt" />
-    <None Remove="Day01.txt" />
-    <None Remove="Day02.txt" />
-    <None Remove="Daycs.txt" />
-    <None Remove="DayFake01.txt" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Assets\Day02.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -31,9 +20,6 @@
     <Content Include="Assets\Daycs.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Assets\Day01.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -43,6 +29,10 @@
     <Content Include="Assets\Day01FakeStar1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AoCLibrary\AoCLibrary.csproj" />
   </ItemGroup>
 
 </Project>

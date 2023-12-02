@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace AoCLibrary
 {
-    public class AoCHelper
+    public class ElfHelper
     {
 
         // returns last
@@ -180,6 +180,8 @@ namespace AoCLibrary
 
             var outs = new List<string>();
             var all = ReadAll();
+			if (all == null)
+				return null;
             var finalResult = all.Last().Value;
             var lines = new List<string>();
             foreach (var member in finalResult.AllMembers())
@@ -216,7 +218,7 @@ namespace AoCLibrary
 
 
             outs = new List<string>();
-            AoCResult prevResult = null;
+            AoCResult? prevResult = null;
             foreach (var kvp in all)
             {
                 var date = kvp.Key;
@@ -260,20 +262,20 @@ namespace AoCLibrary
             }
             return finalResult;
         }
-        static Dictionary<DateTime, AoCResult> ReadAll()
+        static Dictionary<DateTime, AoCResult>? ReadAll()
         {
             if (!Directory.Exists(Communicator.Dir))
                 return null;
             var files = Directory.GetFiles(Communicator.Dir, "url*.json").Order();
             if (!files.Any())
                 return null;
-            AoCResult last = null;
+            AoCResult? last = null;
             var rv = new Dictionary<DateTime, AoCResult>();
             foreach (var file in files)
             {
                 var json = File.ReadAllText(file);
                 var res = Deserialize(json);
-                if (res.HasChanges(last, null))
+				if (res != null && res.HasChanges(last, null))
                 {
                     rv.Add(Communicator.TimeFromFile(file), res);
                     last = res;
@@ -288,10 +290,33 @@ namespace AoCLibrary
 		static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions() { PropertyNameCaseInsensitive = true, WriteIndented = true };
 
 		public static readonly int Year = DateTime.Today.Year;
-
+		public static string DayString()
+		{
+			return $"{Day():00}";
+		}
+		static public string CodeDir()
+		{
+			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");
+		}
+		public static int Day()
+		{
+			return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
+		}
 		public static string Serialize(AoCResult result)
 		{
 			return JsonSerializer.Serialize(result, _jsonOptions);
+		}
+
+		public static void WriteStubFiles(int day)
+		{
+			var strDay = $"{day:00}";
+			var dir = ElfHelper.CodeDir();
+			var cs = File.ReadAllText("assets\\DayCS.txt");
+			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
+			File.WriteAllText(Path.Combine(dir, $"Day{strDay}.cs"), cs);
+			File.Copy("assets\\Day01.txt", Path.Combine(dir, $"assets\\Day{strDay}.txt"), true);
+			File.Copy("assets\\Day01FakeStar1.txt", Path.Combine(dir, $"assets\\Day{strDay}FakeStar1.txt"), true);
+			File.Copy("assets\\Day01FakeStar2.txt", Path.Combine(dir, $"assets\\Day{strDay}FakeStar2.txt"), true);
 		}
 	}
 }

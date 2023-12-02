@@ -1,3 +1,4 @@
+using AoCLibrary;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -24,7 +25,7 @@ namespace Advent23
 			var sw = Stopwatch.StartNew();
 			var runner = GetDayRunner();
 			if (runner == null)
-				Log("No runner found for Day" + DayString());
+				Log("No runner found for Day" + ElfHelper.DayString());
 			else
 			{
 				Stopwatch.StartNew();
@@ -35,47 +36,32 @@ namespace Advent23
 		{
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			var advent = assemblies[1];
-			if (advent == null || !advent.FullName.Contains("Advent23"))
+			if (advent?.FullName?.Contains("Advent23") != true)
 			{
 				Log("No assembly[1] found!");
 				return null;
 			}
-			var className = $"Advent23.Day{DayString()}";
+			var className = $"Advent23.Day{ElfHelper.DayString()}";
 			var dayClass = advent.GetType(className);
 			if (dayClass == null)
 			{
 				Log($"No class {className} found in {advent}");
-				WriteStubFiles(Day());
+				ElfHelper.WriteStubFiles(ElfHelper.Day());
 				return null;
 			}
-			return (IDayRunner) Activator.CreateInstance(dayClass);
+			var o = Activator.CreateInstance(dayClass);
+			if (o is IDayRunner rv)
+				return rv;
+			return null;
 		}
 
-		private static void WriteStubFiles(int day)
-		{
-			var strDay = $"{day:00}";
-			var dir = @"c:\temp\data";
-			var cs = File.ReadAllText("assets\\DayCS.txt");
-			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
-			File.WriteAllText(Path.Combine(dir, $"Day{strDay}.cs"), cs);
-			File.Copy("assets\\Day01.txt", Path.Combine(dir, $"Day{strDay}.txt"), true);
-			File.Copy("assets\\Day01FakeStar1.txt", Path.Combine(dir, $"Day{strDay}FakeStar1.txt"), true);
-			File.Copy("assets\\Day01FakeStar2.txt", Path.Combine(dir, $"Day{strDay}FakeStar2.txt"), true);
-		}
 
-		static string DayString()
-		{
-			return $"{Day():00}";
-		}
-		static int Day()
-		{
-			return (int) (DateTime.Today - new DateTime(2023, 11, 30)).TotalDays;
-		}
+
 		static void Read(bool real)
 		{
 			if (real)
 			{
-				var filename = $"Day{Day():00}.txt";
+				var filename = $"Day{ElfHelper.Day():00}.txt";
 				Log("Read" + filename);
 				_starLines.Add(StarEnum.Star1, Read(filename));
 			}
@@ -83,7 +69,7 @@ namespace Advent23
 			{
 				for(int i = 0; i < 2; i++)
 				{
-					var filename = $"Day{Day():00}FakeStar{i + 1}.txt";
+					var filename = $"Day{ElfHelper.Day():00}FakeStar{i + 1}.txt";
 					Log("Read" + filename);
 					var star = StarEnum.Star1;
 					if (i == 1)

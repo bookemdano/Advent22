@@ -24,9 +24,9 @@ internal class Program : ILogger
             var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
 			next = DateTime.Now.AddMinutes(15);
 
-            var aocResult = AoCHelper.Deserialize(res.Json);
+            var aocResult = ElfHelper.Deserialize(res.Json);
 			Debug.Assert(aocResult != null);
-			File.WriteAllText(@"c:\temp\data\aoc.json", AoCHelper.Serialize(aocResult));
+			File.WriteAllText(@"c:\temp\data\aoc.json", ElfHelper.Serialize(aocResult));
             if (aocResult.HasChanges(last, this))
             {
                 var ordered = aocResult.AllMembers().OrderByDescending(m => m.LocalScore);

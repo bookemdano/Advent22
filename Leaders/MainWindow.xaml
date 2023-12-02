@@ -10,6 +10,7 @@
     <StackPanel>
 		<StackPanel Orientation="Horizontal">
 			<Button Click="Now_Click" Margin="3" Padding="3">Now</Button>
+			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>
 		</StackPanel>
 		<ListBox x:Name="lstResults"/>
 		<ListBox x:Name="lst"/>

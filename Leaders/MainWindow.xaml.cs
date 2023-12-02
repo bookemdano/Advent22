@@ -1,19 +1,8 @@
 using AoCLibrary;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Leaders
 {
@@ -47,11 +36,25 @@ namespace Leaders
 
 		async Task Read(bool force)
 		{
+			Title = "Day" + ElfHelper.DayString();
+			btnAddNext.IsEnabled = false;
+			for (int day = ElfHelper.Day(); day <= 25; day++)
+			{
+				var dayFile = $"Day{day:00}.cs";
+				if (!File.Exists(Path.Combine(ElfHelper.CodeDir(), dayFile)))
+				{
+					btnAddNext.IsEnabled = true;
+					btnAddNext.Content = $"Add Day{day:00}";
+					btnAddNext.Tag = day;
+					break;
+				}
+			}
+
 			var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json", overrideThrottle: force);
 			Log("Updating real: " + res.RealRead);
-			var aocResult = AoCHelper.Deserialize(res.Json);
+			var aocResult = ElfHelper.Deserialize(res.Json);
 			Debug.Assert(aocResult != null);
-			File.WriteAllText(@"c:\temp\data\aoc.json", AoCHelper.Serialize(aocResult));
+			File.WriteAllText(@"c:\temp\data\aoc.json", ElfHelper.Serialize(aocResult));
 			if (aocResult.HasChanges(_last, this) || force)
 			{
 				lstResults.Items.Clear();
@@ -77,6 +80,14 @@ namespace Leaders
 		private async void Now_Click(object sender, RoutedEventArgs e)
 		{
 			await Read(true);
+		}
+
+		private async void AddNext_Click(object sender, RoutedEventArgs e)
+		{
+			var day = (int) btnAddNext.Tag;
+			ElfHelper.WriteStubFiles(day);
+			Log("Created next");
+			await Read(false);
 		}
 	}
 }

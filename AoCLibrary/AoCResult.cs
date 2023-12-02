@@ -17,7 +17,7 @@ namespace AoCLibrary
         {
             return Members.AllMembers(hideZeros);
         }
-        public bool HasChanges(AoCResult? last, ILogger logger)
+        public bool HasChanges(AoCResult? last, ILogger? logger)
         {
             if (last == null)
                 return true;
@@ -149,7 +149,7 @@ namespace AoCLibrary
         {
             return GetUrl(Name);
         }
-        static public string GetUrl(string name)
+        static public string? GetUrl(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 name = "-";
@@ -180,12 +180,11 @@ namespace AoCLibrary
         {
             var days = CompetitionDayLevel.AllDays();
             int i = 1;
-            var score = 0;
             var parts = new List<string>();
             parts.Add(GetName());
             foreach (var day in days)
             {
-                var startOfDay = new DateTime(AoCHelper.Year, 12, i);
+                var startOfDay = new DateTime(ElfHelper.Year, 12, i);
                 double hours;
                 if (day?.Star1 == null)
                     parts.Add("");
@@ -213,7 +212,7 @@ namespace AoCLibrary
             var timeString = LastTime().ToString("M/d HH:mm");
             if (DateTime.Today == LastTime().Date)
                 timeString = LastTime().ToString("HH:mm");
-			var days = (DateTime.Today - new DateTime(AoCHelper.Year, 11, 30)).TotalDays;
+			var days = (DateTime.Today - new DateTime(ElfHelper.Year, 11, 30)).TotalDays;
             if (days > 25)
                 days = 25;
             var starString = "½";
