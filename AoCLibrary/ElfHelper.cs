@@ -103,6 +103,7 @@ namespace AoCLibrary
 			rv = Deserialize(str);
 			if (rv == null)
 				return rv;
+			rv.CalcRank();
 			File.WriteAllText(jsonFile, Serialize(rv));
 			return rv;
 		}

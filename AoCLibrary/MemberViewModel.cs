@@ -57,8 +57,11 @@ namespace AoCLibrary
 				if (_member.Stars > 0)
 				{
 					var avg = 23 - (double)_member.LocalScore / _member.Stars;
-					rv = ElfHelper.Fraction(avg, 8);
+					rv = avg.ToString("0.00");
 				}
+				var firsts = _member.AllTimes().Values.Count(s => s.Rank == 1);
+				if (firsts > 0)
+					rv += $" ({firsts})";
 				return rv;
 			}
 		}

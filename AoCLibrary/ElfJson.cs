@@ -159,6 +159,53 @@ namespace AoCLibrary
 		{
 			return AllDays(false)[dayIndex];
 		}
+
+		internal Dictionary<StarKey, StarLevel> AllTimes()
+		{
+
+			Dictionary<StarKey, StarLevel> times = [];
+			int dayIndex = 0;
+			foreach (var day in AllDays(hideNulls: false))
+			{
+				var dayDict = new Dictionary<StarEnum, DateTime>();
+				if (day?.Star1 != null)
+					times.Add(new StarKey(dayIndex, StarEnum.Star1), day.Star1);
+				if (day?.Star2 != null)
+					times.Add(new StarKey(dayIndex, StarEnum.Star2), day.Star2);
+				dayIndex++;
+			}
+			return times;
+		}
+	}
+	public enum StarEnum
+	{
+		NA,
+		Star1,
+		Star2
+	}
+	public class StarKey
+	{
+		public StarKey(int dayIndex, StarEnum star)
+		{
+			DayIndex = dayIndex;
+			Star = star;
+		}
+		public override int GetHashCode()
+		{
+			return DayIndex * 100 + (int) Star;
+		}
+		public override bool Equals(object? obj)
+		{
+			if (obj is StarKey other)
+				return DayIndex == other.DayIndex && Star == other.Star;
+			return false;
+		}
+		public int DayIndex { get; set; }
+		public StarEnum Star { get; set; }
+		public override string ToString()
+		{
+			return $"{(DayIndex + 1):00}-{Star}";
+		}
 	}
 	public class DayLevels
 	{
@@ -257,5 +304,7 @@ namespace AoCLibrary
 				return ElfHelper.GetTime(StarTs);
 			}
 		}
+
+		public int Rank { get; set; }
 	}
 }

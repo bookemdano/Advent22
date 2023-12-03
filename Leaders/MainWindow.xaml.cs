@@ -76,6 +76,7 @@ namespace Leaders
 			var elfResult = await ElfHelper.Read(force);
 			Debug.Assert(elfResult != null);
 			Log("Updating UI with data from: " + elfResult.Timestamp);
+
 			var changes = elfResult.HasChanges(_last);
 			if (changes.Any())
 			{
@@ -85,7 +86,8 @@ namespace Leaders
 			}
 
 			staLeft.Text = "Left today: " + elfResult.PointsLeftToday();
-			var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
+
+			var ordered = elfResult.AllMembers(true).OrderByDescending(m => m.LocalScore);
 			var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
 			int i = 0;
 			var vms = new List<MemberViewModel>();

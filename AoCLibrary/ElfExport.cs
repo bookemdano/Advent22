@@ -79,7 +79,7 @@ namespace AoCLibrary
 			var groups = allStars.GroupBy(s => s.GetHour()).OrderBy(k => k.Key);
 			var outs = new Dictionary<string, List<string>>();
 			var outs2 = new Dictionary<string, List<string>>();
-			foreach (var member in res.AllMembers())
+			foreach (var member in res.AllMembers(false))
 			{
 				outs.Add(member.Name, new());
 				outs2.Add(member.Name, new());
@@ -88,7 +88,7 @@ namespace AoCLibrary
 			foreach (var kvp in groups)
 			{
 				hours.Add(kvp.Key.ToString("M/d H:mm"));
-				foreach (var member in res.AllMembers())
+				foreach (var member in res.AllMembers(false))
 				{
 					var founds = kvp.Where(m => m.Name == member.Name);
 					if (founds?.Any() == true)
