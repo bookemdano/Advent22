@@ -6,7 +6,7 @@ namespace Advent23
 		public object? Star2 { get; set; }
 		public override string ToString()
 		{
-			return "Star1=>" + Star1 + " Star2=>" + Star2;
+			return "Star1=> " + Star1 + " Star2=> " + Star2;
 		}
 	}
 	interface IDayRunner

@@ -1,7 +1,6 @@
 using AoCLibrary;
 using System.Diagnostics;
 using System.Reflection;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Advent23
 {
@@ -17,7 +16,18 @@ namespace Advent23
 			else
 				return _starLines[star];
 		}
+		static internal string GetText(StarEnum star, bool real)
+		{
+			if (!_starLines.Any())
+				Read(real);
+
+			if (real)
+				return _starTexts[StarEnum.Star1];
+			else
+				return _starTexts[star];
+		}
 		static readonly Dictionary<StarEnum, string[]> _starLines = [];
+		static readonly Dictionary<StarEnum, string> _starTexts = [];
 
 		static void Main(string[] args)
 		{
@@ -30,6 +40,7 @@ namespace Advent23
 			else
 			{
 				Stopwatch.StartNew();
+				ElfHelper.ResetTestLog();
 				ElfHelper.Log(runner.Run(), sw);
 			}
 		}

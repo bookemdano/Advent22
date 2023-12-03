@@ -11,7 +11,21 @@ namespace AoCLibrary
 			if (sw != null)
 				str += $" {sw.ElapsedMilliseconds:0}ms";
 			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Communicator.Dir, $"endless{DateTime.Today.Year}.log"), str + Environment.NewLine);
+			File.AppendAllText(Path.Combine(Communicator.Dir, $"endless{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
+			Console.WriteLine(str);
+		}
+		static string _testLogFile = $"endless{DateTime.Today:yyyyMMdd}.log";
+		public static void ResetTestLog()
+		{
+			File.Delete(Path.Combine(Communicator.Dir, _testLogFile));
+		}
+		public static void TestLog(object o, Stopwatch? sw = null)
+		{
+			var str = o?.ToString() ?? "";
+			if (sw != null)
+				str += $" {sw.ElapsedMilliseconds:0}ms";
+			str = $"{DateTime.Now} {str}";
+			File.AppendAllText(Path.Combine(Communicator.Dir, _testLogFile), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
 
@@ -175,5 +189,6 @@ namespace AoCLibrary
 			else
 				return dt.ToString("M/d HH:mm");
 		}
+
 	}
 }
