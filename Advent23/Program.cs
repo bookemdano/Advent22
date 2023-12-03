@@ -33,6 +33,8 @@ namespace Advent23
 		{
 			//for(int i = 1; i < 26; i++)
 			//	WriteStubFiles(i);
+			ElfHelper.AppName = "RUN";
+
 			var sw = Stopwatch.StartNew();
 			var runner = GetDayRunner();
 			if (runner == null)

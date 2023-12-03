@@ -48,7 +48,7 @@ namespace AoCLibrary
 				if (day?.Star2 != null)
 					star2--;
 			}
-			return $"Star1: {star1} Star2: {star2}";
+			return $"{star1 + star2}({star1},{star2})";
 		}
 	}
 }

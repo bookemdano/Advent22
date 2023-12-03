@@ -18,6 +18,7 @@ namespace Leaders
 
 		public MainWindow()
 		{
+			ElfHelper.AppName = "LEAD";
 			InitializeComponent();
 			DispatcherTimer timer = new ();
 			timer.Tick += Timer_Tick;
@@ -32,7 +33,7 @@ namespace Leaders
 
 		void Log(string str)
 		{
-			ElfHelper.Log("LEAD " + str);
+			ElfHelper.Log(str);
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 
@@ -74,31 +75,29 @@ namespace Leaders
 
 			var elfResult = await ElfHelper.Read(force);
 			Debug.Assert(elfResult != null);
-			Log("Updating from: " + elfResult.Timestamp);
+			Log("Updating UI with data from: " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(_last);
-			if (changes.Any() || grd.Items.Count == 0 || force)
+			if (changes.Any())
 			{
-				if (changes.Any())
-				{
-					foreach (var change in changes)
-						Log(change);
-					Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + string.Join(Environment.NewLine, changes));
-				}
-
-				staLeft.Text = "Points left today: " + elfResult.PointsLeftToday();
-				var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
-				var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
-				int i = 0;
-				var vms = new List<MemberViewModel>();
-				foreach (var showable in showables)
-				{
-					++i;
-					vms.Add(new MemberViewModel(showable, i));
-				}
-				grd.ItemsSource = vms;
+				foreach (var change in changes)
+					Log(change);
+				Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + string.Join(Environment.NewLine, changes));
 			}
 
-			_next = elfResult.Timestamp.AddMinutes(15);
+			staLeft.Text = "Left today: " + elfResult.PointsLeftToday();
+			var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
+			var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
+			int i = 0;
+			var vms = new List<MemberViewModel>();
+			var prevScore = showables.First().LocalScore;
+			foreach (var showable in showables)
+			{
+				++i;
+				vms.Add(new MemberViewModel(showable, i, prevScore));
+			}
+			grd.ItemsSource = vms;
+
+			_next = elfResult.Timestamp.Add(ElfHelper.MinApiRefresh);
 			staNext.Text = "Next update " + _next;
 			_last = elfResult;
 		}
@@ -119,6 +118,16 @@ namespace Leaders
 			ElfHelper.WriteStubFiles(day, true);
 			Log("Created next day" + day);
 			UpdateNextButton();
+		}
+
+		private void Puzzles_Click(object sender, RoutedEventArgs e)
+		{
+			ElfHelper.Open("https://adventofcode.com/");
+		}
+
+		private void Leaderboard_Click(object sender, RoutedEventArgs e)
+		{
+			ElfHelper.Open("https://adventofcode.com/2023/leaderboard/private/view/1403088");
 		}
 	}
 }

@@ -5,9 +5,10 @@ namespace AoCLibrary
 {
     public class ElfHelper
     {
+		static public string AppName { get; set; } = string.Empty;
 		public static void Log(object o, Stopwatch? sw = null)
 		{
-			var str = o?.ToString() ?? "";
+			var str = $"{AppName} {o}";
 			if (sw != null)
 				str += $" {sw.ElapsedMilliseconds:0}ms";
 			str = $"{DateTime.Now} {str}";
@@ -81,7 +82,7 @@ namespace AoCLibrary
 				File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
 			}
 		}
-
+		public static TimeSpan MinApiRefresh => TimeSpan.FromMinutes(15);
 		public static async Task<ElfResult?> Read(bool force)
 		{
 			var jsonFile = Path.Combine(Communicator.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
@@ -91,8 +92,12 @@ namespace AoCLibrary
 				var json = File.ReadAllText(jsonFile);
 				rv = Deserialize(json);
 			}
-			if (rv != null && rv.Timestamp + TimeSpan.FromMinutes(15) > DateTime.Now)
-				return rv;
+			Log($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
+			if (rv != null && rv.Timestamp + MinApiRefresh > DateTime.Now)
+			{
+				Log($"New enough");
+				return rv;  // new enough
+			}
 			
 			var str = await Communicator.Read($"https://adventofcode.com/{Year}/leaderboard/private/view/1403088.json");
 			rv = Deserialize(str);
@@ -189,6 +194,22 @@ namespace AoCLibrary
 			else
 				return dt.ToString("M/d HH:mm");
 		}
+		static public void Open(string filename)
+		{
+			try
+			{
+				var psi = new ProcessStartInfo
+				{
+					UseShellExecute = true,
+					FileName = filename
+				};
+				Process.Start(psi);
 
+			}
+			catch (Exception ex)
+			{
+				Log($"Open({filename}) " + ex);
+			}
+		}
 	}
 }

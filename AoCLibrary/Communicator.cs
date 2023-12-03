@@ -14,6 +14,7 @@ namespace AoCLibrary
         static public async Task<string> Read(string url)
         {
             var uri = new Uri(url);
+			ElfHelper.Log($"Read({uri})");
             var cookieContainer = new CookieContainer();
 			using var handler = new HttpClientHandler() { CookieContainer = cookieContainer };
 			using var client = new HttpClient(handler) { BaseAddress = uri };

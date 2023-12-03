@@ -5,8 +5,9 @@ using System.Diagnostics;
 internal class Program
 {
     private static async Task Main(string[] args)
-    {
-        var program = new Program();
+	{
+		ElfHelper.AppName = "LC";
+		var program = new Program();
         await program.Runner();
     }
     async Task Runner()

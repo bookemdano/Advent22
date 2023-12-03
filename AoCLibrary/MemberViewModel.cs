@@ -4,16 +4,29 @@ namespace AoCLibrary
 	{
 		Member _member;
 		public int Place { get; }
-		public MemberViewModel(Member member, int place)
+		int _prevScore;
+		public MemberViewModel(Member member, int place, int prevScore)
 		{
 			_member = member;
 			Place = place;
+			_prevScore = prevScore;
 		}
 		public string Name
 		{
 			get
 			{
 				return _member.GetName();
+			}
+		}
+		public string Score
+		{
+			get
+			{
+				var delta = _member.LocalScore - _prevScore;
+				if (delta == 0)
+					return _member.LocalScore.ToString();
+				else
+					return $"{_member.LocalScore} ({delta})";
 			}
 		}
 		public string Stars
