@@ -25,7 +25,7 @@ namespace AoCLibrary
 		public List<string> HasChanges(ElfResult? last)
         {
 			var rv = new List<string>();
-			var allMembers = AllMembers(true);
+			var allMembers = AllMembers(false);
             var lastAllMembers = last?.AllMembers(false);
 			if (lastAllMembers == null)
 				return rv;
@@ -33,6 +33,13 @@ namespace AoCLibrary
 			foreach (var member in allMembers)
 			{
 				var lastM = lastAllMembers.FirstOrDefault(m => m.Name == member.Name);
+				if (lastM == null)
+				{
+					rv.Add($"New player! {member.GetName()}");
+					continue;
+				}
+				if (member.LocalScore == 0)
+					continue;
 				var lastScore = 0;
 				if (lastM != null)
 					lastScore = lastM.LocalScore;
@@ -44,8 +51,9 @@ namespace AoCLibrary
 
 		public string PointsLeftToday()
 		{
-			int star1 = Members.Count();
-			int star2 = star1;
+			var max = Members.Count();
+			int star1 = max;
+			int star2 = max;
 			foreach(var member in AllMembers(true))
 			{
 				var day = member.GetDay(ElfHelper.DayIndex);
@@ -56,7 +64,7 @@ namespace AoCLibrary
 				if (day.ContainsKey("2"))
 					star2--;
 			}
-			return $"{star1 + star2}({star1},{star2})";
+			return $"{star1 + star2}({star1},{star2}) players:{max}";
 		}
 
 		public void CalcRank()

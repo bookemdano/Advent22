@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using System.Xml.Linq;
 
 namespace AoCLibrary
 {
@@ -38,13 +39,13 @@ namespace AoCLibrary
 			};
 		public string GetName()
 		{
+			if (string.IsNullOrWhiteSpace(Name))
+				Name = "JD" + Id;
+
 			return GetName(Name);
 		}
 		static public string GetName(string name)
 		{
-			if (string.IsNullOrWhiteSpace(name))
-				name = "-";
-
 			if (!_shortnames.TryGetValue(name, out string? value))
 				return name;
 
