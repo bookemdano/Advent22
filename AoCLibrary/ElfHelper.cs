@@ -42,7 +42,7 @@ namespace AoCLibrary
 
 		public static readonly int Year = DateTime.Today.Year;
 
-		public static int MaxScore() => 22;
+		public static int MaxScore => 22;
 
 		public static string DayString()
 		{
@@ -55,7 +55,6 @@ namespace AoCLibrary
 				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
 			}
 		}
-
 		static public string CodeDir()
 		{
 			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");

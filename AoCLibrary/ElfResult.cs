@@ -38,8 +38,8 @@ namespace AoCLibrary
 
 		public string PointsLeftToday()
 		{
-			int star1 = ElfHelper.MaxScore();
-			int star2 = ElfHelper.MaxScore();
+			int star1 = ElfHelper.MaxScore;
+			int star2 = ElfHelper.MaxScore;
 			foreach(var member in Members.AllMembers(true))
 			{
 				var day = member.GetDay(ElfHelper.DayIndex);

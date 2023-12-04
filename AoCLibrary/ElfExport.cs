@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace AoCLibrary
 {
 	static public class ElfExport
@@ -51,7 +45,7 @@ namespace AoCLibrary
 			foreach (var kvp in stars)
 			{
 				var starScores = kvp.Value.OrderBy(s => s.Timestamp);
-				int score = 22;
+				int score = ElfHelper.MaxScore;
 				foreach (var starScore in starScores)
 				{
 					starScore.Score = score--;
