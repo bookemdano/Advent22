@@ -42,7 +42,7 @@ namespace AoCLibrary
 				else
 				{
 					var rv = ElfHelper.Fraction(_member.Stars / (days * 2.0), 8);
-					if (_member.GetDay(ElfHelper.DayIndex())?.Stars() == 2)
+					if (_member.GetDay(ElfHelper.DayIndex)?.Stars() == 2)
 						rv += "*";
 					return rv;
 				}

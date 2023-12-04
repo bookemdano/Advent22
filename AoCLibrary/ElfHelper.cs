@@ -46,11 +46,14 @@ namespace AoCLibrary
 
 		public static string DayString()
 		{
-			return $"{Day():00}";
+			return $"{Day:00}";
 		}
-		public static int Day()
+		public static int Day
 		{
-			return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
+			get
+			{
+				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
+			}
 		}
 
 		static public string CodeDir()
@@ -58,15 +61,21 @@ namespace AoCLibrary
 			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");
 		}
 
-		public static void WriteStubFiles(int day, bool updatePrj)
+		public static async Task WriteStubFiles(int day, bool updatePrj)
 		{
+			//https://adventofcode.com/2023/day/4/input/
 			var strDay = $"{day:00}";
 			var codeDir = ElfHelper.CodeDir();
 			var assetDir = Path.Combine(codeDir, "assets");
 			var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
 			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
 			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
-			File.Copy(Path.Combine(assetDir, "Day01.txt"), Path.Combine(assetDir, $"Day{strDay}.txt"), true);
+			var str = await Communicator.Read($"https://adventofcode.com/{Year}/day/{day}/input");
+			if (string.IsNullOrEmpty(str))
+				File.Copy(Path.Combine(assetDir, "Day01.txt"), Path.Combine(assetDir, $"Day{strDay}.txt"), true);
+			else
+				File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}.txt"), str);
+
 			File.Copy(Path.Combine(assetDir, "Day01FakeStar1.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), true);
 			File.Copy(Path.Combine(assetDir, "Day01FakeStar2.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), true);
 
@@ -184,10 +193,7 @@ namespace AoCLibrary
 			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
 		}
 
-		internal static int DayIndex()
-		{
-			return Day() - 1;
-		}
+		internal static int DayIndex => Day - 1;
 		static public string TimeString(DateTime dt)
 		{
 			if (DateTime.Today == dt.Date)

@@ -55,7 +55,7 @@ namespace Leaders
 		private void UpdateNextButton()
 		{
 			btnAddNext.IsEnabled = false;
-			for (int day = ElfHelper.Day(); day <= 25; day++)
+			for (int day = ElfHelper.Day; day <= 25; day++)
 			{
 				var dayFile = $"Day{day:00}.cs";
 				if (!File.Exists(Path.Combine(ElfHelper.CodeDir(), dayFile)))
@@ -106,6 +106,7 @@ namespace Leaders
 
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
+			//await ElfHelper.WriteStubFiles(4, false);
 			await Tick(false);
 		}
 
@@ -114,22 +115,26 @@ namespace Leaders
 			await Tick(true);
 		}
 
-		private void AddNext_Click(object sender, RoutedEventArgs e)
+		private async void AddNext_Click(object sender, RoutedEventArgs e)
 		{
-			var day = (int) btnAddNext.Tag;
-			ElfHelper.WriteStubFiles(day, true);
-			Log("Created next day" + day);
-			UpdateNextButton();
+			if (MessageBox.Show("Are you sure?", "Sure?", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
+			{
+				var day = (int)btnAddNext.Tag;
+				await ElfHelper.WriteStubFiles(day, true);
+				Log("Created next day" + day);
+				UpdateNextButton();
+			}
 		}
 
-		private void Puzzles_Click(object sender, RoutedEventArgs e)
+		private void Puzzle_Click(object sender, RoutedEventArgs e)
 		{
-			ElfHelper.Open("https://adventofcode.com/");
+			//https://adventofcode.com/2023/day/4
+			ElfHelper.Open($"https://adventofcode.com/{ElfHelper.Year}/day/{ElfHelper.Day}");
 		}
 
 		private void Leaderboard_Click(object sender, RoutedEventArgs e)
 		{
-			ElfHelper.Open("https://adventofcode.com/2023/leaderboard/private/view/1403088");
+			ElfHelper.Open($"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088");
 		}
 	}
 }

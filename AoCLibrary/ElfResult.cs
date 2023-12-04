@@ -42,7 +42,7 @@ namespace AoCLibrary
 			int star2 = ElfHelper.MaxScore();
 			foreach(var member in Members.AllMembers(true))
 			{
-				var day = member.GetDay(ElfHelper.DayIndex());
+				var day = member.GetDay(ElfHelper.DayIndex);
 				if (day?.Star1 != null)
 					star1--;
 				if (day?.Star2 != null)

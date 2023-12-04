@@ -46,7 +46,7 @@ namespace Advent23
 				ElfHelper.Log(runner.Run(), sw);
 			}
 		}
-		static IDayRunner? GetDayRunner()
+		 static IDayRunner? GetDayRunner()
 		{
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			var advent = assemblies[1];
@@ -60,7 +60,7 @@ namespace Advent23
 			if (dayClass == null)
 			{
 				ElfHelper.Log($"No class {className} found in {advent}");
-				ElfHelper.WriteStubFiles(ElfHelper.Day(), false);
+				//await ElfHelper.WriteStubFiles(ElfHelper.Day, false);
 				return null;
 			}
 			var o = Activator.CreateInstance(dayClass);
@@ -75,7 +75,7 @@ namespace Advent23
 		{
 			if (real)
 			{
-				var filename = $"Day{ElfHelper.Day():00}.txt";
+				var filename = $"Day{ElfHelper.DayString()}.txt";
 				ElfHelper.Log("Read" + filename);
 				_starLines.Add(StarEnum.Star1, Read(filename));
 			}
@@ -83,7 +83,7 @@ namespace Advent23
 			{
 				for(int i = 0; i < 2; i++)
 				{
-					var filename = $"Day{ElfHelper.Day():00}FakeStar{i + 1}.txt";
+					var filename = $"Day{ElfHelper.DayString()}FakeStar{i + 1}.txt";
 					ElfHelper.Log("Read" + filename);
 					var star = StarEnum.Star1;
 					if (i == 1)
