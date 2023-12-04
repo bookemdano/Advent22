@@ -10,10 +10,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="bring.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\..\privatestash\TwilioStash.cs" Link="TwilioStash.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="bring.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="elf.ico" />
   </ItemGroup>
 

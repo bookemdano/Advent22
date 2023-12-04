@@ -114,7 +114,10 @@ namespace Leaders
 			if (changes.Any())
 			{
 				foreach (var change in changes)
+				{
 					Log(change);
+					PlaySound();
+				}
 				Send(string.Join(Environment.NewLine, changes));
 			}
 
@@ -136,7 +139,10 @@ namespace Leaders
 			staNext.Text = "Next update " + _next;
 			_last = elfResult;
 		}
-
+		internal static void PlaySound()
+		{
+			new System.Media.SoundPlayer("bring.wav").Play();
+		}
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			//await ElfHelper.WriteStubFiles(4, false);
