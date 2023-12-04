@@ -5,7 +5,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
-namespace Finder2020Win
+namespace Leaders
 {
     public class Sms
     {

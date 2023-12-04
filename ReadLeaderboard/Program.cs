@@ -24,7 +24,6 @@ internal class Program
 			}
 			var elfResult = await ElfHelper.Read(false);
 			Debug.Assert(elfResult != null);
-			//var res = await Communicator.Read($"https://adventofcode.com/{DateTime.Today.Year}/leaderboard/private/view/1403088.json");
 			next = elfResult.Timestamp.AddMinutes(15);
 			Log("Read " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(last);

@@ -63,14 +63,13 @@ namespace AoCLibrary
 
 		public static async Task WriteStubFiles(int day, bool updatePrj)
 		{
-			//https://adventofcode.com/2023/day/4/input/
 			var strDay = $"{day:00}";
 			var codeDir = ElfHelper.CodeDir();
 			var assetDir = Path.Combine(codeDir, "assets");
 			var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
 			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
 			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
-			var str = await Communicator.Read($"https://adventofcode.com/{Year}/day/{day}/input");
+			var str = await Communicator.Read($"{DailyUrl}/input");
 			if (string.IsNullOrEmpty(str))
 				File.Copy(Path.Combine(assetDir, "Day01.txt"), Path.Combine(assetDir, $"Day{strDay}.txt"), true);
 			else
@@ -108,7 +107,7 @@ namespace AoCLibrary
 				return rv;  // new enough
 			}
 			
-			var str = await Communicator.Read($"https://adventofcode.com/{Year}/leaderboard/private/view/1403088.json");
+			var str = await Communicator.Read($"{LeaderUrl}.json");
 			rv = Deserialize(str);
 			if (rv == null)
 				return rv;
@@ -194,6 +193,10 @@ namespace AoCLibrary
 		}
 
 		internal static int DayIndex => Day - 1;
+
+		//https://adventofcode.com/2023/day/4/input/
+		public static string DailyUrl => $"https://adventofcode.com/{Year}/day/{Day}";
+		static public string LeaderUrl => $"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088";
 		static public string TimeString(DateTime dt)
 		{
 			if (DateTime.Today == dt.Date)
@@ -217,6 +220,19 @@ namespace AoCLibrary
 			{
 				Log($"Open({filename}) " + ex);
 			}
+		}
+
+		public static int NextEmptyDay()
+		{
+			for (int day = Day; day <= 25; day++)
+			{
+				var dayFile = $"Day{day:00}.cs";
+				if (!File.Exists(Path.Combine(CodeDir(), dayFile)))
+				{
+					return day;
+				}
+			}
+			return -1;
 		}
 	}
 }

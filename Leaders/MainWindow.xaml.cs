@@ -1,8 +1,7 @@
 using AoCLibrary;
-using Finder2020Win;
 using System.Diagnostics;
 using System.IO;
-using System.Security.Policy;
+using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -40,8 +39,20 @@ namespace Leaders
 		async Task Tick(bool force)
 		{
 			Title = "Day" + ElfHelper.DayString();
-			UpdateNextButton();
 
+			if (LastSentDay != ElfHelper.Day)
+			{
+				Send(ElfHelper.DailyUrl);
+				LastSentDay = ElfHelper.Day;
+
+				if (ElfHelper.Day == ElfHelper.NextEmptyDay())
+				{
+					await ElfHelper.WriteStubFiles(ElfHelper.Day, true);
+					Log("Created next day" + ElfHelper.Day);
+					UpdateNextButton();
+				}
+			}
+			
 			try
 			{
 				await Read(force);
@@ -55,19 +66,41 @@ namespace Leaders
 		private void UpdateNextButton()
 		{
 			btnAddNext.IsEnabled = false;
-			for (int day = ElfHelper.Day; day <= 25; day++)
+			var day = ElfHelper.NextEmptyDay();
+			if (day > 0)
 			{
-				var dayFile = $"Day{day:00}.cs";
-				if (!File.Exists(Path.Combine(ElfHelper.CodeDir(), dayFile)))
-				{
-					btnAddNext.IsEnabled = true;
-					btnAddNext.Content = $"Add Day{day:00}";
-					btnAddNext.Tag = day;
-					break;
-				}
+				btnAddNext.IsEnabled = true;
+				btnAddNext.Content = $"Add Day{day:00}";
+				btnAddNext.Tag = day;
 			}
 		}
-
+		int _lastDaySent = -1;
+		int LastSentDay
+		{
+			get
+			{
+				if (_lastDaySent == -1)
+				{
+					_lastDaySent = 0;
+					if (File.Exists(Path.Combine(Communicator.Dir, "LastDaySent.cfg")))
+					{
+						var str = File.ReadAllText(Path.Combine(Communicator.Dir, "LastDaySent.cfg"));
+						int.TryParse(str, out _lastDaySent);
+					}
+				}
+				return _lastDaySent;
+			}
+			set
+			{
+				_lastDaySent = value;
+				File.WriteAllText(Path.Combine(Communicator.Dir, "LastDaySent.cfg"), _lastDaySent.ToString());
+			}
+		}
+		void Send(string str)
+		{
+			Log("Sending " + str);
+			Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + str);
+		}
 		async Task Read(bool force)
 		{
 			if (!force && DateTime.Now < _next)
@@ -82,7 +115,7 @@ namespace Leaders
 			{
 				foreach (var change in changes)
 					Log(change);
-				Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + string.Join(Environment.NewLine, changes));
+				Send(string.Join(Environment.NewLine, changes));
 			}
 
 			staLeft.Text = "Left today: " + elfResult.PointsLeftToday();
@@ -107,6 +140,7 @@ namespace Leaders
 		private async void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			//await ElfHelper.WriteStubFiles(4, false);
+			UpdateNextButton();
 			await Tick(false);
 		}
 
@@ -128,13 +162,12 @@ namespace Leaders
 
 		private void Puzzle_Click(object sender, RoutedEventArgs e)
 		{
-			//https://adventofcode.com/2023/day/4
-			ElfHelper.Open($"https://adventofcode.com/{ElfHelper.Year}/day/{ElfHelper.Day}");
+			ElfHelper.Open(ElfHelper.DailyUrl);
 		}
 
 		private void Leaderboard_Click(object sender, RoutedEventArgs e)
 		{
-			ElfHelper.Open($"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088");
+			ElfHelper.Open(ElfHelper.LeaderUrl);
 		}
 	}
 }
