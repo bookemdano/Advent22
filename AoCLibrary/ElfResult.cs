@@ -32,7 +32,7 @@ namespace AoCLibrary
 
 			foreach (var member in allMembers)
 			{
-				var lastM = lastAllMembers.FirstOrDefault(m => m.Name == member.Name);
+				var lastM = lastAllMembers.FirstOrDefault(m => m.Id == member.Id);
 				if (lastM == null)
 				{
 					rv.Add($"New player! {member.GetName()}");
@@ -44,8 +44,10 @@ namespace AoCLibrary
 				if (lastM != null)
 					lastScore = lastM.LocalScore;
 				if (member.LocalScore != lastScore)
-					rv.Add($"{member.Name} Gained {member.LocalScore - lastScore}!");
+					rv.Add($"{member.GetName()} Gained {member.LocalScore - lastScore}!");
             }
+			if (rv.Any())
+				rv.Add("Changes since " + last?.Timestamp);
             return rv;
         }
 

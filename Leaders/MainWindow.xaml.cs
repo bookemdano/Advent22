@@ -106,10 +106,12 @@ namespace Leaders
 			if (!force && DateTime.Now < _next)
 				return;
 
+			if (_last == null)
+				_last = ElfHelper.ReadFromFile();
+
 			var elfResult = await ElfHelper.Read(force);
 			Debug.Assert(elfResult != null);
 			Log("Updating UI with data from: " + elfResult.Timestamp);
-
 			var changes = elfResult.HasChanges(_last);
 			if (changes.Any())
 			{

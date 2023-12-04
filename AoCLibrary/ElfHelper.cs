@@ -87,15 +87,32 @@ namespace AoCLibrary
 			}
 		}
 		public static TimeSpan MinApiRefresh => TimeSpan.FromMinutes(15);
-		public static async Task<ElfResult?> Read(bool force)
+		public static ElfResult? ReadFromFile()
 		{
-			var jsonFile = Path.Combine(Communicator.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
+			var files = Directory.GetFiles(Communicator.Dir, "aoc*.json").OrderByDescending(f => f);
+			if (!files.Any())
+				return null;
+
+			var jsonFile = files.First();
 			ElfResult? rv = null;
-			if (File.Exists(jsonFile) && !force)
+			if (File.Exists(jsonFile))
 			{
 				var json = File.ReadAllText(jsonFile);
-				rv = Deserialize(json);
+				return Deserialize(json);
 			}
+			return null;
+		}
+		public static void WriteToFile(ElfResult result)
+		{
+			var jsonFile = Path.Combine(Communicator.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
+			File.WriteAllText(jsonFile, Serialize(result));
+		}
+		public static async Task<ElfResult?> Read(bool force)
+		{
+			ElfResult? rv = null;
+			if (!force)
+				rv = ReadFromFile();
+
 			Log($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
 			if (rv != null && rv.Timestamp + MinApiRefresh > DateTime.Now)
 			{
@@ -109,7 +126,7 @@ namespace AoCLibrary
 			if (rv == null)
 				return rv;
 			rv.CalcRank();
-			File.WriteAllText(jsonFile, Serialize(rv));
+			WriteToFile(rv);
 			return rv;
 		}
 

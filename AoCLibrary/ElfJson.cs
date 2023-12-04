@@ -40,7 +40,7 @@ namespace AoCLibrary
 		public string GetName()
 		{
 			if (string.IsNullOrWhiteSpace(Name))
-				Name = "JD" + Id;
+				Name = "JD" + Id.ToString().Substring(4,3);
 
 			return GetName(Name);
 		}
