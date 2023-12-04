@@ -2,69 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace AoCLibrary
 {
-	public class MemberGroup
-    {
-        public Member[] AllMembers(bool hideZeros = true)
-        {
-            if (Member08.Name == null)
-                Member08.Name = "-";
-            var rv = new Member[] {
-                Member00, Member01, Member02, Member03, Member04, Member05, Member06, Member07, Member08, Member09,
-                Member10, Member11, Member12, Member13, Member14, Member15, Member16, Member17, Member18, Member19,
-                Member20, Member21};
-            if (hideZeros)
-                rv = rv.Where(m => m.LocalScore  != 0).ToArray();
-            return rv;
-        }
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-		[JsonPropertyName("2428221")]
-        public Member Member00 { get; set; }    // Greg
-        [JsonPropertyName("2497986")]
-        public Member Member01 { get; set; }    // Jesse
-        [JsonPropertyName("2439451")]
-        public Member Member02 { get; set; }    // Dan
-        [JsonPropertyName("2439454")]
-        public Member Member03 { get; set; }    // Lan Vu
-        [JsonPropertyName("1403088")]
-        public Member Member04 { get; set; }    // Hambone
-        [JsonPropertyName("2481606")]
-        public Member Member05 { get; set; }    // Parker
-        [JsonPropertyName("1555842")]
-        public Member Member06 { get; set; }    // Colin
-        [JsonPropertyName("2298841")]
-        public Member Member07 { get; set; }    // Nelson
-        [JsonPropertyName("1839258")]
-        public Member Member08 { get; set; }    // "" 
-        [JsonPropertyName("1539979")]
-        public Member Member09 { get; set; }    // Ian
-        [JsonPropertyName("678584")]
-        public Member Member10 { get; set; }    // Ali
-        [JsonPropertyName("1659760")]
-        public Member Member11 { get; set; }    // Jesse0
-        [JsonPropertyName("1861750")]
-        public Member Member12 { get; set; }    // Fafa
-        [JsonPropertyName("1650120")]
-        public Member Member13 { get; set; }    //Brian Parker
-        [JsonPropertyName("1538218")]
-        public Member Member14 { get; set; }    // Derrick
-        [JsonPropertyName("2454059")]
-        public Member Member15 { get; set; }    // Joe
-        [JsonPropertyName("1538420")]
-        public Member Member16 { get; set; }    // Fomur
-        [JsonPropertyName("1646913")]
-        public Member Member17 { get; set; }    // Buddha
-        [JsonPropertyName("2452095")]
-        public Member Member18 { get; set; }    // JTruit
-        [JsonPropertyName("1562200")]
-        public Member Member19 { get; set; }    // Ryan G
-        [JsonPropertyName("850621")]
-        public Member Member20 { get; set; }    // Francis
-        [JsonPropertyName("2500712")]
-        public Member Member21 { get; set; }    // Michael Roy
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-	}
-
 	public class Member
 	{
 		public Member()
@@ -82,7 +19,8 @@ namespace AoCLibrary
 				{ "jfitzsimmons2", "https://ca.slack-edge.com/TB4KLF92L-U02FRLVN8JF-e488e637c410-512" },
 				{ "jtruit", "https://ca.slack-edge.com/TB4KLF92L-UB58QHN6Q-19f86b8e5625-512" },
 				{ "Jesse Rakowski", "https://ca.slack-edge.com/TB4KLF92L-U020KKDNX5K-d8b8f0cfa119-512" },
-				{ "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" }
+				{ "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" },
+				{ "Jim Green", "https://jhuis.slack.com/archives/D068QSW145P/p1701696243394289" }
 			};
 		static readonly Dictionary<string, string> _shortnames =
 			new() {
@@ -96,6 +34,7 @@ namespace AoCLibrary
 				{ "Jesse Rakowski", "Jesse" },
 				{ "HamboneWilson", "Hambone" },
 				{ "iangohjhu", "Ian" },
+				{ "Jim Green", "Green" },
 			};
 		public string GetName()
 		{
@@ -144,7 +83,7 @@ namespace AoCLibrary
 		[JsonPropertyName("last_star_ts")]
 		public int LastStarTs { get; set; }
 		[JsonPropertyName("completion_day_level")]
-		public DayLevels CompetitionDayLevel { get; set; } = new();
+		public DayLevels? CompetitionDayLevel { get; set; }
 
 		public override string ToString()
 		{
@@ -153,6 +92,8 @@ namespace AoCLibrary
 
 		internal List<DayLevel?> AllDays(bool hideNulls)
 		{
+			if (CompetitionDayLevel == null)
+				return new List<DayLevel?>();
 			return CompetitionDayLevel.AllDays(hideNulls);
 		}
 		internal DayLevel? GetDay(int dayIndex)
@@ -162,7 +103,6 @@ namespace AoCLibrary
 
 		internal Dictionary<StarKey, StarLevel> AllStars()
 		{
-
 			Dictionary<StarKey, StarLevel> times = [];
 			int dayIndex = 0;
 			foreach (var day in AllDays(hideNulls: false))

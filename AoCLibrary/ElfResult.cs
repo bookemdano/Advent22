@@ -2,7 +2,8 @@ namespace AoCLibrary
 {
 	public class ElfResult
     {
-		public MemberGroup Members { get; set; } = new MemberGroup();
+		public string Event { get; set; } = "-noevent-";
+		public Dictionary<string, Member> Members { get; set; } = [];
 
 		// just for our app to use
 		public DateTime Timestamp { get; set; } = DateTime.Now;    
@@ -13,7 +14,12 @@ namespace AoCLibrary
         }
         public Member[] AllMembers(bool hideZeros)
         {
-            return Members.AllMembers(hideZeros);
+			var rv = Members.Values.ToArray();
+			if (rv == null)
+				return [];
+			if (hideZeros && rv != null)
+				rv = rv.Where(m => m?.LocalScore > 0).ToArray();
+			return rv;
         }
 		// return null for no changes
 		public List<string> HasChanges(ElfResult? last)
@@ -38,9 +44,9 @@ namespace AoCLibrary
 
 		public string PointsLeftToday()
 		{
-			int star1 = ElfHelper.MaxScore;
-			int star2 = ElfHelper.MaxScore;
-			foreach(var member in Members.AllMembers(true))
+			int star1 = Members.Count();
+			int star2 = Members.Count();
+			foreach(var member in AllMembers(true))
 			{
 				var day = member.GetDay(ElfHelper.DayIndex);
 				if (day?.Star1 != null)

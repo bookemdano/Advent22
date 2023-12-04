@@ -29,7 +29,6 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Communicator.Dir, _testLogFile), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-
 		public static ElfResult? Deserialize(string json)
 		{
 			return JsonSerializer.Deserialize<ElfResult>(json, _jsonOptions);
@@ -41,8 +40,6 @@ namespace AoCLibrary
 		}
 
 		public static readonly int Year = DateTime.Today.Year;
-
-		public static int MaxScore => 22;
 
 		public static string DayString()
 		{
@@ -63,7 +60,7 @@ namespace AoCLibrary
 		public static async Task WriteStubFiles(int day, bool updatePrj)
 		{
 			var strDay = $"{day:00}";
-			var codeDir = ElfHelper.CodeDir();
+			var codeDir = CodeDir();
 			var assetDir = Path.Combine(codeDir, "assets");
 			var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
 			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
@@ -107,6 +104,7 @@ namespace AoCLibrary
 			}
 			
 			var str = await Communicator.Read($"{LeaderUrl}.json");
+			
 			rv = Deserialize(str);
 			if (rv == null)
 				return rv;

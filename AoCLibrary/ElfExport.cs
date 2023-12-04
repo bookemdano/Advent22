@@ -9,6 +9,7 @@ namespace AoCLibrary
 			var stars = new Dictionary<string, List<StarScore>>();
 			string key;
 			var bestDeltas = new Dictionary<string, TimeSpan>();
+			int maxScore = res.Members.Count();
 			foreach (var member in res.AllMembers(true))
 			{
 				int iDay = 1;
@@ -45,7 +46,7 @@ namespace AoCLibrary
 			foreach (var kvp in stars)
 			{
 				var starScores = kvp.Value.OrderBy(s => s.Timestamp);
-				int score = ElfHelper.MaxScore;
+				int score = maxScore;
 				foreach (var starScore in starScores)
 				{
 					starScore.Score = score--;
