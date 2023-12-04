@@ -83,38 +83,50 @@ namespace AoCLibrary
 		[JsonPropertyName("last_star_ts")]
 		public int LastStarTs { get; set; }
 		[JsonPropertyName("completion_day_level")]
-		public DayLevels? CompetitionDayLevel { get; set; }
+		public DaysLevel CompetitionDayLevel { get; set; }
 
 		public override string ToString()
 		{
 			return $"{GetName()} {Stars} {LocalScore} {LastStarTime}";
 		}
 
-		internal List<DayLevel?> AllDays(bool hideNulls)
+		internal Dictionary<StarKey, StarLevel> AllStars()
 		{
+			var rv = new Dictionary<StarKey, StarLevel>();
 			if (CompetitionDayLevel == null)
-				return new List<DayLevel?>();
-			return CompetitionDayLevel.AllDays(hideNulls);
+				return rv;
+			foreach(var kvpDay in CompetitionDayLevel)
+			{
+				var day = kvpDay.Key;
+				foreach(var kvpStar in kvpDay.Value)
+				{
+					var star = kvpStar.Key;
+					var starKey = new StarKey(day, star);
+					rv[starKey] = kvpStar.Value;
+				}
+			}
+			return rv;
 		}
 		internal DayLevel? GetDay(int dayIndex)
 		{
-			return AllDays(false)[dayIndex];
+			return CompetitionDayLevel.GetDay(dayIndex);
 		}
-
-		internal Dictionary<StarKey, StarLevel> AllStars()
+	}
+	public class DaysLevel : Dictionary<string, DayLevel>
+	{
+		internal DayLevel? GetDay(int dayIndex)
 		{
-			Dictionary<StarKey, StarLevel> times = [];
-			int dayIndex = 0;
-			foreach (var day in AllDays(hideNulls: false))
-			{
-				var dayDict = new Dictionary<StarEnum, DateTime>();
-				if (day?.Star1 != null)
-					times.Add(new StarKey(dayIndex, StarEnum.Star1), day.Star1);
-				if (day?.Star2 != null)
-					times.Add(new StarKey(dayIndex, StarEnum.Star2), day.Star2);
-				dayIndex++;
-			}
-			return times;
+			var key = (dayIndex + 1).ToString();
+			if (ContainsKey(key))
+				return this[key];
+			return null;
+		}
+	}
+	public class DayLevel : Dictionary<string, StarLevel>
+	{
+		internal int StarCount()
+		{
+			return this.Count();
 		}
 	}
 	public enum StarEnum
@@ -125,6 +137,14 @@ namespace AoCLibrary
 	}
 	public class StarKey
 	{
+		public StarKey(string day, string star)
+		{
+			DayIndex = int.Parse(day) - 1;
+			if (star == "1")
+				Star = StarEnum.Star1;
+			else if (star == "2")
+				Star = StarEnum.Star2;
+		}
 		public StarKey(int dayIndex, StarEnum star)
 		{
 			DayIndex = dayIndex;
@@ -147,92 +167,7 @@ namespace AoCLibrary
 			return $"{(DayIndex + 1):00}-{Star}";
 		}
 	}
-	public class DayLevels
-	{
 
-		public List<DayLevel?> AllDays(bool hideNulls)
-		{
-			var rv = new List<DayLevel?> {
-					   Day01, Day02, Day03, Day04, Day05, Day06, Day07, Day08, Day09,
-				Day10, Day11, Day12, Day13, Day14, Day15, Day16, Day17, Day18, Day19,
-				Day20, Day21, Day22, Day23, Day24, Day25};
-
-			if (hideNulls)
-				return rv.Where(d => d != null).ToList();
-			return rv;
-		}
-		[JsonPropertyName("1")]
-		public DayLevel? Day01 { get; set; }
-		[JsonPropertyName("2")]
-		public DayLevel? Day02 { get; set; }
-		[JsonPropertyName("3")]
-		public DayLevel? Day03 { get; set; }
-		[JsonPropertyName("4")]
-		public DayLevel? Day04 { get; set; }
-		[JsonPropertyName("5")]
-		public DayLevel? Day05 { get; set; }
-		[JsonPropertyName("6")]
-		public DayLevel? Day06 { get; set; }
-		[JsonPropertyName("7")]
-		public DayLevel? Day07 { get; set; }
-		[JsonPropertyName("8")]
-		public DayLevel? Day08 { get; set; }
-		[JsonPropertyName("9")]
-		public DayLevel? Day09 { get; set; }
-		[JsonPropertyName("10")]
-		public DayLevel? Day10 { get; set; }
-		[JsonPropertyName("11")]
-		public DayLevel? Day11 { get; set; }
-		[JsonPropertyName("12")]
-		public DayLevel? Day12 { get; set; }
-		[JsonPropertyName("13")]
-		public DayLevel? Day13 { get; set; }
-		[JsonPropertyName("14")]
-		public DayLevel? Day14 { get; set; }
-		[JsonPropertyName("15")]
-		public DayLevel? Day15 { get; set; }
-		[JsonPropertyName("16")]
-		public DayLevel? Day16 { get; set; }
-		[JsonPropertyName("17")]
-		public DayLevel? Day17 { get; set; }
-		[JsonPropertyName("18")]
-		public DayLevel? Day18 { get; set; }
-		[JsonPropertyName("19")]
-		public DayLevel? Day19 { get; set; }
-		[JsonPropertyName("20")]
-		public DayLevel? Day20 { get; set; }
-		[JsonPropertyName("21")]
-		public DayLevel? Day21 { get; set; }
-		[JsonPropertyName("22")]
-		public DayLevel? Day22 { get; set; }
-		[JsonPropertyName("23")]
-		public DayLevel? Day23 { get; set; }
-		[JsonPropertyName("24")]
-		public DayLevel? Day24 { get; set; }
-		[JsonPropertyName("25")]
-		public DayLevel? Day25 { get; set; }
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-
-	}
-	public class DayLevel
-	{
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-		[JsonPropertyName("1")]
-		public StarLevel Star1 { get; set; }
-		[JsonPropertyName("2")]
-		public StarLevel Star2 { get; set; }
-
-		internal int Stars()
-		{
-			var rv = 0;
-			if (Star1 != null)
-				rv++;
-			if (Star2 != null)
-				rv++;
-			return rv;
-		}
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-	}
 	public class StarLevel
 	{
 		[JsonPropertyName("get_star_ts")]

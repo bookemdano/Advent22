@@ -45,13 +45,15 @@ namespace AoCLibrary
 		public string PointsLeftToday()
 		{
 			int star1 = Members.Count();
-			int star2 = Members.Count();
+			int star2 = star1;
 			foreach(var member in AllMembers(true))
 			{
 				var day = member.GetDay(ElfHelper.DayIndex);
-				if (day?.Star1 != null)
+				if (day == null)
+					continue;
+				if (day.ContainsKey("1"))
 					star1--;
-				if (day?.Star2 != null)
+				if (day.ContainsKey("2"))
 					star2--;
 			}
 			return $"{star1 + star2}({star1},{star2})";

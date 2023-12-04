@@ -13,7 +13,7 @@ namespace AoCLibrary
 			foreach (var member in res.AllMembers(true))
 			{
 				int iDay = 1;
-				foreach (var day in member.AllDays(false))
+				/*foreach (var day in member.AllDays(false))
 				{
 
 					if (day?.Star1 != null)
@@ -34,7 +34,7 @@ namespace AoCLibrary
 						bestDeltas.Add($"{Member.GetName(member.Name)} Day {iDay}", delta);
 					}
 					iDay++;
-				}
+				}*/
 			}
 
 			var bests = new List<string>();

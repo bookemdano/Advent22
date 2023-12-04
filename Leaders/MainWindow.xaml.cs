@@ -128,7 +128,7 @@ namespace Leaders
 			foreach (var showable in showables)
 			{
 				++i;
-				vms.Add(new MemberViewModel(showable, i, prevScore));
+				vms.Add(new MemberViewModel(showable, i, prevScore, elfResult.Members.Count()));
 			}
 			grd.ItemsSource = vms;
 

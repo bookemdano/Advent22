@@ -29,15 +29,15 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Communicator.Dir, _testLogFile), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
+		public static string Serialize(ElfResult result)
+		{
+			return JsonSerializer.Serialize(result, _jsonOptions);
+		}
 		public static ElfResult? Deserialize(string json)
 		{
 			return JsonSerializer.Deserialize<ElfResult>(json, _jsonOptions);
 		}
 		static readonly JsonSerializerOptions _jsonOptions = new () { PropertyNameCaseInsensitive = true, WriteIndented = true };
-		public static string Serialize(ElfResult result)
-		{
-			return JsonSerializer.Serialize(result, _jsonOptions);
-		}
 
 		public static readonly int Year = DateTime.Today.Year;
 

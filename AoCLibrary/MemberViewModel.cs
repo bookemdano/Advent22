@@ -5,11 +5,14 @@ namespace AoCLibrary
 		Member _member;
 		public int Place { get; }
 		int _prevScore;
-		public MemberViewModel(Member member, int place, int prevScore)
+		private int _maxScore;
+
+		public MemberViewModel(Member member, int place, int prevScore, int maxScore)
 		{
 			_member = member;
 			Place = place;
 			_prevScore = prevScore;
+			_maxScore = maxScore;
 		}
 		public string Name
 		{
@@ -41,8 +44,8 @@ namespace AoCLibrary
 					return "🌟";
 				else
 				{
-					var rv = ElfHelper.Fraction(_member.Stars / (days * 2.0), 8);
-					if (_member.GetDay(ElfHelper.DayIndex)?.Stars() == 2)
+					var rv = (_member.Stars - (days * 2.0)).ToString();
+					if (_member.GetDay(ElfHelper.DayIndex)?.StarCount() == 2)
 						rv += "*";
 					return rv;
 				}
@@ -56,7 +59,7 @@ namespace AoCLibrary
 				var rv = "-";
 				if (_member.Stars > 0)
 				{
-					var avg = 23 - (double)_member.LocalScore / _member.Stars;
+					var avg = (_maxScore + 1) - (double)_member.LocalScore / _member.Stars;
 					rv = avg.ToString("0.00");
 				}
 				var firsts = _member.AllStars().Values.Count(s => s.Rank == 1);
@@ -86,15 +89,7 @@ namespace AoCLibrary
 
 		List<DateTime> AllTimes()
 		{
-			List<DateTime> times = [];
-			foreach (var day in _member.AllDays(hideNulls: true))
-			{
-				if (day?.Star1 != null)
-					times.Add(day.Star1.StarTime);
-				if (day?.Star2 != null)
-					times.Add(day.Star2.StarTime);
-			}
-			return times.OrderByDescending(t => t).ToList();
+			return _member.AllStars().Values.Select(s => s.StarTime).OrderByDescending(t => t).ToList();
 		}
 
 	}
