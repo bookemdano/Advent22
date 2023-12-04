@@ -1,6 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
-
 namespace AoCLibrary
 {
 	public class ElfResult
@@ -56,11 +53,13 @@ namespace AoCLibrary
 
 		public void CalcRank()
 		{
-			var dict = new Dictionary<Member, Dictionary<StarKey, StarLevel>>();
+			var allStars = new List<Dictionary<StarKey, StarLevel>>();
 			foreach(var member in AllMembers(true))
-				dict.Add(member, member.AllTimes());
+				allStars.Add(member.AllStars());
+
+			// starKeys done so far
 			var starKeys = new List<StarKey>();
-			foreach(var starDict in dict.Values)
+			foreach(var starDict in allStars)
 			{
 				foreach(var kvp in starDict)
 				{
@@ -68,13 +67,15 @@ namespace AoCLibrary
 						starKeys.Add(kvp.Key);
 				}
 			}
+
+			// go through each and set rank base on everyone who completed
 			foreach(var starKey in starKeys)
 			{
 				var starLevels = new List<StarLevel>();
-				foreach(var kvp in dict)
+				foreach(var allStar in allStars)
 				{
-					if (kvp.Value.ContainsKey(starKey))
-						starLevels.Add(kvp.Value[starKey]);
+					if (allStar.ContainsKey(starKey))
+						starLevels.Add(allStar[starKey]);
 				}
 				int i = 1;
 				foreach(var starLevel in starLevels.OrderBy(s => s.StarTime))

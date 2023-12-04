@@ -59,7 +59,7 @@ namespace AoCLibrary
 					var avg = 23 - (double)_member.LocalScore / _member.Stars;
 					rv = avg.ToString("0.00");
 				}
-				var firsts = _member.AllTimes().Values.Count(s => s.Rank == 1);
+				var firsts = _member.AllStars().Values.Count(s => s.Rank == 1);
 				if (firsts > 0)
 					rv += $" ({firsts})";
 				return rv;

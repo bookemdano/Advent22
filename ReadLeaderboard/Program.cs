@@ -30,7 +30,7 @@ internal class Program
 			var changes = elfResult.HasChanges(last);
 			if (last == null || changes.Any())
             {
-                var ordered = elfResult.AllMembers().OrderByDescending(m => m.LocalScore);
+                var ordered = elfResult.AllMembers(true).OrderByDescending(m => m.LocalScore);
                 var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
                 int i = 0;
                 foreach (var showable in showables)

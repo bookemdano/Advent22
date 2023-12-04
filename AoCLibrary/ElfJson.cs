@@ -160,7 +160,7 @@ namespace AoCLibrary
 			return AllDays(false)[dayIndex];
 		}
 
-		internal Dictionary<StarKey, StarLevel> AllTimes()
+		internal Dictionary<StarKey, StarLevel> AllStars()
 		{
 
 			Dictionary<StarKey, StarLevel> times = [];
