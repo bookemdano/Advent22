@@ -14,8 +14,8 @@ namespace AoCLibrary
 			if (IsWindows)
 				Dir = @"c:\temp\data\elf";
 			else
-				Dir = Path.Combine("data", "elf");
-
+	            Dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "data", "elf");
+    
             Directory.CreateDirectory(Dir);
 		}
 

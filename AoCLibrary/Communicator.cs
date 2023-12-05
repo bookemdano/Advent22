@@ -20,7 +20,7 @@ namespace AoCLibrary
 				if (rv.StartsWith('{'))
 				{
 					var cacheDir = Path.Combine(Utils.Dir, "cache");
-					Directory.CreateDirectory(Utils.Dir);
+					Directory.CreateDirectory(cacheDir);
 					var filename = Path.Combine(cacheDir, $"url{DateTime.Now:yyyyMMdd HHmmss}.json");
 					File.WriteAllText(filename, rv);
 				}
