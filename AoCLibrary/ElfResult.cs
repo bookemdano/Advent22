@@ -44,7 +44,7 @@ namespace AoCLibrary
 				if (lastM != null)
 					lastScore = lastM.LocalScore;
 				if (member.LocalScore != lastScore)
-					rv.Add($"{member.GetName()} Gained {member.LocalScore - lastScore}!");
+					rv.Add($"{member.GetName()} Gained {member.LocalScore - lastScore} {member.Places()}");
             }
 			if (rv.Any())
 				rv.Add("Changes since " + last?.Timestamp);

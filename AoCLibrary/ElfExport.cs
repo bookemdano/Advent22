@@ -40,7 +40,7 @@ namespace AoCLibrary
 			var bests = new List<string>();
 			foreach (var order in bestDeltas.OrderBy(kvp => kvp.Value).Take(10))
 				bests.Add($"{order.Key}: {order.Value.TotalSeconds:0}s");
-			File.WriteAllLines(Path.Combine(Communicator.Dir, "BestDelta.csv"), bests);
+			File.WriteAllLines(Path.Combine(Utils.Dir, "BestDelta.csv"), bests);
 
 			var allStars = new List<StarScore>();
 			foreach (var kvp in stars)
@@ -110,19 +110,19 @@ namespace AoCLibrary
 			outlines2.Add("Name,url," + string.Join(',', hours));
 			foreach (var outPart in outs2)
 			{
-				outlines2.Add(Member.GetName(outPart.Key) + "," + Member.GetUrl(outPart.Key) + "," + string.Join(',', outPart.Value));
+				outlines2.Add(ElfHelper.GetName(outPart.Key) + "," + ElfHelper.GetUrl(outPart.Key) + "," + string.Join(',', outPart.Value));
 			}
 
-			File.WriteAllLines(Path.Combine(Communicator.Dir, "CalcedStars.csv"), outlines2);
+			File.WriteAllLines(Path.Combine(Utils.Dir, "CalcedStars.csv"), outlines2);
 
 			var outlines = new List<string>();
 			outlines.Add("Name,url," + string.Join(',', hours));
 			foreach (var outPart in outs)
 			{
-				outlines.Add(Member.GetName(outPart.Key) + "," + Member.GetUrl(outPart.Key) + "," + string.Join(',', outPart.Value));
+				outlines.Add(ElfHelper.GetName(outPart.Key) + "," + ElfHelper.GetUrl(outPart.Key) + "," + string.Join(',', outPart.Value));
 			}
 
-			File.WriteAllLines(Path.Combine(Communicator.Dir, "CalcedScores.csv"), outlines);
+			File.WriteAllLines(Path.Combine(Utils.Dir, "CalcedScores.csv"), outlines);
 		}
 	
 	}

@@ -1,7 +1,6 @@
 using AoCLibrary;
 using System.Diagnostics;
 using System.IO;
-using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -17,7 +16,7 @@ namespace Leaders
 
 		public MainWindow()
 		{
-			ElfHelper.AppName = "LEAD";
+			Utils.AppName = "LEAD";
 			InitializeComponent();
 			DispatcherTimer timer = new ();
 			timer.Tick += Timer_Tick;
@@ -32,7 +31,7 @@ namespace Leaders
 
 		void Log(string str)
 		{
-			ElfHelper.Log(str);
+			Utils.Log(str);
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 
@@ -82,9 +81,9 @@ namespace Leaders
 				if (_lastDaySent == -1)
 				{
 					_lastDaySent = 0;
-					if (File.Exists(Path.Combine(Communicator.Dir, "LastDaySent.cfg")))
+					if (File.Exists(Path.Combine(Utils.Dir, "LastDaySent.cfg")))
 					{
-						var str = File.ReadAllText(Path.Combine(Communicator.Dir, "LastDaySent.cfg"));
+						var str = File.ReadAllText(Path.Combine(Utils.Dir, "LastDaySent.cfg"));
 						int.TryParse(str, out _lastDaySent);
 					}
 				}
@@ -93,7 +92,7 @@ namespace Leaders
 			set
 			{
 				_lastDaySent = value;
-				File.WriteAllText(Path.Combine(Communicator.Dir, "LastDaySent.cfg"), _lastDaySent.ToString());
+				File.WriteAllText(Path.Combine(Utils.Dir, "LastDaySent.cfg"), _lastDaySent.ToString());
 			}
 		}
 		void Send(string str)
@@ -170,12 +169,12 @@ namespace Leaders
 
 		private void Puzzle_Click(object sender, RoutedEventArgs e)
 		{
-			ElfHelper.Open(ElfHelper.DailyUrl);
+			Utils.Open(ElfHelper.DailyUrl);
 		}
 
 		private void Leaderboard_Click(object sender, RoutedEventArgs e)
 		{
-			ElfHelper.Open(ElfHelper.LeaderUrl);
+			Utils.Open(ElfHelper.LeaderUrl);
 		}
 	}
 }

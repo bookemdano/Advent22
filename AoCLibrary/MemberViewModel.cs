@@ -68,11 +68,11 @@ namespace AoCLibrary
 				return rv;
 			}
 		}
-		public string Time
+		public string LastTime
 		{
 			get
 			{
-				return ElfHelper.TimeString(_member.LastStarTime);
+				return Utils.TimeString(_member.LastStarTime);
 			}
 		}
 
@@ -83,27 +83,14 @@ namespace AoCLibrary
 				var times = AllTimes();
 				if (times.Count() < 2)
 					return "";
-				return ElfHelper.DeltaString(times[0] - times[1]);
+				return Utils.DeltaString(times[0] - times[1]);
 			}
 		}
 		public string Places
 		{
 			get
 			{
-				var stars = _member.AllStars();
-				if (!stars.Any())
-					return "";
-				var parts = new List<string>();
-				var end = ElfHelper.DayIndex - 5;
-				if (end < 0)
-					end = 0;
- 				for (int i = ElfHelper.DayIndex; i >= end; i--)
-				{
-					var star1 = stars.FirstOrDefault(s => s.Key.DayIndex == i && s.Key.Star == StarEnum.Star1).Value?.Rank.ToString() ?? "-";
-					var star2 = stars.FirstOrDefault(s => s.Key.DayIndex == i && s.Key.Star == StarEnum.Star2).Value?.Rank.ToString() ?? "-";
-					parts.Add($"({star1},{star2})");
-				}
-				return string.Join(",", parts.ToArray());
+				return _member.Places();
 			}
 		}
 

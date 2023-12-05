@@ -118,9 +118,9 @@ namespace Advent23
 			}
 
 			if (check.Length - 3 > maxLen)
-				ElfHelper.TestLog("off");
+				Utils.TestLog("off");
 
-			ElfHelper.TestLog($"{rv} Checked {check}({check.Length}) {number} for {row} - {firstCol}");
+			Utils.TestLog($"{rv} Checked {check}({check.Length}) {number} for {row} - {firstCol}");
 			return rv;
 		}
 		private bool NearSymbol(string[] lines, int row, int firstCol, string number)
@@ -159,9 +159,9 @@ namespace Advent23
 			}
 
 			if (check.Length - 3 > maxLen)
-				ElfHelper.TestLog("off");
+				Utils.TestLog("off");
 
-			ElfHelper.TestLog($"{rv} Checked {check}({check.Length}) {number} for {row} - {firstCol}");
+			Utils.TestLog($"{rv} Checked {check}({check.Length}) {number} for {row} - {firstCol}");
 			return rv;
 		}
 

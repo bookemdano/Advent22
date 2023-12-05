@@ -17,7 +17,7 @@ namespace Leaders
         /// <returns>returns false if phone number invalid</returns>
         static public bool SendMessage(string phone, string body)
         {
-            ElfHelper.Log($"Sms.SendMessage({phone})");
+			Utils.Log($"Sms.SendMessage({phone})");
             try
             {
                 phone = StripPhoneNumber(phone);
@@ -27,15 +27,15 @@ namespace Leaders
                     phone = "+" + phone;
                 if (phone?.Length != 12)
                 {
-					ElfHelper.Log($"SMS.SendMessage() Invalid phone number {phone}");
+					Utils.Log($"SMS.SendMessage() Invalid phone number {phone}");
                     return false;
                 }
 
-                ElfHelper.Log($"SMS.SendMessage() to {phone}");
+				Utils.Log($"SMS.SendMessage() to {phone}");
 
                 TwilioClient.Init(TwilioStash.AccountSid, TwilioStash.AuthToken);
 
-                ElfHelper.Log("Sms.SendMessage() Really send");
+				Utils.Log("Sms.SendMessage() Really send");
                 var message = MessageResource.Create(
                     to: new PhoneNumber(phone),
                     from: new PhoneNumber(TwilioStash.FromNumber),
@@ -45,7 +45,7 @@ namespace Leaders
             }
             catch (Exception ex)
             {
-                ElfHelper.Log("SMS.SendMessage() " + ex);
+				Utils.Log("SMS.SendMessage() " + ex);
                 return false;
             }
         }

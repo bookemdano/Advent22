@@ -1,50 +1,10 @@
-using System.Diagnostics;
-using System.Text.Json;
-
 namespace AoCLibrary
 {
-    public class ElfHelper
+	public class ElfHelper
     {
-		static public string AppName { get; set; } = string.Empty;
-		public static void Log(object o, Stopwatch? sw = null)
-		{
-			var str = $"{AppName} {o}";
-			if (sw != null)
-				str += $" {sw.ElapsedMilliseconds:0}ms";
-			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Communicator.Dir, $"endless{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
-			Console.WriteLine(str);
-		}
-		static string _testLogFile = $"endless{DateTime.Today:yyyyMMdd}.log";
-		public static void ResetTestLog()
-		{
-			File.Delete(Path.Combine(Communicator.Dir, _testLogFile));
-		}
-		public static void TestLog(object o, Stopwatch? sw = null)
-		{
-			var str = o?.ToString() ?? "";
-			if (sw != null)
-				str += $" {sw.ElapsedMilliseconds:0}ms";
-			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Communicator.Dir, _testLogFile), str + Environment.NewLine);
-			Console.WriteLine(str);
-		}
-		public static string Serialize(ElfResult result)
-		{
-			return JsonSerializer.Serialize(result, _jsonOptions);
-		}
-		public static ElfResult? Deserialize(string json)
-		{
-			return JsonSerializer.Deserialize<ElfResult>(json, _jsonOptions);
-		}
-		static readonly JsonSerializerOptions _jsonOptions = new () { PropertyNameCaseInsensitive = true, WriteIndented = true };
+		public static TimeSpan MinApiRefresh => TimeSpan.FromMinutes(15);	//AoC requests 15 minutes
 
 		public static readonly int Year = DateTime.Today.Year;
-
-		public static string DayString()
-		{
-			return $"{Day:00}";
-		}
 		public static int Day
 		{
 			get
@@ -52,6 +12,13 @@ namespace AoCLibrary
 				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
 			}
 		}
+		internal static int DayIndex => Day - 1;
+
+		public static string DayString()
+		{
+			return $"{Day:00}";
+		}
+
 		static public string CodeDir()
 		{
 			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");
@@ -86,10 +53,9 @@ namespace AoCLibrary
 				File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
 			}
 		}
-		public static TimeSpan MinApiRefresh => TimeSpan.FromMinutes(15);
 		public static ElfResult? ReadFromFile()
 		{
-			var files = Directory.GetFiles(Communicator.Dir, "aoc*.json").OrderByDescending(f => f);
+			var files = Directory.GetFiles(Utils.Dir, "aoc*.json").OrderByDescending(f => f);
 			if (!files.Any())
 				return null;
 
@@ -98,14 +64,14 @@ namespace AoCLibrary
 			if (File.Exists(jsonFile))
 			{
 				var json = File.ReadAllText(jsonFile);
-				return Deserialize(json);
+				return Utils.Deserialize<ElfResult>(json);
 			}
 			return null;
 		}
 		public static void WriteToFile(ElfResult result)
 		{
-			var jsonFile = Path.Combine(Communicator.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
-			File.WriteAllText(jsonFile, Serialize(result));
+			var jsonFile = Path.Combine(Utils.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
+			File.WriteAllText(jsonFile, Utils.Serialize(result));
 		}
 		public static async Task<ElfResult?> Read(bool force)
 		{
@@ -113,16 +79,16 @@ namespace AoCLibrary
 			if (!force)
 				rv = ReadFromFile();
 
-			Log($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
+			Utils.Log($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
 			if (rv != null && rv.Timestamp + MinApiRefresh > DateTime.Now)
 			{
-				Log($"New enough");
+				Utils.Log($"New enough");
 				return rv;  // new enough
 			}
 			
 			var str = await Communicator.Read($"{LeaderUrl}.json");
 			
-			rv = Deserialize(str);
+			rv = Utils.Deserialize<ElfResult>(str);
 			if (rv == null)
 				return rv;
 			rv.CalcRank();
@@ -130,111 +96,11 @@ namespace AoCLibrary
 			return rv;
 		}
 
-		static public string Fraction(double origD, int denom)
-		{
-			var rv = "";
-			var d = origD;
-			if (d >= 1)
-			{
-				rv = ((int)d).ToString();
-				d -= (int)d;
-			}
 
-			if (d == 0)
-				return rv;
-			else if (d <= 1 / 8.0 && denom > 8)
-				return rv + "⅛";
-			else if (d <= 1 / 4.0 && denom >= 4)
-				return rv + "¼";
-			else if (d <= 1 / 3.0 && denom >= 6)
-				return rv + "⅓";
-			else if (d <= 3 / 8.0 && denom >= 8)
-				return rv + "⅜";
-			else if (d <= 1 / 2.0 && denom >= 2)
-				return rv + "½";
-			else if (d <= 5 / 8.0 && denom >= 8)
-				return rv + "⅝";
-			else if (d <= 2 / 3.0 && denom >= 6)
-				return rv + "⅔";
-			else if (d <= 3 / 4.0 && denom >= 4)
-				return rv + "¾";
-			else if (d <= 7 / 8.0 && denom >= 8)
-				return rv + "⅞";
-			else
-				return ((int)origD + 1).ToString(); ;
-		}
-		static internal string DeltaString(TimeSpan delta)
-		{
-			int n;
-			string unit;
-			var years = delta.TotalDays / 365.24;
-			if (years > 5)
-			{
-				n = (int)years;
-				unit = "year";
-			}
-			else if (years > 2)
-			{
-				return $"{Fraction(years, 2)} years";
-			}
-			else if (delta.TotalDays > 1)
-			{
-				unit = "day";
-				n = (int)delta.TotalDays;
-			}
-			else if (delta.TotalHours > 1.5)
-			{
-				unit = "hour";
-				n = (int)delta.TotalHours;
-			}
-			else if (delta.TotalMinutes > 1.5)
-			{
-				unit = "min";
-				n = (int)delta.TotalMinutes;
-			}
-			else
-			{
-				unit = "sec";
-				n = (int)delta.TotalSeconds;
-			}
-			if (n != 1)
-				unit += "s";
-			return $"{n} {unit}";
-		}
-		static public DateTime GetTime(int ts)
-		{
-			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
-		}
-
-		internal static int DayIndex => Day - 1;
 
 		//https://adventofcode.com/2023/day/4/input/
 		public static string DailyUrl => $"https://adventofcode.com/{Year}/day/{Day}";
 		static public string LeaderUrl => $"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088";
-		static public string TimeString(DateTime dt)
-		{
-			if (DateTime.Today == dt.Date)
-				return dt.ToString("HH:mm");
-			else
-				return dt.ToString("M/d HH:mm");
-		}
-		static public void Open(string filename)
-		{
-			try
-			{
-				var psi = new ProcessStartInfo
-				{
-					UseShellExecute = true,
-					FileName = filename
-				};
-				Process.Start(psi);
-
-			}
-			catch (Exception ex)
-			{
-				Log($"Open({filename}) " + ex);
-			}
-		}
 
 		public static int NextEmptyDay()
 		{
@@ -248,5 +114,52 @@ namespace AoCLibrary
 			}
 			return -1;
 		}
+		static readonly Dictionary<string, string> _shortnames =
+			new() {
+				{ "Dan Francis", "Dano" },
+				{ "alihacks", "Ali" },
+				{ "FafaPaku", "Fafa" },
+				{ "Derrick Fyfield", "Derrick" },
+				{ "Greg Herpel", "Greg" },
+				{ "Nelson Denn", "Nelson" },
+				{ "jfitzsimmons2", "Joe" },
+				{ "Jesse Rakowski", "Jesse" },
+				{ "HamboneWilson", "Hambone" },
+				{ "iangohjhu", "Ian" },
+				{ "Jim Green", "Green" },
+			};
+		static public string GetName(string name)
+		{
+			if (!_shortnames.TryGetValue(name, out string? value))
+				return name;
+
+			return value;
+		}
+		static readonly Dictionary<string, string> _urls =
+			new() {
+				{ "Dan Francis", "https://ca.slack-edge.com/TB4KLF92L-U0389RE97GR-e3c92abca80a-512" },
+				{ "alihacks", "https://ca.slack-edge.com/TB4KLF92L-UB57REZTM-97b89a97447f-512" },
+				{ "FafaPaku", "https://ca.slack-edge.com/TB4KLF92L-UB6C5KWMV-f993b687636b-512" },
+				{ "Derrick Fyfield", "https://ca.slack-edge.com/TB4KLF92L-UB7563K9B-4f73317ae1ac-512" },
+				{ "Greg Herpel", "https://ca.slack-edge.com/TB4KLF92L-UG97TR1CG-0f7f046e40b1-512" },
+				{ "Nelson Denn", "https://ca.slack-edge.com/TB4KLF92L-UB67BCMHR-391e25f1eb8d-512" },
+				{ "jfitzsimmons2", "https://ca.slack-edge.com/TB4KLF92L-U02FRLVN8JF-e488e637c410-512" },
+				{ "jtruit", "https://ca.slack-edge.com/TB4KLF92L-UB58QHN6Q-19f86b8e5625-512" },
+				{ "Jesse Rakowski", "https://ca.slack-edge.com/TB4KLF92L-U020KKDNX5K-d8b8f0cfa119-512" },
+				{ "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" },
+				{ "Jim Green", "https://jhuis.slack.com/archives/D068QSW145P/p1701696243394289" }
+	};
+
+		static public string? GetUrl(string name)
+		{
+			if (string.IsNullOrWhiteSpace(name))
+				name = "-";
+
+			if (!_urls.TryGetValue(name, out string? value))
+				return null;
+
+			return value;
+		}
+
 	}
 }
