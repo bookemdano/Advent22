@@ -6,7 +6,7 @@ internal class Program
 {
     private static async Task Main(string[] args)
 	{
-		ElfHelper.AppName = "LC";
+		Utils.AppName = "LC";
 		var program = new Program();
         await program.Runner();
     }
@@ -33,7 +33,7 @@ internal class Program
                 var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
                 int i = 0;
                 foreach (var showable in showables)
-                    Log($"{++i}. {showable}");
+                    Log($"{++i}. {showable} {showable.Places()}");
 				foreach (var change in changes)
 					Log(change);
             }
@@ -45,7 +45,7 @@ internal class Program
     }
     void Log(string str)
     {
-		ElfHelper.Log(str);
+        Utils.Log(str);
     }
 }
 

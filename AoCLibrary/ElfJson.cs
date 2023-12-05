@@ -68,7 +68,7 @@ namespace AoCLibrary
 			return CompetitionDayLevel.GetDay(dayIndex);
 		}
 
-		internal string Places()
+		public string Places()	
 		{
 			var stars = AllStars();
 			if (!stars.Any())

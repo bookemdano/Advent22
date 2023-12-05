@@ -1,14 +1,22 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 
 namespace AoCLibrary
 {
 	static public class Utils
 	{
-		static public string Dir { get; } = @"c:\temp\data\elf";
+        static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+
+        static public string Dir { get; } = @"c:\temp\data\elf";
 		static Utils()
 		{
-			Directory.CreateDirectory(Dir);
+			if (IsWindows)
+				Dir = @"c:\temp\data\elf";
+			else
+				Dir = Path.Combine("data", "elf");
+
+            Directory.CreateDirectory(Dir);
 		}
 
 		static public string AppName { get; set; } = string.Empty;
