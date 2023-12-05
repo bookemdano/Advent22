@@ -43,7 +43,12 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Utils.Dir, _testLogFile), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-		static public string TimeString(DateTime dt)
+        static public void Assert(bool b, string? str = null)
+        {
+			if (b == false)
+				Log("Assert failed " + str);
+		}
+        static public string TimeString(DateTime dt)
 		{
 			if (DateTime.Today == dt.Date)
 				return dt.ToString("HH:mm");
