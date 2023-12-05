@@ -1,6 +1,6 @@
 namespace Advent23
 {
-	internal class Day : IDayRunner
+	internal class Day06 : IDayRunner
 	{
 		public bool IsReal => return false;
 

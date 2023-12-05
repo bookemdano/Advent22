@@ -6,29 +6,6 @@ namespace Advent23
 {
 	internal class Program
 	{
-		static internal string[] GetLines(StarEnum star, bool real)
-		{
-			if (!_starLines.Any())
-				Read(real);
-
-			if (real)
-				return _starLines[StarEnum.Star1];
-			else
-				return _starLines[star];
-		}
-		static internal string GetText(StarEnum star, bool real)
-		{
-			if (!_starLines.Any())
-				Read(real);
-
-			if (real)
-				return _starTexts[StarEnum.Star1];
-			else
-				return _starTexts[star];
-		}
-		static readonly Dictionary<StarEnum, string[]> _starLines = [];
-		static readonly Dictionary<StarEnum, string> _starTexts = [];
-
 		static void Main(string[] args)
 		{
 			//for(int i = 1; i < 26; i++)
@@ -69,32 +46,40 @@ namespace Advent23
 			return null;
 		}
 
-
-
-		static void Read(bool real)
+		static internal string InputFile(bool real, StarEnum star)
 		{
 			if (real)
 			{
-				var filename = $"Day{ElfHelper.DayString()}.txt";
-                Utils.Log("Read" + filename);
-				_starLines.Add(StarEnum.Star1, Read(filename));
+				return $"Day{ElfHelper.DayString()}.txt";
 			}
 			else
 			{
-				for(int i = 0; i < 2; i++)
-				{
-					var filename = $"Day{ElfHelper.DayString()}FakeStar{i + 1}.txt";
-                    Utils.Log("Read" + filename);
-					var star = StarEnum.Star1;
-					if (i == 1)
-						star = StarEnum.Star2;
-					_starLines.Add(star, Read(filename));
-				}
+				if (star == StarEnum.Star1)
+					return $"Day{ElfHelper.DayString()}FakeStar1.txt";
+				else
+					return $"Day{ElfHelper.DayString()}FakeStar2.txt";
 			}
 		}
-		static string[] Read(string filename)
+		static internal string[] GetLines(StarEnum star, bool real)
 		{
+			return ReadLines(real, star);
+		}
+		static internal string GetText(StarEnum star, bool real)
+		{
+			return ReadText(real, star);
+		}
+
+		static string[] ReadLines(bool real, StarEnum star)
+		{
+			var filename = InputFile(real, star);
+			Utils.Log("ReadLines" + filename);
 			return File.ReadAllLines(Path.Combine("Assets", filename)).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+		}
+		static string ReadText(bool real, StarEnum star)
+		{
+			var filename = InputFile(real, star);
+			Utils.Log("ReadText" + filename);
+			return File.ReadAllText(Path.Combine("Assets", filename));
 		}
 	}
 	public enum StarEnum

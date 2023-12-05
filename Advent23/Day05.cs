@@ -11,7 +11,7 @@ namespace Advent23
 			var seedParts = lines[0].Split(":");
 			int i = 0;
             var seeds = seedParts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => long.Parse(s)).ToList();
-			seeds = new List<long>() { 82 };
+			//seeds = new List<long>() { 82 };
 			i++;
             var map = "";
 			while(i < lines.Length)
@@ -61,7 +61,7 @@ namespace Advent23
                     {
                         var leftoverLeft = SeedRange.FromEnd(seedRange.Srce, range.Srce - 1);
                         var inRange = SeedRange.FromEnd(range.Srce, seedRange.SrceEnd);
-                        Utils.Assert(leftoverLeft.Range + inRange.Range == seedRange.Range);
+                        Utils.Assert(leftoverLeft.Range + inRange.Range, seedRange.Range);
                         rv.AddRange(Convert(leftoverLeft));
                         rv.Add(range.Convert(inRange));
                         continue;
@@ -72,7 +72,7 @@ namespace Advent23
                         var leftoverLeft = SeedRange.FromEnd(seedRange.Srce, end: range.Srce - 1);
                         var inRange = SeedRange.FromEnd(range.Srce, end: range.SrceEnd);
                         var leftoverRight = SeedRange.FromEnd(range.SrceEnd + 1, end: seedRange.SrceEnd);
-                        Utils.Assert(leftoverLeft.Range + inRange.Range + leftoverRight.Range == seedRange.Range);
+                        Utils.Assert(leftoverLeft.Range + inRange.Range + leftoverRight.Range, seedRange.Range);
                         rv.AddRange(Convert(leftoverLeft));
                         rv.AddRange(Convert(leftoverRight));
                         rv.Add(range.Convert(inRange));
@@ -82,7 +82,7 @@ namespace Advent23
                     if (seedRange.Srce >= range.Srce && seedRange.SrceEnd <= range.SrceEnd)
                     {
                         var inRange = SeedRange.FromEnd(seedRange.Srce, end: seedRange.SrceEnd);
-                        Utils.Assert(inRange.Range == seedRange.Range);
+                        Utils.Assert(inRange.Range, seedRange.Range);
                         rv.Add(range.Convert(inRange));
                         continue;
                     }
@@ -91,7 +91,7 @@ namespace Advent23
                     {
                         var leftover = SeedRange.FromEnd(range.SrceEnd + 1, end: seedRange.SrceEnd);
                         var inRange = SeedRange.FromEnd(seedRange.Srce, end: range.SrceEnd);
-                        Utils.Assert(leftover.Range + inRange.Range == seedRange.Range);
+                        Utils.Assert(leftover.Range + inRange.Range, seedRange.Range);
                         rv.AddRange(Convert(leftover));
                         rv.Add(range.Convert(inRange));
                         continue;
@@ -195,7 +195,7 @@ namespace Advent23
             var lines = Program.GetLines(StarEnum.Star1, IsReal);
             var seedParts = lines[0].Split(":");
             int i = 0;
-            var seeds = seedParts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => long.Parse(s)).ToList();
+			var seeds = Utils.Split(seedParts[1], ' ').Select(s => long.Parse(s)).ToList();
 			var seedRanges = new List<SeedRange>();
 			for(int j = 0; j < seeds.Count(); j+=2)
 				seedRanges.Add(SeedRange.FromRange(seeds[j], seeds[j + 1]));
