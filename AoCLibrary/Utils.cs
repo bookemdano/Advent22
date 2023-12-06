@@ -178,4 +178,30 @@ namespace AoCLibrary
             return Split(sep, line).Select(s => long.Parse(s)).ToArray();
         }
     }
+	public interface IRace
+	{
+		// winSearch- searching for first win(true) or first loss(false)
+		static public long BinSearch(long min, long max, IRace race, bool winSearch)
+		{
+			while (max != min + 1)
+			{
+				var t = (long)(min + (max - min) / 2);
+				var b = race.Compare(t, winSearch);
+				if (b)
+					max = t;
+				else
+					min = t;
+			}
+			return max;
+		}
+		public bool Compare(long t, bool winSearch)
+		{
+			Utils.TestLog($"Compare({t}) for {this} w:{winSearch}");
+			if (winSearch)
+				return Win(t);
+			else
+				return !Win(t);
+		}
+		bool Win(long t);
+	}
 }

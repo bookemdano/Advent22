@@ -1,11 +1,11 @@
 using AoCLibrary;
 namespace Advent23
 {
-	internal class Day|DD| : IDayRunner
+	internal class Day07 : IDayRunner
 	{
 		public bool IsReal => false;
-		// Day |URL|
-		// Input |INPUTURL|
+		// Day https://adventofcode.com/2023/day/7
+		// Input https://adventofcode.com/2023/day/7/input
 		private object? Star1()
 		{
 			var rv = 0L;

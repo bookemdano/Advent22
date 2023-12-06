@@ -30,16 +30,15 @@ namespace AoCLibrary
 			var codeDir = CodeDir();
 			var assetDir = Path.Combine(codeDir, "assets");
 			var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
-			cs = cs.Replace("Day : IDayRunner", $"Day{strDay} : IDayRunner");
+			var dayUrl = DayUrl(day);
+			cs = cs.Replace("|URL|", dayUrl);
+			cs = cs.Replace("|INPUTURL|", $"{dayUrl}/input");
+			cs = cs.Replace("|DD|", strDay);
 			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
-			var str = await Communicator.Read($"{DailyUrl}/input");
-			if (string.IsNullOrEmpty(str))
-				File.Copy(Path.Combine(assetDir, "Day01.txt"), Path.Combine(assetDir, $"Day{strDay}.txt"), true);
-			else
-				File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}.txt"), str);
-
-			File.Copy(Path.Combine(assetDir, "Day01FakeStar1.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), true);
-			File.Copy(Path.Combine(assetDir, "Day01FakeStar2.txt"), Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), true);
+			var str = await Communicator.Read($"{dayUrl}/input", returnError: false) ?? string.Empty;
+			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}.txt"), str);
+			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), "");
+			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), "");
 
 			if (updatePrj)
 			{
@@ -86,8 +85,9 @@ namespace AoCLibrary
 				return rv;  // new enough
 			}
 			
-			var str = await Communicator.Read($"{LeaderUrl}.json");
-			
+			var str = await Communicator.Read($"{LeaderUrl}.json", returnError: false);
+			if (str == null)
+				return null;
 			rv = Utils.Deserialize<ElfResult>(str);
 			if (rv == null)
 				return rv;
@@ -97,9 +97,13 @@ namespace AoCLibrary
 		}
 
 
+		public static string DayUrl(int day)
+		{
+			return $"https://adventofcode.com/{Year}/day/{day}";
+		}
 
 		//https://adventofcode.com/2023/day/4/input/
-		public static string DailyUrl => $"https://adventofcode.com/{Year}/day/{Day}";
+		public static string DailyUrl => DayUrl(Day);
 		static public string LeaderUrl => $"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088";
 
 		public static int NextEmptyDay()
