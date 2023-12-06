@@ -47,7 +47,7 @@ namespace AoCLibrary
         {
 			Assert(l1 == l2, $"{l1} != {l2}");
         }
-        static void Assert(bool b, string? str = null)
+        static public void Assert(bool b, string str)
         {
             if (b == false)
                 Log("Assert failed " + str);
