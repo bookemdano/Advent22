@@ -2,18 +2,22 @@ namespace Advent23
 {
 	internal class Day : IDayRunner
 	{
-		public bool IsReal => return false;
+		public bool IsReal => false;
 
 		private object? Star1()
 		{
-			var rv = 0;
+			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
+            if (!IsReal)
+                Utils.Assert(rv, 0L);
 			return rv;
 		}
 		private object? Star2()
 		{
-			var rv = 0;
+			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
+            if (!IsReal)
+                Utils.Assert(rv, 0L);
 			return rv;
 		}
 		public RunnerResult Run()

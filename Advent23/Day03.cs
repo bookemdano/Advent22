@@ -1,8 +1,6 @@
 
-using AoCLibrary;
-using Microsoft.Win32;
 using System.Diagnostics;
-using System.Reflection.Metadata.Ecma335;
+using AoCLibrary;
 
 namespace Advent23
 {

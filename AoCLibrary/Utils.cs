@@ -43,16 +43,16 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Utils.Dir, _testLogFile), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-		static void Assert(bool b, string? str)
-		{
-			if (b == false)
-				Log("Assert failed " + str);
-		}
-		static public void Assert(long l1, long l2)
-		{
+        static public void Assert(long l1, long l2)
+        {
 			Assert(l1 == l2, $"{l1} != {l2}");
-		}
-		static public string TimeString(DateTime dt)
+        }
+        static void Assert(bool b, string? str = null)
+        {
+            if (b == false)
+                Log("Assert failed " + str);
+        }
+        static public string TimeString(DateTime dt)
 		{
 			if (DateTime.Today == dt.Date)
 				return dt.ToString("HH:mm");
@@ -163,13 +163,19 @@ namespace AoCLibrary
 			return new DateTime(1970, 1, 1, 0, 0, 0).AddSeconds(Convert.ToDouble(ts)).AddHours(-5);
 		}
 
-		public static List<string> Split(string str, char sep)
-		{
-			return str.Split(sep, StringSplitOptions.RemoveEmptyEntries).ToList();
-		}
-		public static List<string> Split(string str, string sep)
-		{
-			return str.Split(sep, StringSplitOptions.RemoveEmptyEntries).ToList();
-		}
-	}
+        public static string RemoveLabel(string line)
+        {
+            return line.Split(':', StringSplitOptions.TrimEntries)[1];
+        }
+
+        public static string[] Split(char sep, string line)
+        {
+            return line.Split(sep, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static long[] SplitNums(char sep, string line)
+        {
+            return Split(sep, line).Select(s => long.Parse(s)).ToArray();
+        }
+    }
 }

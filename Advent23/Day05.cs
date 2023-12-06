@@ -195,7 +195,7 @@ namespace Advent23
             var lines = Program.GetLines(StarEnum.Star1, IsReal);
             var seedParts = lines[0].Split(":");
             int i = 0;
-			var seeds = Utils.Split(seedParts[1], ' ').Select(s => long.Parse(s)).ToList();
+			var seeds = Utils.Split(' ', seedParts[1]).Select(s => long.Parse(s)).ToList();
 			var seedRanges = new List<SeedRange>();
 			for(int j = 0; j < seeds.Count(); j+=2)
 				seedRanges.Add(SeedRange.FromRange(seeds[j], seeds[j + 1]));
