@@ -1,10 +1,11 @@
 using AoCLibrary;
+using System.Text.Json.Serialization;
 namespace Advent23
 {
 
     internal class Day07 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/7
 		// Input https://adventofcode.com/2023/day/7/input
 		private long Star(StarEnum star)
@@ -23,7 +24,7 @@ namespace Advent23
 			foreach(var hand in hands)
 			{
 				rv += hand.Bid * i;
-                Utils.TestLog(i.ToString() + " " + hand);
+                //Utils.TestLog(i.ToString() + " " + hand);
                 i++;
 			}
 			Utils.TestLog("rv= " + rv);
@@ -117,6 +118,7 @@ namespace Advent23
 			{
 				var noJs = cards.Replace("J", "");
 				groups = noJs.GroupBy(c => c).OrderByDescending(g => g.Count()).ToList();
+				jokers = 5 - noJs.Count();
 			}
 
 			if (groups.Count() == 1 || jokers == 5)

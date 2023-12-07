@@ -1,5 +1,6 @@
 using AoCLibrary;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 
 namespace Advent23
@@ -12,24 +13,29 @@ namespace Advent23
 			//	WriteStubFiles(i);
 			Utils.AppName = "RUN";
 
-			var sw = Stopwatch.StartNew();
 			var runner = GetDayRunner();
 			if (runner == null)
                 Utils.Log("No runner found for Day" + ElfHelper.DayString());
 			else
 			{
-				Stopwatch.StartNew();
-                Utils.ResetTestLog();
 				var res = Run(runner);
-				Utils.Log(res, sw);
 			}
 		}
 		static RunnerResult Run(IDayRunner runner)
 		{
+			Utils.ResetTestLog();
 			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
+			if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
+				ElfHelper.WriteInputFile(ElfHelper.Day);
+
+			var sw = Stopwatch.StartNew();
+
 			var rv = new RunnerResult();
 			rv.Star1 = runner.Star1();
 			rv.Star2 = runner.Star2();
+
+			Utils.Log(rv, sw);
+
 			return rv;
 		}
 		static IDayRunner? GetDayRunner()
@@ -55,6 +61,13 @@ namespace Advent23
 			return null;
 		}
 
+		static bool IsFileThere(string file)
+		{
+			if (!File.Exists(file))
+				return false;
+			var info = new FileInfo(file);
+			return (info.Length > 0);
+		}
 		static internal string InputFile(bool real, StarEnum star)
 		{
 			string filename;
@@ -69,7 +82,13 @@ namespace Advent23
 				else
 					filename = $"Day{ElfHelper.DayString()}FakeStar2.txt";
 			}
-			return Path.Combine("Assets", filename);
+			var rv = Path.Combine("Assets", filename);
+			if (!IsFileThere(rv) && star == StarEnum.Star2 && real == false)
+			{
+				filename = $"Day{ElfHelper.DayString()}FakeStar1.txt";
+				rv = Path.Combine("Assets", filename);
+			}
+			return rv;
 		}
 		static internal string[] GetLines(StarEnum star, bool real)
 		{

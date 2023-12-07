@@ -21,9 +21,9 @@ namespace Leaders
 			timer.Start();
 		}
 
-		private async void Timer_Tick(object? sender, EventArgs e)
+		private void Timer_Tick(object? sender, EventArgs e)
 		{
-			await Tick(false);
+			Tick(false);
 		}
 
 		void Log(string str)
@@ -32,7 +32,7 @@ namespace Leaders
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 
-		async Task Tick(bool force)
+		void Tick(bool force)
 		{
 			Title = "Day" + ElfHelper.DayString();
 
@@ -43,7 +43,7 @@ namespace Leaders
 
 				if (ElfHelper.Day == ElfHelper.NextEmptyDay())
 				{
-					await ElfHelper.WriteStubFiles(ElfHelper.Day, true);
+					ElfHelper.WriteStubFiles(ElfHelper.Day, true);
 					Log("Created next day" + ElfHelper.Day);
 					UpdateNextButton();
 				}
@@ -51,7 +51,7 @@ namespace Leaders
 			
 			try
 			{
-				await Read(force);
+				Read(force);
 			}
 			catch (Exception ex)
 			{
@@ -97,7 +97,7 @@ namespace Leaders
 			Log("Sending " + str);
 			Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + str);
 		}
-		async Task Read(bool force)
+		void Read(bool force)
 		{
 			if (!force && DateTime.Now < _next)
 				return;
@@ -105,7 +105,7 @@ namespace Leaders
 			if (_last == null)
 				_last = ElfHelper.ReadFromFile();
 
-			var elfResult = await ElfHelper.Read(force);
+			var elfResult = ElfHelper.Read(force);
 			Debug.Assert(elfResult != null);
 			Log("Updating UI with data from: " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(_last);
@@ -141,24 +141,24 @@ namespace Leaders
 		{
 			new System.Media.SoundPlayer("bring.wav").Play();
 		}
-		private async void Window_Loaded(object sender, RoutedEventArgs e)
+		private void Window_Loaded(object sender, RoutedEventArgs e)
 		{
 			//await ElfHelper.WriteStubFiles(4, false);
 			UpdateNextButton();
-			await Tick(false);
+			Tick(false);
 		}
 
-		private async void Now_Click(object sender, RoutedEventArgs e)
+		private void Now_Click(object sender, RoutedEventArgs e)
 		{
-			await Tick(true);
+			Tick(true);
 		}
 
-		private async void AddNext_Click(object sender, RoutedEventArgs e)
+		private void AddNext_Click(object sender, RoutedEventArgs e)
 		{
 			if (MessageBox.Show("Are you sure?", "Sure?", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
 			{
 				var day = (int)btnAddNext.Tag;
-				await ElfHelper.WriteStubFiles(day, true);
+				ElfHelper.WriteStubFiles(day, true);
 				Log("Created next day" + day);
 				UpdateNextButton();
 			}
