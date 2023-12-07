@@ -5,7 +5,6 @@ namespace Advent23
 	{
 		public object? Star1()
 		{
-			var rv = 0;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
 			var seedParts = lines[0].Split(":");
 			int i = 0;

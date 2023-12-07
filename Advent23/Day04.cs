@@ -15,7 +15,6 @@ namespace Advent23
 				var winning = parts[1].Split(' ', StringSplitOptions.RemoveEmptyEntries);
 				var mine = parts[2].Split(' ', StringSplitOptions.RemoveEmptyEntries);
 				int i = 0;
-				var cardVal = 0;
 				foreach (var my in mine)
 				{
 					if (winning.Contains(my))

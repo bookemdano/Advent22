@@ -7,7 +7,7 @@ namespace Advent23
 	internal class Program
 	{
 		static bool _crazyTimers = false;
-		static void Main()
+		static async Task Main()
 		{
 			Utils.AppName = "RUN";
 
@@ -21,22 +21,22 @@ namespace Advent23
 					var best = double.MaxValue;
 					for(int i = 0; i < 10; i++)
 					{
-						var res = Run(runner);
+						var res = await RunAsync(runner);
 						if (res.TotalMilliseconds < best)
 							best = res.TotalMilliseconds;
 					}
 					Utils.Log($"Best run {best:0.0}ms");
 				}
 				else
-					Run(runner);
+					await RunAsync(runner);
 			}
 		}
-		static TimeSpan Run(IDayRunner runner)
+		static async Task<TimeSpan> RunAsync(IDayRunner runner)
 		{
 			Utils.ResetTestLog();
 			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
 			if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
-				ElfHelper.WriteInputFile(ElfHelper.Day);	// won't be usable until next build
+				await ElfHelper.WriteInputFileAsync(ElfHelper.Day);	// won't be usable until next build
 
 			var res = new RunnerResult();
 

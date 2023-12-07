@@ -22,7 +22,7 @@ internal class Program
 				Thread.Sleep(TimeSpan.FromMinutes(1));
 				continue;
 			}
-			var elfResult = ElfHelper.Read(false);
+			var elfResult = await ElfHelper.ReadAsync(false);
 			Debug.Assert(elfResult != null);
 			next = elfResult.Timestamp.AddMinutes(15);
 			Log("Read " + elfResult.Timestamp);

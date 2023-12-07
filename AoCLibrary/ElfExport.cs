@@ -7,12 +7,12 @@ namespace AoCLibrary
 		{
 
 			var stars = new Dictionary<string, List<StarScore>>();
-			string key;
+			//string key;
 			var bestDeltas = new Dictionary<string, TimeSpan>();
 			int maxScore = res.Members.Count();
 			foreach (var member in res.AllMembers(true))
 			{
-				int iDay = 1;
+				//int iDay = 1;
 				/*foreach (var day in member.AllDays(false))
 				{
 

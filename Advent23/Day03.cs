@@ -165,7 +165,6 @@ namespace Advent23
 
 		public object? Star2()
 		{
-			var rv = 0;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
 			Dictionary<Symbol, List<string>> dict = [];
 			for (int iRow = 0; iRow < lines.Length; iRow++)

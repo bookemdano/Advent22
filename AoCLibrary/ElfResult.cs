@@ -17,7 +17,7 @@ namespace AoCLibrary
 			var rv = Members.Values.ToArray();
 			if (rv == null)
 				return [];
-			if (hideZeros && rv != null)
+			if (hideZeros)
 				rv = rv.Where(m => m?.LocalScore > 0).ToArray();
 			return rv;
         }

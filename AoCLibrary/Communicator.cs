@@ -7,10 +7,6 @@ namespace AoCLibrary
 		static readonly string _cookieString = "53616c7465645f5f4a5c8551a649899923835062e76be6e6079b68e6574d76ad1caeaae367dc68d8d51241b20417f9ce26396c795150a6e4d91eeeedf3d89a03";
 		//static string _cookieString2022 = "53616c7465645f5f3b43899863152185d2d59143fe9023d92a6d55ab884b6f6f680eb77a696a29670c5ce9d701f913454f82916b42d7bf759aeb3c84cfceefaa";
 
-		static public string? Read(string url, bool returnError)
-		{
-			return ReadAsync(url, returnError).GetAwaiter().GetResult();
-		}
 		static public async Task<string?> ReadAsync(string url, bool returnError)
 		{
 			var uri = new Uri(url);

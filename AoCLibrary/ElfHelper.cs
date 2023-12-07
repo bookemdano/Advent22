@@ -39,12 +39,12 @@ namespace AoCLibrary
 			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");
 		}
 
-		public static void WriteInputFile(int day)
+		public static async Task WriteInputFileAsync(int day)
 		{
-			var str = Communicator.Read($"{DayUrl(day)}/input", returnError: false) ?? string.Empty;
+			var str = await Communicator.ReadAsync($"{DayUrl(day)}/input", returnError: false) ?? string.Empty;
 			File.WriteAllText(Path.Combine(CodeDir(), "assets", $"Day{day:00}.txt"), str);
 		}
-		public static void WriteStubFiles(int day, bool updatePrj)
+		public static async Task WriteStubFilesAsync(int day, bool updatePrj)
 		{
 			var strDay = $"{day:00}";
 			var codeDir = CodeDir();
@@ -55,7 +55,7 @@ namespace AoCLibrary
 			cs = cs.Replace("|INPUTURL|", $"{dayUrl}/input");
 			cs = cs.Replace("|DD|", strDay);
 			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
-			WriteInputFile(day);
+			await WriteInputFileAsync(day);
 			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), "");
 			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), "");
 
@@ -78,7 +78,6 @@ namespace AoCLibrary
 				return null;
 
 			var jsonFile = files.First();
-			ElfResult? rv = null;
 			if (File.Exists(jsonFile))
 			{
 				var json = File.ReadAllText(jsonFile);
@@ -91,7 +90,7 @@ namespace AoCLibrary
 			var jsonFile = Path.Combine(Utils.Dir, $"aoc{DateTime.Today:yyyyMMdd}.json");
 			File.WriteAllText(jsonFile, Utils.Serialize(result));
 		}
-		public static ElfResult? Read(bool force)
+		public static async Task<ElfResult?> ReadAsync(bool force)
 		{
 			ElfResult? rv = null;
 			if (!force)
@@ -104,7 +103,7 @@ namespace AoCLibrary
 				return rv;  // new enough
 			}
 			
-			var str = Communicator.Read($"{LeaderUrl}.json", returnError: false);
+			var str = await Communicator.ReadAsync($"{LeaderUrl}.json", returnError: false);
 			if (str == null)
 				return null;
 			rv = Utils.Deserialize<ElfResult>(str);

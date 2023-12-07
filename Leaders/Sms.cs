@@ -20,8 +20,8 @@ namespace Leaders
 			Utils.Log($"Sms.SendMessage({phone})");
             try
             {
-                phone = StripPhoneNumber(phone);
-                if (phone?.Length == 10)
+                phone = StripPhoneNumber(phone) ?? phone;
+				if (phone?.Length == 10)
                     phone = "1" + phone;
                 if (phone?.Length == 11)
                     phone = "+" + phone;
@@ -49,7 +49,7 @@ namespace Leaders
                 return false;
             }
         }
-        public static string StripPhoneNumber(string str)
+        public static string? StripPhoneNumber(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return null;
