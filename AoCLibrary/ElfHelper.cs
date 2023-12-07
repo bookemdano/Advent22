@@ -4,7 +4,19 @@ namespace AoCLibrary
 {
 	public class ElfHelper
     {
-		public static TimeSpan MinApiRefresh => TimeSpan.FromMinutes(15);	//AoC requests 15 minutes
+		public static TimeSpan MinApiRefresh
+		{
+			get
+			{
+				var hour = DateTime.Now.Hour;
+				if (hour == 0 || hour == 10)
+					return TimeSpan.FromMinutes(10);
+				else if (hour > 5 && hour < 10)
+					return TimeSpan.FromMinutes(5);
+
+				return TimeSpan.FromMinutes(15);    //AoC requests 15 minutes
+			}
+		}
 
 		public static readonly int Year = DateTime.Today.Year;
 		public static int Day

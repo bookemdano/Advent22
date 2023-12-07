@@ -36,7 +36,7 @@ namespace Advent23
 			Utils.ResetTestLog();
 			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
 			if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
-				ElfHelper.WriteInputFile(ElfHelper.Day);
+				ElfHelper.WriteInputFile(ElfHelper.Day);	// won't be usable until next build
 
 			var res = new RunnerResult();
 
