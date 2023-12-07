@@ -1,16 +1,14 @@
 using AoCLibrary;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 
 namespace Advent23
 {
 	internal class Program
 	{
-		static void Main(string[] args)
+		static bool _crazyTimers = false;
+		static void Main()
 		{
-			//for(int i = 1; i < 26; i++)
-			//	WriteStubFiles(i);
 			Utils.AppName = "RUN";
 
 			var runner = GetDayRunner();
@@ -18,23 +16,37 @@ namespace Advent23
                 Utils.Log("No runner found for Day" + ElfHelper.DayString());
 			else
 			{
-				var res = Run(runner);
+				if (_crazyTimers)
+				{
+					var best = double.MaxValue;
+					for(int i = 0; i < 10; i++)
+					{
+						var res = Run(runner);
+						if (res.TotalMilliseconds < best)
+							best = res.TotalMilliseconds;
+					}
+					Utils.Log($"Best run {best:0.0}ms");
+				}
+				else
+					Run(runner);
 			}
 		}
-		static RunnerResult Run(IDayRunner runner)
+		static TimeSpan Run(IDayRunner runner)
 		{
 			Utils.ResetTestLog();
 			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
 			if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
 				ElfHelper.WriteInputFile(ElfHelper.Day);
 
+			var res = new RunnerResult();
+
 			var sw = Stopwatch.StartNew();
-
-			var rv = new RunnerResult();
-			rv.Star1 = runner.Star1();
-			rv.Star2 = runner.Star2();
-
-			Utils.Log(rv, sw);
+			res.Star1 = runner.Star1();
+			var t1 = sw.Elapsed;
+			res.Star2 = runner.Star2();
+			var rv = sw.Elapsed;
+			var t2 = rv - t1;
+			Utils.Log(res + $" t1: {t1.TotalMilliseconds:0.0}ms t2: {t2.TotalMilliseconds:0.0}ms");
 
 			return rv;
 		}

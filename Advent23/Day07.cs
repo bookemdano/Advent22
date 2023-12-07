@@ -1,13 +1,14 @@
 using AoCLibrary;
-using System.Text.Json.Serialization;
 namespace Advent23
 {
 
-    internal class Day07 : IDayRunner
+	internal class Day07 : IDayRunner
 	{
 		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/7
 		// Input https://adventofcode.com/2023/day/7/input
+
+		// after much testing, Hand is about twice as fast as HandHex, I think because of the "new"
 		private long Star(StarEnum star)
 		{
 			var rv = 0L;
@@ -19,12 +20,12 @@ namespace Advent23
 				var parts = Utils.Split(' ', line);
 				hands.Add(new Hand(parts[0], int.Parse(parts[1]), star));
         	}
-			hands = hands.OrderBy(h => h.Ordering).ToList();
 			int i = 1;
-			foreach(var hand in hands)
+			foreach(var hand in hands.OrderBy(h => h.Ordering))
 			{
 				rv += hand.Bid * i;
-                //Utils.TestLog(i.ToString() + " " + hand);
+				if (!IsReal)
+					Utils.TestLog(i.ToString() + " " + hand);
                 i++;
 			}
 			Utils.TestLog("rv= " + rv);
@@ -67,6 +68,94 @@ namespace Advent23
 		FullHouse,
 		Four,
 		Five
+	}
+	public class HandHex
+	{
+		public HandHex(string cards, int bid, StarEnum star)
+		{
+			//_originalCards = cards;
+			_cards = new int[5];
+			for(int i = 0; i < 5; i++)
+			{
+				var c = cards[i];
+				if (c == 'T')
+					_cards[i] = 10;
+				else if (c == 'J')
+				{
+
+					if (star == StarEnum.Star1)
+						_cards[i] = 11;
+					else
+					{
+						_jokers++;
+						_cards[i] = 0;
+					}
+				}
+				else if (c == 'Q')
+					_cards[i] = 12;
+				else if (c == 'K')
+					_cards[i] = 13;
+				else if (c == 'A')
+					_cards[i] = 14;
+				else
+					_cards[i] = c - '0';
+			}
+			_handRank = Rank(star);
+			Ordering = ToHex(_cards);
+			Bid = bid;
+		}
+		static long ToHex(int[] ints)
+		{
+			var rv = 0L;
+			for (int i = 0; i < ints.Length; i++)
+			{
+				var p = ints.Length - i - 1;
+				rv += ints[p] * (long)Math.Pow(16, i);
+			}
+			return rv;
+		}
+		public override string ToString()
+		{
+			return $"{_handRank} {Ordering.ToString("X")}";
+		}
+		RankEnum Rank(StarEnum star)
+		{
+			IEnumerable<IGrouping<int, int>> groups;
+			if (star == StarEnum.Star1)
+				groups = _cards.GroupBy(c => c);
+			else
+				groups = _cards.Where(j => j != 0).GroupBy(c => c);
+
+			if (groups.Count() == 1 || _jokers == 5)
+				return RankEnum.Five;   // five of a kind
+			else if (groups.Count() == 2)
+			{
+				if (groups.OrderByDescending(g => g.Count()).First().Count() + _jokers > 3)
+					return RankEnum.Four;   // four of a kind
+				else
+					return RankEnum.FullHouse;   // full house
+			}
+			else if (groups.Count() == 3)
+			{
+				if (groups.OrderByDescending(g => g.Count()).First().Count() + _jokers == 3)
+					return RankEnum.Three;   // three of a kind
+				else
+					return RankEnum.TwoPair;   // two pair
+			}
+			else if (groups.Count() == 4)
+			{
+				return RankEnum.OnePair;   // one pair
+			}
+			else
+				return RankEnum.HighCard;   // high-card
+		}
+
+		//string _originalCards;
+		int _jokers = 0;
+		int[] _cards;
+		RankEnum _handRank;
+		public long Ordering { get; }
+		public int Bid { get; }
 	}
 	public class Hand
 	{

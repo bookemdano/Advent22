@@ -24,7 +24,7 @@ namespace AoCLibrary
 		{
 			var str = $"{AppName} {o}";
 			if (sw != null)
-				str += $" {sw.ElapsedMilliseconds:0}ms";
+				str += $" {sw.Elapsed.TotalMilliseconds:0.0}ms";
 			str = $"{DateTime.Now} {str}";
 			File.AppendAllText(Path.Combine(Dir, $"endless{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
 			Console.WriteLine(str);
