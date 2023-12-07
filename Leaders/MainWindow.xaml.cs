@@ -34,7 +34,7 @@ namespace Leaders
 
 		void Tick(bool force)
 		{
-			Title = "Day" + ElfHelper.DayString();
+			Title = $"Day {ElfHelper.DayString()} {(100 * ElfHelper.Day / 25)}%";
 
 			if (LastSentDay != ElfHelper.Day)
 			{
