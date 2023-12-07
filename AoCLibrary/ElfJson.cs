@@ -74,7 +74,7 @@ namespace AoCLibrary
 			if (!stars.Any())
 				return "";
 			var parts = new List<string>();
-			var end = ElfHelper.DayIndex - 5;
+			var end = ElfHelper.DayIndex - 7;
 			if (end < 0)
 				end = 0;
 			for (int i = ElfHelper.DayIndex; i >= end; i--)
