@@ -7,7 +7,7 @@
         mc:Ignorable="d"
 		Loaded="Window_Loaded"
         Title="MainWindow" Height="450" Width="800">
-    <StackPanel>
+	<StackPanel>
 		<StackPanel Orientation="Horizontal">
 			<Button Click="Now_Click" Margin="3" Padding="3">Now</Button>
 			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>

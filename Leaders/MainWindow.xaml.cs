@@ -102,8 +102,7 @@ namespace Leaders
 			if (!force && DateTime.Now < _next)
 				return;
 
-			if (_last == null)
-				_last = ElfHelper.ReadFromFile();
+			_last ??= ElfHelper.ReadFromFile();
 
 			var elfResult = await ElfHelper.ReadAsync(force);
 			Debug.Assert(elfResult != null);
