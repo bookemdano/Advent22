@@ -20,10 +20,19 @@ namespace Advent23
 			{
 				Stopwatch.StartNew();
                 Utils.ResetTestLog();
-                Utils.Log(runner.Run(), sw);
+				var res = Run(runner);
+				Utils.Log(res, sw);
 			}
 		}
-		 static IDayRunner? GetDayRunner()
+		static RunnerResult Run(IDayRunner runner)
+		{
+			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
+			var rv = new RunnerResult();
+			rv.Star1 = runner.Star1();
+			rv.Star2 = runner.Star2();
+			return rv;
+		}
+		static IDayRunner? GetDayRunner()
 		{
 			Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 			var advent = assemblies[1];
@@ -48,17 +57,19 @@ namespace Advent23
 
 		static internal string InputFile(bool real, StarEnum star)
 		{
+			string filename;
 			if (real)
 			{
-				return $"Day{ElfHelper.DayString()}.txt";
+				filename = $"Day{ElfHelper.DayString()}.txt";
 			}
 			else
 			{
 				if (star == StarEnum.Star1)
-					return $"Day{ElfHelper.DayString()}FakeStar1.txt";
+					filename = $"Day{ElfHelper.DayString()}FakeStar1.txt";
 				else
-					return $"Day{ElfHelper.DayString()}FakeStar2.txt";
+					filename = $"Day{ElfHelper.DayString()}FakeStar2.txt";
 			}
+			return Path.Combine("Assets", filename);
 		}
 		static internal string[] GetLines(StarEnum star, bool real)
 		{
@@ -73,13 +84,13 @@ namespace Advent23
 		{
 			var filename = InputFile(real, star);
 			Utils.Log("ReadLines" + filename);
-			return File.ReadAllLines(Path.Combine("Assets", filename)).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+			return File.ReadAllLines(filename).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
 		}
 		static string ReadText(bool real, StarEnum star)
 		{
 			var filename = InputFile(real, star);
 			Utils.Log("ReadText" + filename);
-			return File.ReadAllText(Path.Combine("Assets", filename));
+			return File.ReadAllText(filename);
 		}
 	}
 	public enum StarEnum

@@ -6,7 +6,7 @@ namespace Advent23
 	{
 		public bool IsReal => true;
 
-		private object? Star1()
+		public object? Star1()
 		{
 			var rv = 1L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
@@ -19,7 +19,7 @@ namespace Advent23
                 Utils.Assert(rv, 288);
             return rv;
 		}
-		private object? Star2()
+		public object? Star2()
 		{
             var rv = 1L;
             var lines = Program.GetLines(StarEnum.Star1, IsReal);
@@ -34,13 +34,13 @@ namespace Advent23
         }
 		long GetWinQuad(long time, long dist)
 		{
-			var a = -1;	// upside down parabala
-			var b = time; 
+			var a = -1; // upside down parabala
+			var b = time;
 			var c = -(dist + .00000001); // because we want to win, not tie
 			var plus = ((0 - b) + Math.Sqrt(b * b - 4 * a * c)) / (2 * a);
 			var minus = ((0 - b) - Math.Sqrt(b * b - 4 * a * c)) / (2 * a);
-			var firstWin = (long) Math.Ceiling(plus);
-			var lastWin = (long) Math.Floor(minus);
+			var firstWin = (long)Math.Ceiling(plus);
+			var lastWin = (long)Math.Floor(minus);
 
 			var race = new Race(time, dist);
 			Utils.Assert(race.Win(firstWin), "firstWin");

@@ -12,7 +12,8 @@ namespace Advent23
 	interface IDayRunner
 	{
 		bool IsReal { get; }
-		RunnerResult Run();
+		object? Star1();
+		object? Star2();
 
 	}
 }

@@ -3,7 +3,7 @@ namespace Advent23
 {
 	internal class Day05 : IDayRunner
 	{
-		private object? Star1()
+		public object? Star1()
 		{
 			var rv = 0;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
@@ -189,7 +189,7 @@ namespace Advent23
             }
         }
 		
-		private object? Star2()
+		public object? Star2()
 		{
             var lines = Program.GetLines(StarEnum.Star1, IsReal);
             var seedParts = lines[0].Split(":");

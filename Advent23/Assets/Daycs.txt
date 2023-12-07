@@ -6,7 +6,7 @@ namespace Advent23
 		public bool IsReal => false;
 		// Day |URL|
 		// Input |INPUTURL|
-		private object? Star1()
+		public object? Star1()
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
@@ -14,7 +14,7 @@ namespace Advent23
                 Utils.Assert(rv, 0L);
 			return rv;
 		}
-		private object? Star2()
+		public object? Star2()
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
@@ -22,12 +22,6 @@ namespace Advent23
                 Utils.Assert(rv, 0L);
 			return rv;
 		}
-		public RunnerResult Run()
-		{
-			var rv = new RunnerResult();
-			rv.Star1 = Star1();
-			rv.Star2 = Star2();
-			return rv;
-		}
+
 	}
 }

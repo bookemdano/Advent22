@@ -19,7 +19,7 @@ namespace Advent23
 			rv.Star2 = Star2();
 			return rv;
 		}
-		private object? Star1()
+		public object? Star1()
 		{
 			var total = 0;
 			foreach (var line in Program.GetLines(StarEnum.Star1, IsReal))
@@ -30,7 +30,7 @@ namespace Advent23
 			}
 			return total;
 		}
-		private object? Star2()
+		public object? Star2()
 		{
 			var total = 0;
 			var dict = new Dictionary<string, int>();
