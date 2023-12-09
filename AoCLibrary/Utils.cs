@@ -6,9 +6,9 @@ namespace AoCLibrary
 {
 	static public class Utils
 	{
-        static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+        static public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        static public string Dir { get; } = @"c:\temp\data\elf";
+        static public string Dir { get; }
 		static Utils()
 		{
 			if (IsWindows)
@@ -29,7 +29,7 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Dir, $"endless{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-		static string _testLogFile = $"endless{DateTime.Today:yyyyMMdd}.log";
+		static readonly string _testLogFile = $"endless{DateTime.Today:yyyyMMdd}.log";
 		public static void ResetTestLog()
 		{
 			File.Delete(Path.Combine(Dir, _testLogFile));

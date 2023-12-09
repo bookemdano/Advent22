@@ -36,7 +36,12 @@ namespace AoCLibrary
 
 		static public string CodeDir()
 		{
-			return "C:\\repos\\Advent22\\Advent" + DateTime.Today.ToString("yy");
+			var root = string.Empty;
+			if (Utils.IsWindows)
+				return "C:\\repos";
+			else
+				root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects");
+			return Path.Combine(root, "Advent22", "Advent" + DateTime.Today.ToString("yy"));
 		}
 
 		public static async Task WriteInputFileAsync(int day)

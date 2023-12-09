@@ -52,7 +52,6 @@ namespace Advent23
                 var row = new Row(line);
                 rows.Add(row.Key, row);
             }
-            var found = false;
 
             var paths = rows.Values.Where(r => r.GhostKey == 'A').ToArray();
             var pathLens = new List<long>();
@@ -64,7 +63,7 @@ namespace Advent23
                 foreach (var c in dir)
                 {
                     step++;
-                    for(int i = 0; i < paths.Count(); i++)
+					for (int i = 0; i < paths.Length; i++)
                     {
                         if (c == 'R')
                             paths[i] = rows[paths[i].Right];
@@ -77,7 +76,7 @@ namespace Advent23
                         pathLens.Add(step);
                         var list = paths.ToList();
                         list.Remove(done);
-                        paths = list.ToArray();
+                        paths = [.. list];
                     }
                 }
             }

@@ -7,15 +7,14 @@ namespace Advent23
 
 		// Day https://adventofcode.com/2023/day/9
 		// Input https://adventofcode.com/2023/day/9/input
-		public object? Star1()
+		public long Star(StarEnum star)
 		{
-			var rv = 0L;
-			var lines = Program.GetLines(StarEnum.Star1, IsReal);
-			foreach(var line in lines)
+			long rv = 0;
+			var lines = Program.GetLines(star, IsReal);
+			foreach (var line in lines)
 			{
 				var nums = Utils.SplitNums(' ', line);
-				var newLines = new List<long[]>();
-				newLines.Add(nums);
+				var newLines = new List<long[]> { nums };
 				var last = nums.ToArray();
 				while (true)
 				{
@@ -26,50 +25,40 @@ namespace Advent23
 					}
 					if (deltas.All(d => d == 0))
 						break;
-					last = deltas.ToArray();
+					last = [.. deltas];
 					newLines.Add(last);
 				}
 				newLines.Reverse();
 				var lastDelta = 0L;
 				foreach (var newLine in newLines)
-					lastDelta = newLine.Last() + lastDelta;
+				{
+					if (star == StarEnum.Star1)
+						lastDelta = newLine.Last() + lastDelta;
+					else
+						lastDelta = newLine.First() - lastDelta;
+				}
 				rv += lastDelta;
 			}
+			return rv;
+		}
+
+		public object? Star1()
+		{
+			var rv = Star(StarEnum.Star1);
             if (!IsReal)
                 Utils.Assert(rv, 114L);
+			else
+				Utils.Assert(rv, 1953784198L);
 			// 1953784198
 			return rv;
 		}
 		public object? Star2()
 		{
-			var rv = 0L;
-			var lines = Program.GetLines(StarEnum.Star2, IsReal);
-			foreach (var line in lines)
-			{
-				var nums = Utils.SplitNums(' ', line);
-				var newLines = new List<long[]>();
-				newLines.Add(nums);
-				var last = nums.ToArray();
-				while (true)
-				{
-					var deltas = new List<long>();
-					for (int i = 0; i < last.Length - 1; i++)
-					{
-						deltas.Add(last[i + 1] - last[i]);
-					}
-					if (deltas.All(d => d == 0))
-						break;
-					last = deltas.ToArray();
-					newLines.Add(last);
-				}
-				newLines.Reverse();
-				var firstDelta = 0L;
-				foreach (var newLine in newLines)
-					firstDelta = newLine.First() - firstDelta;
-				rv += firstDelta;
-			}
+			var rv = Star(StarEnum.Star2);
 			if (!IsReal)
                 Utils.Assert(rv, 2L);
+			else
+				Utils.Assert(rv, 957L);
 			//957
 			return rv;
 		}
