@@ -104,21 +104,21 @@ namespace Advent23
 		}
 		static internal string[] GetLines(StarEnum star, bool real)
 		{
-			return ReadLines(real, star);
+			return ReadLines(star, real);
 		}
 		static internal string GetText(StarEnum star, bool real)
 		{
-			return ReadText(real, star);
+			return ReadText(star, real);
 		}
 
-		static string[] ReadLines(bool real, StarEnum star)
+		static string[] ReadLines(StarEnum star, bool real)
 		{
 			var filename = InputFile(real, star);
 			Utils.Log("ReadLines" + filename);
 			return File.ReadAllLines(filename).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
 		}
-		static string ReadText(bool real, StarEnum star)
-		{
+		static string ReadText(StarEnum star, bool real)
+        {
 			var filename = InputFile(real, star);
 			Utils.Log("ReadText" + filename);
 			return File.ReadAllText(filename);
