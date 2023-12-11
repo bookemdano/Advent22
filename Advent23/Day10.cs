@@ -1,7 +1,4 @@
-using System.Reflection.Metadata.Ecma335;
-using System.Xml.Linq;
 using AoCLibrary;
-using Microsoft.Win32;
 namespace Advent23
 {
 	internal class Day10 : IDayRunner

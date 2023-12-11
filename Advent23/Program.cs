@@ -6,7 +6,7 @@ namespace Advent23
 {
 	internal class Program
 	{
-		static bool _crazyTimers = false;
+		static bool _crazyTimers = true;
 		static async Task Main()
 		{
 			Utils.AppName = "RUN";
@@ -18,14 +18,14 @@ namespace Advent23
 			{
 				if (_crazyTimers)
 				{
-					var best = double.MaxValue;
+					var best = TimeSpan.MaxValue;
 					for(int i = 0; i < 10; i++)
 					{
 						var res = await RunAsync(runner);
-						if (res.TotalMilliseconds < best)
-							best = res.TotalMilliseconds;
+						if (res < best)
+							best = res;
 					}
-					Utils.Log($"Best run {best:0.0}ms");
+					Utils.Log($"Best run {ElfHelper.SmallString(best)}");
 				}
 				else
 					await RunAsync(runner);
@@ -47,11 +47,18 @@ namespace Advent23
 			var sw = Stopwatch.StartNew();
 			res.Star1 = runner.Star1();
 			var t1 = sw.Elapsed;
+			if (!_crazyTimers)
+				Utils.Log($"r1:{res.Star1} t1: {ElfHelper.SmallString(t1)}");
 			res.Star2 = runner.Star2();
 			var rv = sw.Elapsed;
 			var t2 = rv - t1;
-			Utils.Log(res + $" t1: {t1.TotalMilliseconds:0.0}ms t2: {t2.TotalMilliseconds:0.0}ms");
-
+			if (!_crazyTimers)
+			{
+				Utils.Log($"r2:{res.Star2} t2: {ElfHelper.SmallString(t2)}");
+				Utils.Log($"total: {ElfHelper.SmallString(rv)}");
+			}
+			else
+				Utils.Log($"{res} t1: {ElfHelper.SmallString(t1)} t2: {ElfHelper.SmallString(t2)} total: {ElfHelper.SmallString(rv)}");
 			return rv;
 		}
 		static IDayRunner? GetDayRunner()
@@ -106,26 +113,27 @@ namespace Advent23
 			}
 			return rv;
 		}
+		static Dictionary<string, string[]> _dictLines = [];
 		static internal string[] GetLines(StarEnum star, bool real)
 		{
-			return ReadLines(star, real);
+			var filename = InputFile(real, star);
+			if (!_dictLines.ContainsKey(filename))
+			{
+				Utils.Log("ReadLines- " + filename);
+				_dictLines[filename] = File.ReadAllLines(filename).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+			}
+			return _dictLines[filename];
 		}
+		static Dictionary<string, string> _dictText = [];
 		static internal string GetText(StarEnum star, bool real)
 		{
-			return ReadText(star, real);
-		}
-
-		static string[] ReadLines(StarEnum star, bool real)
-		{
 			var filename = InputFile(real, star);
-			Utils.Log("ReadLines" + filename);
-			return File.ReadAllLines(filename).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
-		}
-		static string ReadText(StarEnum star, bool real)
-        {
-			var filename = InputFile(real, star);
-			Utils.Log("ReadText" + filename);
-			return File.ReadAllText(filename);
+			if (!_dictText.ContainsKey(filename))
+			{
+				Utils.Log("ReadText- " + filename);
+				_dictText[filename] = File.ReadAllText(filename);
+			}
+			return _dictText[filename];
 		}
 	}
 	public enum StarEnum

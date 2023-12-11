@@ -5,7 +5,7 @@ namespace Advent23
 {
 	internal class Day11 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/11
 		// Input https://adventofcode.com/2023/day/11/input
 		public object? Star1()
@@ -13,7 +13,7 @@ namespace Advent23
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
 			var grid = Grid11.FromLines(lines);
-			rv = Star(grid, 2);
+			rv = Star(grid, expandTo: 2);
 			if (!IsReal)
 				Utils.Assert(rv, 374L);
 			else
@@ -28,9 +28,9 @@ namespace Advent23
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
 			var grid = Grid11.FromLines(lines);
 			if (IsReal)
-				rv = Star(grid, 1000000);
+				rv = Star(grid, expandTo: 1000000);
 			else
-				rv = Star(grid, 100);
+				rv = Star(grid, expandTo: 100);
 
 			if (!IsReal)
 				Utils.Assert(rv, 8410L);
@@ -51,12 +51,12 @@ namespace Advent23
 				foreach (var to in stars)
 				{
 					if (to.StarNum <= from.StarNum)
-						continue;
+						continue;	// only do one way
 					var d = grid.Distance(from.Pt, to.Pt);
-					Utils.TestLog($"{from.StarNum} {to.StarNum} d:{d}");
+					if (!IsReal)
+						Utils.TestLog($"{from.StarNum} {to.StarNum} d:{d}");
 					rv += d;
 				}
-
 			}
 			grid.WriteCounts(false, "ex");
 			return rv;
@@ -116,64 +116,6 @@ namespace Advent23
 				if (nodesInCol.All(c => c.Char == '.'))
 					_colSizes[iCol] = expandTo;
 			}
-		}
-		internal Grid11 Expand()
-		{
-			var rowNodes = ExpandRows();
-			var colNodes = ExpandCols(rowNodes);
-			return new Grid11(colNodes);
-		}
-		static List<Node11> ExpandCols(List<Node11> nodes)
-		{
-			List<Node11> rv = new List<Node11>();
-			int newCols = 0;
-			int nRows = nodes.Max(n => n.Pt.Row) + 1;
-			int nCols = nodes.Max(n => n.Pt.Col) + 1;
-			for (int iCol = 0; iCol < nCols; iCol++)
-			{
-				var rows = nodes.Where(n => n.Pt.Col == iCol).ToList();
-				for (int iRow = 0; iRow < nRows; iRow++)
-				{
-					var pt = new Point(iRow, iCol + newCols);
-					rv.Add(new Node11(pt, rows[iRow].Char));
-				}
-				if (rows.All(c => c.Char == '.'))
-				{
-					newCols++;
-					for (int iRow = 0; iRow < nRows; iRow++)
-					{
-						var pt = new Point(iRow, iCol + newCols);
-						rv.Add(new Node11(pt, '.'));
-					}
-				}
-			}
-			return rv;
-		}
-
-		private List<Node11> ExpandRows()
-		{
-			List<Node11> rv = new List<Node11>();
-			int newRows = 0;
-			for (int iRow = 0; iRow < _rows; iRow++)
-			{
-				var cols = this.Values.Where(n => n.Pt.Row == iRow).ToList();
-				for (int iCol = 0; iCol < _cols; iCol++)
-				{
-					var pt = new Point(iRow + newRows, iCol);
-					rv.Add(new Node11(pt, cols[iCol].Char));
-				}
-				if (cols.All(c => c.Char == '.'))
-				{
-					newRows++;
-					for (int iCol = 0; iCol < _cols; iCol++)
-					{
-						var pt = new Point(iRow + newRows, iCol);
-						rv.Add(new Node11(pt, '.'));
-					}
-				}
-			}
-
-			return rv;
 		}
 
 		public void WriteCounts(bool raw, string tag)

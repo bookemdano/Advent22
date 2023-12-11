@@ -43,7 +43,16 @@ namespace AoCLibrary
 				root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects");
 			return Path.Combine(root, "Advent22", "Advent" + DateTime.Today.ToString("yy"));
 		}
-
+		public static string SmallString(TimeSpan elapsed)
+		{
+			var ms = elapsed.TotalMilliseconds;
+			if (ms > 1000)
+				return $"{elapsed.TotalSeconds:0.00}s";
+			else if (ms > 100)
+				return $"{elapsed.TotalMilliseconds:0}ms";
+			else
+				return $"{elapsed.TotalMilliseconds:0.0}ms";
+		}
 		public static async Task<string> WriteInputFileAsync(int day)
 		{
 			var str = await Communicator.ReadAsync($"{DayUrl(day)}/input", returnError: false) ?? string.Empty;

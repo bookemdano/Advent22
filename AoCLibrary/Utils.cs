@@ -26,10 +26,10 @@ namespace AoCLibrary
 			if (sw != null)
 				str += $" {sw.Elapsed.TotalMilliseconds:0.0}ms";
 			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Dir, $"endless{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
+			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-		static readonly string _testLogFile = $"endless{DateTime.Today:yyyyMMdd}.log";
+		static readonly string _testLogFile = $"elf{DateTime.Today:yyyyMMdd}.log";
 		public static void ResetTestLog()
 		{
 			File.Delete(Path.Combine(Dir, _testLogFile));
