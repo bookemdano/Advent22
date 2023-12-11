@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using AoCLibrary;
+using Microsoft.Win32;
 namespace Advent23
 {
 	internal class Day10 : IDayRunner
@@ -40,17 +41,19 @@ namespace Advent23
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
-            var grd = new Grid(lines);
-            var starts = grd.FindStarts().ToArray();
+            var grdOrig = new Grid(lines);
             int step = 0;
+			var grd = grdOrig.AddSpaces();
+			grd.WriteCounts(true);
+			var starts = grd.FindStarts().ToArray();
 
-            while (starts.Count() > 0)
+			while (starts.Count() > 0)
             {
                 step++;
+				Utils.TestLog($"{step} Starts:{starts.Count()}");
                 var newStarts = new List<Node>();
-                for (int i = 0; i < 2; i++)
+                foreach(var start in starts)
                 {
-                    var start = starts[i];
                     start.Count = step;
                     var cons = grd.Connections(start);
                     Utils.Assert(cons.Count() < 2, "Less than 2");
@@ -59,9 +62,12 @@ namespace Advent23
                 }
                 starts = newStarts.ToArray();
             }
+			grd.WriteCounts(false);
 
-            rv = grd.Insides();
-            grd.WriteCounts();
+
+			rv = grd.Insides();
+			// now shrink
+            grd.WriteCounts(false);
             if (!IsReal)
                 Utils.Assert(rv, 8L);
 			return rv;
@@ -95,11 +101,13 @@ namespace Advent23
 	}
 	public class Node
 	{
-        public Node(int row, int col, char c)
+		public Node(int row, int col, char c, bool startTag = false, bool og = false)
         {
             Pt = new Point(row, col);
             Char = c;
-            ConnPts = Connections(Pt, Char);
+            ConnPts = Connections();
+			StartTag = startTag;
+			Og = og;
         }
 
         public Point Pt { get; }
@@ -107,8 +115,10 @@ namespace Advent23
         public int? Count { get; set; } = null;
         public List<Point> ConnPts { get; private set; }
         public bool? Escape { get; internal set; }
+		public bool StartTag { get; private set; }
+		public bool Og { get; private set; }
 
-        public override string ToString()
+		public override string ToString()
         {
             return $"{Pt} '{Char}' {Count} e:{Escape} ({string.Join("-", ConnPts.ToList())})";
         }
@@ -122,46 +132,63 @@ namespace Advent23
 
             return rv;
         }
-        static internal List<Point> Connections(Point pt, char c)
+        List<Point> Connections()
         {
             var rv = new List<Point>();
-            if (South(c))
-                rv.Add(new(pt.Row + 1, pt.Col));
-            if (North(c))
-                rv.Add(new(pt.Row - 1, pt.Col));
-            if (East(c))
-                rv.Add(new(pt.Row, pt.Col + 1));
-            if (West(c))
-                rv.Add(new(pt.Row, pt.Col - 1));
+            if (South())
+                rv.Add(new(Pt.Row + 1, Pt.Col));
+            if (North())
+                rv.Add(new(Pt.Row - 1, Pt.Col));
+            if (East())
+                rv.Add(new(Pt.Row, Pt.Col + 1));
+            if (West())
+                rv.Add(new(Pt.Row, Pt.Col - 1));
     
             return rv;
         }
-        static bool North(char c)
+		internal bool North()
         {
-            return (c == '|' || c == 'L' || c == 'J');
+            return (Char == '|' || Char == 'L' || Char == 'J');
         }
-        static bool South(char c)
+		internal bool South()
         {
-            return (c == '|' || c == '7' || c == 'F');
+            return (Char == '|' || Char == '7' || Char == 'F');
         }
-        static bool East(char c)
+        internal bool East()
         {
-            return (c == '-' || c == 'L' || c == 'F');
+            return (Char == '-' || Char == 'L' || Char == 'F');
         }
-        static bool West(char c)
+		internal bool West()
         {
-            return (c == '-' || c == '7' || c == 'J');
+            return (Char == '-' || Char == '7' || Char == 'J');
         }
         public bool ConnectsTo(Point pt)
         {
             return ConnPts.Contains(pt);
 
         }
-
         internal void SetStart(List<Node> vals)
         {
-            Count = 0;
-            ConnPts = vals.Select(v => v.Pt).ToList();
+			if (!StartTag)
+			{
+				StartTag = true;
+				var pt1 = vals[0];
+				var pt2 = vals[1];
+				if ((Pt.Row == pt1.Pt.Row + 1 && Pt.Row == pt2.Pt.Row - 1) || (Pt.Row == pt2.Pt.Row + 1 && Pt.Row == pt1.Pt.Row - 1))
+					Char = '-';
+				else if ((Pt.Col == pt1.Pt.Col + 1 && Pt.Col == pt2.Pt.Col - 1) || (Pt.Col == pt2.Pt.Col + 1 && Pt.Col == pt1.Pt.Col - 1))
+					Char = '|';
+				else if ((Pt.Col == pt1.Pt.Col - 1 && Pt.Row == pt2.Pt.Row + 1) || (Pt.Col == pt2.Pt.Col - 1 && Pt.Row == pt1.Pt.Row + 1))
+					Char = 'L';
+				else if ((Pt.Col == pt1.Pt.Col - 1 && Pt.Row == pt2.Pt.Row - 1) || (Pt.Col == pt2.Pt.Col - 1 && Pt.Row == pt1.Pt.Row - 1))
+					Char = 'F';
+				else if ((Pt.Col == pt1.Pt.Col + 1 && Pt.Row == pt2.Pt.Row + 1) || (Pt.Col == pt2.Pt.Col + 1 && Pt.Row == pt1.Pt.Row + 1))
+					Char = 'J';
+				else if ((Pt.Col == pt1.Pt.Col + 1 && Pt.Row == pt2.Pt.Row - 1) || (Pt.Col == pt2.Pt.Col + 1 && Pt.Row == pt1.Pt.Row - 1))
+					Char = '7';
+				ConnPts = vals.Select(v => v.Pt).ToList();
+			}
+			Count = 0;
         }
 
         internal bool Interconnected(Node other)
@@ -185,7 +212,7 @@ namespace Advent23
         private int _rows;
         private int _cols;
 
-        public Grid(string[] lines)
+		public Grid(string[] lines)
 		{
 			_rows = lines.Length;
 			_cols = lines[0].Length;
@@ -198,37 +225,79 @@ namespace Advent23
                 iRow++;
             }
 		}
-        internal List<Node> Connections(Node gv)
+
+		public Grid(List<Node> nodes)
+		{
+			_grd = nodes;
+			_rows = nodes.Max(n => n.Pt.Row);
+			_cols = nodes.Max(n => n.Pt.Col);
+		}
+
+		public Grid AddSpaces()
+		{
+			FindStarts();	// renames start to a wall
+			var newNodes = new List<Node>();
+			var newRow = 0;
+			// add cols
+			for (int row = 0; row < _rows; row++)
+			{
+				var newCol = 0;
+				for (int col = 0; col < _cols - 1; col++)
+				{
+					var node = Find(new Point(row, col))!;
+					newNodes.Add(new Node(newRow, newCol, node.Char, node.StartTag, og: true ));
+					// add col
+					if (node.Char == '-' || node.Char == 'L' || node.Char == 'F')
+						newNodes.Add(new Node(newRow, newCol + 1, '-'));
+					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
+						newNodes.Add(new Node(newRow, newCol + 1, '.'));
+
+					if (node.Char == '|' || node.Char == 'F' || node.Char == '7')
+						newNodes.Add(new Node(newRow + 1, newCol, '|'));
+					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
+						newNodes.Add(new Node(newRow + 1, newCol, '.'));
+
+					newNodes.Add(new Node(newRow + 1, newCol + 1, '.'));
+					newCol += 2;
+				}
+				newRow += 2;
+			}
+
+			return new Grid(newNodes);
+		}
+		internal List<Node> Connections(Node gv)
         {
             var pts = gv.ConnPts;
             if (!pts.Any())
                 return new List<Node>();
-            var gvs = pts.Select(p => Find(p)).ToList();
-            return gvs.Where(v => v.Count == null).ToList();
+			List<Node> nodes = pts.Select(p => Find(p)).Where(p => p != null).ToList();
+            return nodes.Where(n => n.Count == null).ToList();
         }
         Node? Find(Point pt)
         {
             return _grd.FirstOrDefault(v => v.Pt.Equals(pt));
         }
-        bool CanEscape(Node node, List<Node> fromPath)
+        bool CanEscape(Node node)
         {
-            if (node.Escape != null)
+			if (node.Pt.Row == 1 && node.Pt.Col == 3)
+				node.Escape = node.Escape;
+
+			if (node.Escape != null)
                 return node.Escape.Value;
-            if (node.IsWall())
-            {
-                node.Escape = false;
-                return false;
-            }
-            else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == _rows - 1 || node.Pt.Col == _cols - 1)
-            {
-                node.Escape = true;
-                return true;
-            }
+			if (node.IsWall())
+			{
+				node.Escape = false;
+				return false;
+			}
+			else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == _rows - 1 || node.Pt.Col == _cols - 1)
+			{
+				node.Escape = true;
+				return true;
+			}
 
             List<Node> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
             foreach(var from in fromPath)
                 neighbors.Remove(from);
-
             if (neighbors.Any(n => n.Escape == true))
             {
                 node.Escape = true;
@@ -236,9 +305,7 @@ namespace Advent23
             }
             foreach (var neighbor in neighbors)
             {
-                var newPath = new List<Node>(fromPath);
-                newPath.Add(node);
-                if (CanEscape(neighbor, newPath))
+                if (CanEscape(neighbor))
                 {
                     node.Escape = true;
                     break;
@@ -257,85 +324,54 @@ namespace Advent23
             }
             foreach (var node in _grd)
             {
-                CanEscape(node, new List<Node>());
+                CanEscape(node);
             }
-            return _grd.Count(n => n.Escape == false && n.IsWall() == false);
-            int rv = 0;
-            for (int row = 0; row < _grd.Max(v => v.Pt.Row); row++)
-            {
-                bool inside = false;
-                bool inwall = false;
-                Node? lastNode = null;
-                for (int col = 0; col < _grd.Max(v => v.Pt.Col); col++)
-                {
-                    var node = Find(new Point(row, col));
-                    if (node.IsWall())
-                    {
-                        var nextPt = new Point(row, col + 1);
-                        var nextNode = Find(nextPt);
+			return _grd.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
 
-                        var connected = node.Interconnected(nextNode);
-                        if (!inwall && !inside)
-                        {
-                            if (connected)
-                                inwall = true;
-                            else
-                                inside = true;
-                        }
-                        else if (!inwall && inside)
-                        {
-                            if (connected)
-                                inwall = true;
-                            else
-                                inside = false;
-                        }
-                        else if (inwall && !inside)
-                        {
-                            if (!connected)
-                                inwall = false;
-                        }
-                        else if (inwall && inside)
-                        {
-                            if (!connected)
-                                inwall = false;
-                        }
-                    }
-                    else
-                    {
-                        Utils.Assert(inwall == false, "not in wall");
-                        if (inside)
-                            rv++;
-                    }
-                    lastNode = node;
-                }
-            }
-            return rv;
+			var insides = _grd.Where(n => n.Escape == false && n.IsWall() == false);
+			var rv = 0;
+			foreach(var inside in insides)
+			{
+				var neighbors = inside.Neighbors().Select(n => Find(n));
+				if (!neighbors.Any(n => n.IsWall()))
+					rv++;
+			}
+			return rv;
+			//return _grd.Count(n => n.Escape == false && n.IsWall() == false);
         }
-        public void WriteCounts()
+        public void WriteCounts(bool raw)
         {
             var lines = new List<string>();
-            for (int row = 0; row < _grd.Max(v => v.Pt.Row); row++)
+            for (int row = 0; row < _rows; row++)
             {
                 var parts = new List<string>();
-                for (int col = 0; col < _grd.Max(v => v.Pt.Col); col++)
+                for (int col = 0; col < _cols; col++)
                 {
                     var v = Find(new Point(row, col))!;
-                    if (v.IsWall())
-                        parts.Add("*");
-                    else if (v.Escape == false)
-                        parts.Add("e");
-                    //parts.Add(v.Count.Value.ToString());
-                    else
-                        parts.Add("-");
-                }
+					if (raw)
+						parts.Add(v.Char.ToString());
+					else
+					{
+						if (v.IsWall())
+							parts.Add(v.Char.ToString());
+						else if (v.Escape == false)
+							parts.Add("I");
+						//parts.Add(v.Count.Value.ToString());
+						else
+							parts.Add("0");
+					}
+				}
                 lines.Add(string.Join(",", parts));
             }
-            File.WriteAllLines(Path.Combine(Utils.Dir, "counts.csv"), lines);
+            File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{raw}.csv"), lines);
         }
         public List<Node> FindStarts()
         {
-            var start = _grd.First(v => v.Char == 'S');
-            var vals = _grd.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
+			var start = _grd.FirstOrDefault(v => v.StartTag);
+			if (start == null)
+				start = _grd.First(v => v.Char == 'S');
+
+			var vals = _grd.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
             start.SetStart(vals);
             return vals;
         }
