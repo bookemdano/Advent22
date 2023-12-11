@@ -1,3 +1,4 @@
+using System.Reflection.Metadata.Ecma335;
 using System.Xml.Linq;
 using AoCLibrary;
 using Microsoft.Win32;
@@ -5,14 +6,14 @@ namespace Advent23
 {
 	internal class Day10 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/10
 		// Input https://adventofcode.com/2023/day/10/input
 		public object? Star1()
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
-			var grd = new Grid(lines);
+			var grd = Grid.FromLines(lines);
 			var starts = grd.FindStarts().ToArray();
             int step = 0;
 
@@ -41,8 +42,8 @@ namespace Advent23
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
-            var grdOrig = new Grid(lines);
-            int step = 0;
+			var grdOrig = Grid.FromLines(lines);
+			int step = 0;
 			var grd = grdOrig.AddSpaces();
 			grd.WriteCounts(true);
 			var starts = grd.FindStarts().ToArray();
@@ -69,9 +70,11 @@ namespace Advent23
 			// now shrink
             grd.WriteCounts(false);
             if (!IsReal)
-                Utils.Assert(rv, 8L);
+                Utils.Assert(rv, 10L);
 			return rv;
-            // 873 too high
+			// 873 too high
+			// 589
+
 		}
 
 	}
@@ -84,7 +87,7 @@ namespace Advent23
 		}
         public override int GetHashCode()
         {
-            return Row * 1000 + Col;
+            return Row * 100000 + Col;
         }
         public override bool Equals(object? obj)
         {
@@ -208,29 +211,30 @@ namespace Advent23
     }
 	public class Grid
 	{
-		List<Node>  _grd = new List<Node>();
+		Dictionary<Point, Node>  _dict = [];
         private int _rows;
         private int _cols;
 
-		public Grid(string[] lines)
+		static public Grid FromLines(string[] lines)
 		{
-			_rows = lines.Length;
-			_cols = lines[0].Length;
 			int iRow = 0;
+			var nodes = new List<Node>();
 			foreach (var line in lines)
 			{
 				int iCol = 0;
 				foreach (var c in line)
-					_grd.Add(new Node(iRow, iCol++, c));
+					nodes.Add(new Node(iRow, iCol++, c));
                 iRow++;
             }
+			return new Grid(nodes);
 		}
 
 		public Grid(List<Node> nodes)
 		{
-			_grd = nodes;
-			_rows = nodes.Max(n => n.Pt.Row);
-			_cols = nodes.Max(n => n.Pt.Col);
+			foreach(var node in nodes)
+				_dict.Add(node.Pt, node);
+			_rows = nodes.Max(n => n.Pt.Row) + 1;
+			_cols = nodes.Max(n => n.Pt.Col) + 1;
 		}
 
 		public Grid AddSpaces()
@@ -242,10 +246,10 @@ namespace Advent23
 			for (int row = 0; row < _rows; row++)
 			{
 				var newCol = 0;
-				for (int col = 0; col < _cols - 1; col++)
+				for (int col = 0; col < _cols; col++)
 				{
 					var node = Find(new Point(row, col))!;
-					newNodes.Add(new Node(newRow, newCol, node.Char, node.StartTag, og: true ));
+					newNodes.Add(new Node(newRow, newCol, node.Char, node.StartTag, og: true));
 					// add col
 					if (node.Char == '-' || node.Char == 'L' || node.Char == 'F')
 						newNodes.Add(new Node(newRow, newCol + 1, '-'));
@@ -263,7 +267,7 @@ namespace Advent23
 				newRow += 2;
 			}
 
-			return new Grid(newNodes);
+			return new Grid(newNodes.OrderBy(n => n.Pt.GetHashCode()).ToList());
 		}
 		internal List<Node> Connections(Node gv)
         {
@@ -275,7 +279,9 @@ namespace Advent23
         }
         Node? Find(Point pt)
         {
-            return _grd.FirstOrDefault(v => v.Pt.Equals(pt));
+			if (!_dict.TryGetValue(pt, out Node? value))
+				return null;
+            return value;
         }
         bool CanEscape(Node node)
         {
@@ -296,8 +302,6 @@ namespace Advent23
 			}
 
             List<Node> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
-            foreach(var from in fromPath)
-                neighbors.Remove(from);
             if (neighbors.Any(n => n.Escape == true))
             {
                 node.Escape = true;
@@ -317,29 +321,49 @@ namespace Advent23
         }
         public int Insides()
         {
-            foreach (var node in _grd)
+            foreach (var node in _dict.Values)
             {
                 if (!node.IsWall())
                     node.ResetChar();
             }
-            foreach (var node in _grd)
-            {
-                CanEscape(node);
-            }
-			return _grd.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
-
-			var insides = _grd.Where(n => n.Escape == false && n.IsWall() == false);
-			var rv = 0;
-			foreach(var inside in insides)
-			{
-				var neighbors = inside.Neighbors().Select(n => Find(n));
-				if (!neighbors.Any(n => n.IsWall()))
-					rv++;
-			}
-			return rv;
-			//return _grd.Count(n => n.Escape == false && n.IsWall() == false);
+			
+			CalcEscape();
+			return _dict.Values.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
         }
-        public void WriteCounts(bool raw)
+
+		private void CalcEscape()
+		{
+			foreach (var kvp in _dict)
+				kvp.Value.Escape = null;
+
+			var last = 0;
+			while (_dict.Values.Count(n => n.Escape == null) != last)
+			{
+				Utils.TestLog("Remaining " + _dict.Values.Count(n => n.Escape == null));
+				WriteCounts(false);
+				last = _dict.Values.Count(n => n.Escape == null);
+				foreach (var kvp in _dict.Where(kvp => kvp.Value.Escape == null))
+				{
+					var node = kvp.Value;
+					if (node.IsWall())
+						node.Escape = false;
+					else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == _rows - 1 || node.Pt.Col == _cols - 1)
+						node.Escape = true;
+					else
+					{
+						var ns = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
+						if (ns.Any(n => n?.Escape == true))
+							node.Escape = true;
+						else if (!ns.Any(n => n?.Escape == null))
+							node.Escape = false;
+					}
+				}
+			}
+			_dict.Values.Where(n => n.Escape == null).ToList().ForEach(n => n.Escape = false);
+			WriteCounts(false);
+		}
+
+		public void WriteCounts(bool raw)
         {
             var lines = new List<string>();
             for (int row = 0; row < _rows; row++)
@@ -354,11 +378,13 @@ namespace Advent23
 					{
 						if (v.IsWall())
 							parts.Add(v.Char.ToString());
+							//parts.Add(v.Count.Value.ToString());
 						else if (v.Escape == false)
 							parts.Add("I");
-						//parts.Add(v.Count.Value.ToString());
-						else
+						else if (v.Escape == true)
 							parts.Add("0");
+						else 
+							parts.Add(" ");
 					}
 				}
                 lines.Add(string.Join(",", parts));
@@ -367,11 +393,11 @@ namespace Advent23
         }
         public List<Node> FindStarts()
         {
-			var start = _grd.FirstOrDefault(v => v.StartTag);
+			var start = _dict.Values.FirstOrDefault(v => v.StartTag);
 			if (start == null)
-				start = _grd.First(v => v.Char == 'S');
+				start = _dict.Values.First(v => v.Char == 'S');
 
-			var vals = _grd.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
+			var vals = _dict.Values.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
             start.SetStart(vals);
             return vals;
         }
