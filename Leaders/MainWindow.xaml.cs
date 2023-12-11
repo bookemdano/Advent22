@@ -34,7 +34,9 @@ namespace Leaders
 
 		async Task TickAsync(bool force)
 		{
-			Title = $"Day {ElfHelper.DayString()} {(100 * ElfHelper.Day / 25)}%";
+			var daysInto = (DateTime.Now - new DateTime(ElfHelper.Year, 12, 1)).TotalDays;
+
+			Title = $"Day {ElfHelper.DayString()} {(100 * daysInto / 25):0.0}%";
 
 			if (LastSentDay != ElfHelper.Day)
 			{

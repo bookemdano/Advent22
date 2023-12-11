@@ -24,9 +24,10 @@ namespace AoCLibrary
 		{
 			get
 			{
-				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
+				return 10; // (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
 			}
 		}
+
 		internal static int DayIndex => Day - 1;
 
 		public static string DayString()

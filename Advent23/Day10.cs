@@ -65,7 +65,7 @@ namespace Advent23
 				var grdOrig = Grid10.FromLines(lines);
 				int step = 0;
 				var grd = grdOrig.AddSpaces();
-				grd.WriteCounts(true);
+				grd.WriteCounts("add");
 				var starts = grd.FindStarts().ToArray();
 
 				while (starts.Count() > 0)
@@ -83,12 +83,12 @@ namespace Advent23
 					}
 					starts = newStarts.ToArray();
 				}
-				grd.WriteCounts(false);
+				grd.WriteCounts(false, "pre");
 
 
 				rv = grd.Insides();
 				// now shrink
-				grd.WriteCounts(false);
+				grd.WriteCounts(false, "done");
 				check.Compare(rv);
 			}
 			return rv;
@@ -250,11 +250,13 @@ namespace Advent23
             return nodes.Where(n => n.Count == null).ToList();
         }
    
-        bool CanEscape(Node10 node)
+        bool? CanEscape(Node10 node, List<Point> path)
         {
-			if (node.Pt.Row == 1 && node.Pt.Col == 3)
-				node.Escape = node.Escape;
-
+			if (DateTime.Now > _nextLog)
+			{
+				WriteCounts(false, "can");
+				_nextLog = DateTime.Now.AddSeconds(1);
+			}
 			if (node.Escape != null)
                 return node.Escape.Value;
 			if (node.IsWall())
@@ -268,24 +270,39 @@ namespace Advent23
 				return true;
 			}
 
-            List<Node10> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
+			if (path.Count() > 5)
+				return null;    // give up for now and try later
+
+			List<Node10> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
             if (neighbors.Any(n => n.Escape == true))
             {
                 node.Escape = true;
                 return true;
             }
+			bool all = true;
             foreach (var neighbor in neighbors)
             {
-                if (CanEscape(neighbor))
+				if (path.Any(x => x == neighbor.Pt))
+				{
+					all = false;
+					continue;
+				}
+				var newPath = new List<Point>(path);
+				newPath.Add(node.Pt);
+				var res = CanEscape(neighbor, newPath);
+				if (res == null)
+					all = false;
+				else if (res == true)
                 {
                     node.Escape = true;
                     break;
                 }
             }
-            if (node.Escape == null)
+            if (all && node.Escape == null)
                 node.Escape = false;
-            return node.Escape.Value;
+            return node.Escape;
         }
+		DateTime _nextLog = DateTime.MinValue;
         public int Insides()
         {
             foreach (var node in Values)
@@ -293,10 +310,26 @@ namespace Advent23
                 if (!node.IsWall())
                     node.ResetChar();
             }
-			
+			//NearestEscape();
 			CalcEscape();
+
 			return Values.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
         }
+
+		private long NearestEscape()
+		{
+			// slow but works
+			var count = 0;
+			while (count != Values.Count(n => n.Escape == null))
+			{
+				count = Values.Count(n => n.Escape == null);
+				foreach (var node in Values.Where(n => n.Escape == null))
+					CanEscape(node, new List<Point>());
+				WriteCounts(false, "can");
+
+			}
+			return Values.Count(n => n.Escape == null && n.Og == true);
+		}
 
 		private void CalcEscape()
 		{
@@ -307,7 +340,7 @@ namespace Advent23
 			while (Values.Count(n => n.Escape == null) != last)
 			{
 				Utils.TestLog("Remaining " + Values.Count(n => n.Escape == null));
-				WriteCounts(false);
+				WriteCounts(false, "calc");
 				last = Values.Count(n => n.Escape == null);
 				foreach (var kvp in this.Where(kvp => kvp.Value.Escape == null))
 				{
@@ -327,11 +360,13 @@ namespace Advent23
 				}
 			}
 			Values.Where(n => n.Escape == null).ToList().ForEach(n => n.Escape = false);
-			WriteCounts(false);
+			WriteCounts(false, "calc");
 		}
 
-		public void WriteCounts(bool raw)
+		public void WriteCounts(bool raw, string tag)
         {
+			if (raw)
+				WriteCounts(tag);
             var lines = new List<string>();
             for (int row = 0; row < _rows; row++)
             {
@@ -356,7 +391,7 @@ namespace Advent23
 				}
                 lines.Add(string.Join(",", parts));
             }
-            File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{raw}.csv"), lines);
+            File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{ElfHelper.DayString()}{raw}{tag}.csv"), lines);
         }
         public List<Node10> FindStarts()
         {
