@@ -3,7 +3,7 @@ namespace Advent23
 {
 	internal class Day10 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/10
 		// Input https://adventofcode.com/2023/day/10/input
 		public object? Star1()
