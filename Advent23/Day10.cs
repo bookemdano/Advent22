@@ -118,6 +118,27 @@ namespace Advent23
         public bool? Escape { get; internal set; }
 		public bool StartTag { get; private set; }
 		public bool Og { get; private set; }
+		public char CornerChar
+		{
+			get
+			{
+				//┌┐└┘─│
+				if (Char == 'F')
+					return '┌';
+				else if (Char == '7')
+					return '┐';
+				else if (Char == 'J')
+					return '┘';
+				else if (Char == 'L')
+					return '└';
+				else if (Char == '|')
+					return '│';
+				else if (Char == '-')
+					return '─';
+				else
+					return Char;
+			}
+		}
 
 		public override string ToString()
         {
@@ -379,7 +400,7 @@ namespace Advent23
 					else
 					{
 						if (v.IsWall())
-							parts.Add(v.Char.ToString());
+							parts.Add(v.CornerChar.ToString());
 							//parts.Add(v.Count.Value.ToString());
 						else if (v.Escape == false)
 							parts.Add("I");
