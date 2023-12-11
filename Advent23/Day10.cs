@@ -3,71 +3,94 @@ namespace Advent23
 {
 	internal class Day10 : IDayRunner
 	{
-		public bool IsReal => true;
+		public bool IsReal => false;
 		// Day https://adventofcode.com/2023/day/10
 		// Input https://adventofcode.com/2023/day/10/input
 		public object? Star1()
 		{
 			var rv = 0L;
-			var lines = Program.GetLines(StarEnum.Star1, IsReal);
-			var grd = Grid10.FromLines(lines);
-			var starts = grd.FindStarts().ToArray();
-            int step = 0;
-
-            while (starts.Count() > 0)
+			var checks = new List<StarCheck>();
+			if (IsReal)
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star1, IsReal), 7063));
+			else
 			{
-                step++;
-                var newStarts = new List<Node10>();
-                for(int i = 0; i < 2; i++)
-                {
-                    var start = starts[i];
-                    start.Count = step;
-                    var cons = grd.Connections(start);
-                    Utils.Assert(cons.Count() < 2, "Less than 2");
-                    if (cons.Any())
-                        newStarts.Add(cons.First());
-                }
-                starts = newStarts.ToArray();
-            }
-            rv = step;
-            if (!IsReal)
-                Utils.Assert(rv, 8L);
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star1, IsReal, 0), 4));
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star1, IsReal, 1), 8));
+			}
+			foreach(var check in checks)
+			{
+				var lines = Program.GetLines(check.Key);
+				var grd = Grid10.FromLines(lines);
+				var starts = grd.FindStarts().ToArray();
+				int step = 0;
+
+				while (starts.Count() > 0)
+				{
+					step++;
+					var newStarts = new List<Node10>();
+					for (int i = 0; i < 2; i++)
+					{
+						var start = starts[i];
+						start.Count = step;
+						var cons = grd.Connections(start);
+						Utils.Assert(cons.Count() < 2, "Less than 2");
+						if (cons.Any())
+							newStarts.Add(cons.First());
+					}
+					starts = newStarts.ToArray();
+				}
+				rv = step;
+				check.Compare(rv);
+			}
 			return rv;
             // 7063
 		}
 		public object? Star2()
 		{
 			var rv = 0L;
-			var lines = Program.GetLines(StarEnum.Star2, IsReal);
-			var grdOrig = Grid10.FromLines(lines);
-			int step = 0;
-			var grd = grdOrig.AddSpaces();
-			grd.WriteCounts(true);
-			var starts = grd.FindStarts().ToArray();
 
-			while (starts.Count() > 0)
-            {
-                step++;
-				Utils.TestLog($"{step} Starts:{starts.Count()}");
-                var newStarts = new List<Node10>();
-                foreach(var start in starts)
-                {
-                    start.Count = step;
-                    var cons = grd.Connections(start);
-                    Utils.Assert(cons.Count() < 2, "Less than 2");
-                    if (cons.Any())
-                        newStarts.Add(cons.First());
-                }
-                starts = newStarts.ToArray();
-            }
-			grd.WriteCounts(false);
+			var checks = new List<StarCheck>();
+			if (IsReal)
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star2, IsReal), 589));
+			else
+			{
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star2, IsReal, 0), 4));
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star2, IsReal, 1), 8));
+				checks.Add(new StarCheck(new StarCheckKey(StarEnum.Star2, IsReal, 2), 10));
+			}
+
+			foreach(var check in checks)
+			{
+				var lines = Program.GetLines(check.Key);
+				var grdOrig = Grid10.FromLines(lines);
+				int step = 0;
+				var grd = grdOrig.AddSpaces();
+				grd.WriteCounts(true);
+				var starts = grd.FindStarts().ToArray();
+
+				while (starts.Count() > 0)
+				{
+					step++;
+					Utils.TestLog($"{step} Starts:{starts.Count()}");
+					var newStarts = new List<Node10>();
+					foreach (var start in starts)
+					{
+						start.Count = step;
+						var cons = grd.Connections(start);
+						Utils.Assert(cons.Count() < 2, "Less than 2");
+						if (cons.Any())
+							newStarts.Add(cons.First());
+					}
+					starts = newStarts.ToArray();
+				}
+				grd.WriteCounts(false);
 
 
-			rv = grd.Insides();
-			// now shrink
-            grd.WriteCounts(false);
-            if (!IsReal)
-                Utils.Assert(rv, 10L);
+				rv = grd.Insides();
+				// now shrink
+				grd.WriteCounts(false);
+				check.Compare(rv);
+			}
 			return rv;
 			// 873 too high
 			// 589

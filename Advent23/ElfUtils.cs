@@ -103,4 +103,41 @@ namespace Advent23
 	internal class ElfUtils
 	{
 	}
+
+	public class StarCheckKey
+	{
+		public StarCheckKey(StarEnum star, bool isReal, int? part = null)
+		{
+			Star = star;
+			IsReal = isReal;
+			Part = part;
+		}
+		public override string ToString()
+		{
+			return $"{Star} r:{IsReal} p:{Part}";
+		}
+		public StarEnum Star { get; }
+		public bool IsReal { get; }
+		public int? Part { get; }
+	}
+	public class StarCheck
+	{
+		public StarCheck(StarCheckKey key, long expected)
+		{
+			Key = key;
+			Expected = expected;
+		}
+
+		public StarCheckKey Key { get; }
+		public long Expected { get; }
+		public override string ToString()
+		{
+			return $"{Key} e:{Expected}";
+		}
+		public void Compare(long answer)
+		{
+			Utils.Log($"Compare {this} ?= a:{answer}");
+			Utils.Assert(answer, Expected);
+		}
+	}
 }

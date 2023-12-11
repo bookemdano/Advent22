@@ -1,8 +1,8 @@
 using AoCLibrary;
-using System.Xml.Linq;
 
 namespace Advent23
 {
+
 	internal class Day11 : IDayRunner
 	{
 		public bool IsReal => true;
@@ -11,13 +11,18 @@ namespace Advent23
 		public object? Star1()
 		{
 			var rv = 0L;
+			StarCheck check;
+			var key = new StarCheckKey(StarEnum.Star1, IsReal);
+			if (IsReal)
+				check = new StarCheck(key, 9623138L);
+			else
+				check = new StarCheck(key, 374L);
+
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
 			var grid = Grid11.FromLines(lines);
 			rv = Star(grid, expandTo: 2);
-			if (!IsReal)
-				Utils.Assert(rv, 374L);
-			else
-				Utils.Assert(rv, 9623138L);
+
+			check.Compare(rv);
 			// 		rv	9623138	long
 
 			return rv;
@@ -25,17 +30,21 @@ namespace Advent23
 		public object? Star2()
 		{
 			var rv = 0L;
-			var lines = Program.GetLines(StarEnum.Star2, IsReal);
+			StarCheck check;
+			var key = new StarCheckKey(StarEnum.Star2, IsReal);
+			if (IsReal)
+				check = new StarCheck(key, 726820169514L);
+			else
+				check = new StarCheck(key, 8410L);
+
+			var lines = Program.GetLines(key);
 			var grid = Grid11.FromLines(lines);
 			if (IsReal)
 				rv = Star(grid, expandTo: 1000000);
 			else
 				rv = Star(grid, expandTo: 100);
 
-			if (!IsReal)
-				Utils.Assert(rv, 8410L);
-			else
-				Utils.Assert(rv, 726820169514L);
+			check.Compare(rv);
 			//726820169514
 			return rv;
 		}

@@ -91,7 +91,7 @@ namespace Advent23
 			var info = new FileInfo(file);
 			return (info.Length > 0);
 		}
-		static internal string InputFile(bool real, StarEnum star)
+		static internal string InputFile(bool real, StarEnum star, int? part = null)
 		{
 			string filename;
 			if (real)
@@ -100,10 +100,10 @@ namespace Advent23
 			}
 			else
 			{
-				if (star == StarEnum.Star1)
-					filename = $"Day{ElfHelper.DayString()}FakeStar1.txt";
+				if (part == null)
+					filename = $"Day{ElfHelper.DayString()}Fake{star}.txt";
 				else
-					filename = $"Day{ElfHelper.DayString()}FakeStar2.txt";
+					filename = $"Day{ElfHelper.DayString()}Fake{star}Part{part + 1}.txt";
 			}
 			var rv = Path.Combine("Assets", filename);
 			if (!IsFileThere(rv) && star == StarEnum.Star2 && real == false)
@@ -114,9 +114,13 @@ namespace Advent23
 			return rv;
 		}
 		static Dictionary<string, string[]> _dictLines = [];
-		static internal string[] GetLines(StarEnum star, bool real)
+		static internal string[] GetLines(StarCheckKey key)
 		{
-			var filename = InputFile(real, star);
+			return GetLines(key.Star, key.IsReal, key.Part);
+		}
+		static internal string[] GetLines(StarEnum star, bool real, int? part = null)
+		{
+			var filename = InputFile(real, star, part);
 			if (!_dictLines.ContainsKey(filename))
 			{
 				Utils.Log("ReadLines- " + filename);
