@@ -38,16 +38,17 @@ namespace AoCLibrary
 		{
 			var root = string.Empty;
 			if (Utils.IsWindows)
-				return "C:\\repos";
+				root = "C:\\repos";
 			else
 				root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects");
 			return Path.Combine(root, "Advent22", "Advent" + DateTime.Today.ToString("yy"));
 		}
 
-		public static async Task WriteInputFileAsync(int day)
+		public static async Task<string> WriteInputFileAsync(int day)
 		{
 			var str = await Communicator.ReadAsync($"{DayUrl(day)}/input", returnError: false) ?? string.Empty;
 			File.WriteAllText(Path.Combine(CodeDir(), "assets", $"Day{day:00}.txt"), str);
+			return str;
 		}
 		public static async Task WriteStubFilesAsync(int day, bool updatePrj)
 		{

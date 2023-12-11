@@ -13,14 +13,14 @@ namespace Advent23
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
-			var grd = Grid.FromLines(lines);
+			var grd = Grid10.FromLines(lines);
 			var starts = grd.FindStarts().ToArray();
             int step = 0;
 
             while (starts.Count() > 0)
 			{
                 step++;
-                var newStarts = new List<Node>();
+                var newStarts = new List<Node10>();
                 for(int i = 0; i < 2; i++)
                 {
                     var start = starts[i];
@@ -42,7 +42,7 @@ namespace Advent23
 		{
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
-			var grdOrig = Grid.FromLines(lines);
+			var grdOrig = Grid10.FromLines(lines);
 			int step = 0;
 			var grd = grdOrig.AddSpaces();
 			grd.WriteCounts(true);
@@ -52,7 +52,7 @@ namespace Advent23
             {
                 step++;
 				Utils.TestLog($"{step} Starts:{starts.Count()}");
-                var newStarts = new List<Node>();
+                var newStarts = new List<Node10>();
                 foreach(var start in starts)
                 {
                     start.Count = step;
@@ -78,42 +78,19 @@ namespace Advent23
 		}
 
 	}
-	public class Point
+
+	public class Node10
 	{
-		public Point(int row, int col)
+		public Node10(int row, int col, char c, bool startTag = false, bool og = false)
 		{
-			Row = row;
-			Col = col;
-		}
-        public override int GetHashCode()
-        {
-            return Row * 100000 + Col;
-        }
-        public override bool Equals(object? obj)
-        {
-			if (obj is not Point other)
-				return false;
-			return (other.Row == Row && other.Col == Col);
-        }
-        public override string ToString()
-        {
-            return $"({Row}, {Col})";
-        }
-        public int Row { get; }
-		public int Col { get; }
-	}
-	public class Node
-	{
-		public Node(int row, int col, char c, bool startTag = false, bool og = false)
-        {
-            Pt = new Point(row, col);
-            Char = c;
-            ConnPts = Connections();
+			Pt = new Point(row, col);
+			Char = c;
+			ConnPts = Connections();
 			StartTag = startTag;
 			Og = og;
-        }
+		}
 
-        public Point Pt { get; }
+		public Point Pt { get; }
         public char Char { get; private set; }
         public int? Count { get; set; } = null;
         public List<Point> ConnPts { get; private set; }
@@ -170,7 +147,7 @@ namespace Advent23
             return ConnPts.Contains(pt);
 
         }
-        internal void SetStart(List<Node> vals)
+        internal void SetStart(List<Node10> vals)
         {
 			if (!StartTag)
 			{
@@ -194,7 +171,7 @@ namespace Advent23
 			Count = 0;
         }
 
-        internal bool Interconnected(Node other)
+        internal bool Interconnected(Node10 other)
         {
             return (ConnectsTo(other.Pt) && other.ConnectsTo(Pt));
         }
@@ -209,27 +186,27 @@ namespace Advent23
             ConnPts.Clear();
         }
     }
-	public class Grid
+	public class Grid10
 	{
-		Dictionary<Point, Node>  _dict = [];
+		Dictionary<Point, Node10>  _dict = [];
         private int _rows;
         private int _cols;
 
-		static public Grid FromLines(string[] lines)
+		static public Grid10 FromLines(string[] lines)
 		{
 			int iRow = 0;
-			var nodes = new List<Node>();
+			var nodes = new List<Node10>();
 			foreach (var line in lines)
 			{
 				int iCol = 0;
 				foreach (var c in line)
-					nodes.Add(new Node(iRow, iCol++, c));
+					nodes.Add(new Node10(iRow, iCol++, c));
                 iRow++;
             }
-			return new Grid(nodes);
+			return new Grid10(nodes);
 		}
 
-		public Grid(List<Node> nodes)
+		public Grid10(List<Node10> nodes)
 		{
 			foreach(var node in nodes)
 				_dict.Add(node.Pt, node);
@@ -237,10 +214,10 @@ namespace Advent23
 			_cols = nodes.Max(n => n.Pt.Col) + 1;
 		}
 
-		public Grid AddSpaces()
+		public Grid10 AddSpaces()
 		{
 			FindStarts();	// renames start to a wall
-			var newNodes = new List<Node>();
+			var newNodes = new List<Node10>();
 			var newRow = 0;
 			// add cols
 			for (int row = 0; row < _rows; row++)
@@ -249,41 +226,41 @@ namespace Advent23
 				for (int col = 0; col < _cols; col++)
 				{
 					var node = Find(new Point(row, col))!;
-					newNodes.Add(new Node(newRow, newCol, node.Char, node.StartTag, og: true));
+					newNodes.Add(new Node10(newRow, newCol, node.Char, node.StartTag, og: true));
 					// add col
 					if (node.Char == '-' || node.Char == 'L' || node.Char == 'F')
-						newNodes.Add(new Node(newRow, newCol + 1, '-'));
+						newNodes.Add(new Node10(newRow, newCol + 1, '-'));
 					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
-						newNodes.Add(new Node(newRow, newCol + 1, '.'));
+						newNodes.Add(new Node10(newRow, newCol + 1, '.'));
 
 					if (node.Char == '|' || node.Char == 'F' || node.Char == '7')
-						newNodes.Add(new Node(newRow + 1, newCol, '|'));
+						newNodes.Add(new Node10(newRow + 1, newCol, '|'));
 					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
-						newNodes.Add(new Node(newRow + 1, newCol, '.'));
+						newNodes.Add(new Node10(newRow + 1, newCol, '.'));
 
-					newNodes.Add(new Node(newRow + 1, newCol + 1, '.'));
+					newNodes.Add(new Node10(newRow + 1, newCol + 1, '.'));
 					newCol += 2;
 				}
 				newRow += 2;
 			}
 
-			return new Grid(newNodes.OrderBy(n => n.Pt.GetHashCode()).ToList());
+			return new Grid10(newNodes.OrderBy(n => n.Pt.GetHashCode()).ToList());
 		}
-		internal List<Node> Connections(Node gv)
+		internal List<Node10> Connections(Node10 gv)
         {
             var pts = gv.ConnPts;
             if (!pts.Any())
-                return new List<Node>();
-			List<Node> nodes = pts.Select(p => Find(p)).Where(p => p != null).ToList();
+                return new List<Node10>();
+			List<Node10> nodes = pts.Select(p => Find(p)).Where(p => p != null).ToList();
             return nodes.Where(n => n.Count == null).ToList();
         }
-        Node? Find(Point pt)
+        Node10? Find(Point pt)
         {
-			if (!_dict.TryGetValue(pt, out Node? value))
+			if (!_dict.TryGetValue(pt, out Node10? value))
 				return null;
             return value;
         }
-        bool CanEscape(Node node)
+        bool CanEscape(Node10 node)
         {
 			if (node.Pt.Row == 1 && node.Pt.Col == 3)
 				node.Escape = node.Escape;
@@ -301,7 +278,7 @@ namespace Advent23
 				return true;
 			}
 
-            List<Node> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
+            List<Node10> neighbors = node.Neighbors().Select(n => Find(n)).Where(n => n != null).ToList();
             if (neighbors.Any(n => n.Escape == true))
             {
                 node.Escape = true;
@@ -391,7 +368,7 @@ namespace Advent23
             }
             File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{raw}.csv"), lines);
         }
-        public List<Node> FindStarts()
+        public List<Node10> FindStarts()
         {
 			var start = _dict.Values.FirstOrDefault(v => v.StartTag);
 			if (start == null)
