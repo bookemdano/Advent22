@@ -18,9 +18,19 @@ namespace Advent23
 		{ 
 			return $"{Pt} '{Char}'";
 		}
+		internal List<Point> Neighbors()
+		{
+			var rv = new List<Point>();
+			rv.Add(new(Pt.Row + 1, Pt.Col));
+			rv.Add(new(Pt.Row - 1, Pt.Col));
+			rv.Add(new(Pt.Row, Pt.Col + 1));
+			rv.Add(new(Pt.Row, Pt.Col - 1));
+
+			return rv;
+		}
 
 		public Point Pt { get; }
-		public char Char { get; private set; }
+		public char Char { get; protected set; }
 	}
 	public class Grid<T> : Dictionary<Point, T> where T : Node
 	{

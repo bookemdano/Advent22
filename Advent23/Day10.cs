@@ -99,20 +99,21 @@ namespace Advent23
 
 	}
 
-	public class Node10
+	public class Node10 : Node
 	{
-		public Node10(int row, int col, char c, bool startTag = false, bool og = false)
+		public Node10(Point pt, char c) : base(pt, c)
 		{
-			Pt = new Point(row, col);
-			Char = c;
+			ConnPts = Connections();
+			StartTag = false;
+			Og = false;
+		}
+		public Node10(Point pt, char c, bool startTag, bool og) : base(pt, c)
+		{
 			ConnPts = Connections();
 			StartTag = startTag;
 			Og = og;
 		}
-
-		public Point Pt { get; }
-        public char Char { get; private set; }
-        public int? Count { get; set; } = null;
+		public int? Count { get; set; } = null;
         public List<Point> ConnPts { get; private set; }
         public bool? Escape { get; internal set; }
 		public bool StartTag { get; private set; }
@@ -120,18 +121,9 @@ namespace Advent23
 
 		public override string ToString()
         {
-            return $"{Pt} '{Char}' {Count} e:{Escape} ({string.Join("-", ConnPts.ToList())})";
+            return $"{base.ToString()} {Count} e:{Escape} ({string.Join("-", ConnPts.ToList())})";
         }
-        internal List<Point> Neighbors()
-        {
-            var rv = new List<Point>();
-            rv.Add(new(Pt.Row + 1, Pt.Col));
-            rv.Add(new(Pt.Row - 1, Pt.Col));
-            rv.Add(new(Pt.Row, Pt.Col + 1));
-            rv.Add(new(Pt.Row, Pt.Col - 1));
 
-            return rv;
-        }
         List<Point> Connections()
         {
             var rv = new List<Point>();
@@ -206,32 +198,15 @@ namespace Advent23
             ConnPts.Clear();
         }
     }
-	public class Grid10
+	public class Grid10 : Grid<Node10>
 	{
-		Dictionary<Point, Node10>  _dict = [];
-        private int _rows;
-        private int _cols;
-
-		static public Grid10 FromLines(string[] lines)
-		{
-			int iRow = 0;
-			var nodes = new List<Node10>();
-			foreach (var line in lines)
-			{
-				int iCol = 0;
-				foreach (var c in line)
-					nodes.Add(new Node10(iRow, iCol++, c));
-                iRow++;
-            }
-			return new Grid10(nodes);
-		}
-
 		public Grid10(List<Node10> nodes)
 		{
-			foreach(var node in nodes)
-				_dict.Add(node.Pt, node);
-			_rows = nodes.Max(n => n.Pt.Row) + 1;
-			_cols = nodes.Max(n => n.Pt.Col) + 1;
+			Init(nodes);
+		}
+		internal static Grid10 FromLines(string[] lines)
+		{
+			return new Grid10(GetNodes(lines));
 		}
 
 		public Grid10 AddSpaces()
@@ -246,19 +221,19 @@ namespace Advent23
 				for (int col = 0; col < _cols; col++)
 				{
 					var node = Find(new Point(row, col))!;
-					newNodes.Add(new Node10(newRow, newCol, node.Char, node.StartTag, og: true));
+					newNodes.Add(new Node10(new Point(newRow, newCol), node.Char, node.StartTag, og: true));
 					// add col
 					if (node.Char == '-' || node.Char == 'L' || node.Char == 'F')
-						newNodes.Add(new Node10(newRow, newCol + 1, '-'));
+						newNodes.Add(new Node10(new Point(newRow, newCol + 1), '-'));
 					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
-						newNodes.Add(new Node10(newRow, newCol + 1, '.'));
+						newNodes.Add(new Node10(new Point(newRow, newCol + 1), '.'));
 
 					if (node.Char == '|' || node.Char == 'F' || node.Char == '7')
-						newNodes.Add(new Node10(newRow + 1, newCol, '|'));
+						newNodes.Add(new Node10(new Point(newRow + 1, newCol), '|'));
 					else //if (node.Char == '.' || node.Char == '|' || node.Char == 'J' || node.Char == '7')
-						newNodes.Add(new Node10(newRow + 1, newCol, '.'));
+						newNodes.Add(new Node10(new Point(newRow + 1, newCol), '.'));
 
-					newNodes.Add(new Node10(newRow + 1, newCol + 1, '.'));
+					newNodes.Add(new Node10(new Point(newRow + 1, newCol + 1), '.'));
 					newCol += 2;
 				}
 				newRow += 2;
@@ -274,12 +249,7 @@ namespace Advent23
 			List<Node10> nodes = pts.Select(p => Find(p)).Where(p => p != null).ToList();
             return nodes.Where(n => n.Count == null).ToList();
         }
-        Node10? Find(Point pt)
-        {
-			if (!_dict.TryGetValue(pt, out Node10? value))
-				return null;
-            return value;
-        }
+   
         bool CanEscape(Node10 node)
         {
 			if (node.Pt.Row == 1 && node.Pt.Col == 3)
@@ -318,28 +288,28 @@ namespace Advent23
         }
         public int Insides()
         {
-            foreach (var node in _dict.Values)
+            foreach (var node in Values)
             {
                 if (!node.IsWall())
                     node.ResetChar();
             }
 			
 			CalcEscape();
-			return _dict.Values.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
+			return Values.Count(n => n.Escape == false && n.IsWall() == false && n.Og == true);
         }
 
 		private void CalcEscape()
 		{
-			foreach (var kvp in _dict)
+			foreach (var kvp in this)
 				kvp.Value.Escape = null;
 
 			var last = 0;
-			while (_dict.Values.Count(n => n.Escape == null) != last)
+			while (Values.Count(n => n.Escape == null) != last)
 			{
-				Utils.TestLog("Remaining " + _dict.Values.Count(n => n.Escape == null));
+				Utils.TestLog("Remaining " + Values.Count(n => n.Escape == null));
 				WriteCounts(false);
-				last = _dict.Values.Count(n => n.Escape == null);
-				foreach (var kvp in _dict.Where(kvp => kvp.Value.Escape == null))
+				last = Values.Count(n => n.Escape == null);
+				foreach (var kvp in this.Where(kvp => kvp.Value.Escape == null))
 				{
 					var node = kvp.Value;
 					if (node.IsWall())
@@ -356,7 +326,7 @@ namespace Advent23
 					}
 				}
 			}
-			_dict.Values.Where(n => n.Escape == null).ToList().ForEach(n => n.Escape = false);
+			Values.Where(n => n.Escape == null).ToList().ForEach(n => n.Escape = false);
 			WriteCounts(false);
 		}
 
@@ -390,11 +360,11 @@ namespace Advent23
         }
         public List<Node10> FindStarts()
         {
-			var start = _dict.Values.FirstOrDefault(v => v.StartTag);
+			var start = Values.FirstOrDefault(v => v.StartTag);
 			if (start == null)
-				start = _dict.Values.First(v => v.Char == 'S');
+				start = Values.First(v => v.Char == 'S');
 
-			var vals = _dict.Values.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
+			var vals = Values.Where(v => v.ConnPts.Any(c => c.Equals(start.Pt))).ToList();
             start.SetStart(vals);
             return vals;
         }

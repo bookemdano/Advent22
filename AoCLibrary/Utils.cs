@@ -50,7 +50,7 @@ namespace AoCLibrary
         static public void Assert(bool b, string str)
         {
             if (b == false)
-                Log("Assert failed " + str);
+                Log("ASSERT FAILED " + str);
         }
         static public string TimeString(DateTime dt)
 		{
