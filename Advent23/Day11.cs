@@ -5,7 +5,7 @@ namespace Advent23
 {
 	internal class Day11 : IDayRunner
 	{
-		public bool IsReal => true;
+		public bool IsReal => false;
 		// Day https://adventofcode.com/2023/day/11
 		// Input https://adventofcode.com/2023/day/11/input
 		public object? Star1()
@@ -13,27 +13,7 @@ namespace Advent23
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
 			var grid = Grid11.FromLines(lines);
-			grid.WriteCounts(true, "og");
-			grid.Expand(2);
-			grid.WriteCounts(true, "ex");
-			var stars = grid.GetStars();
-			foreach(var from in stars)
-			{
-				foreach (var to in stars)
-				{
-					if (to.StarNum <= from.StarNum)
-						continue;
-					if (from.StarNum == 1 && to.StarNum == 7)
-						rv += 0;
-					if (from.StarNum == 5 && to.StarNum == 9)
-						rv += 0;
-					var d = grid.Distance(from.Pt, to.Pt);
-					Utils.TestLog($"{from.StarNum} {to.StarNum} d:{d}");
-					rv += d;
-				}
-
-			}
-			grid.WriteCounts(false, "ex");
+			rv = Star(grid, 2);
 			if (!IsReal)
 				Utils.Assert(rv, 374L);
 			else
@@ -47,12 +27,24 @@ namespace Advent23
 			var rv = 0L;
 			var lines = Program.GetLines(StarEnum.Star2, IsReal);
 			var grid = Grid11.FromLines(lines);
-			grid.WriteCounts(true, "og");
 			if (IsReal)
-				grid.Expand(1000000);
+				rv = Star(grid, 1000000);
 			else
-				grid.Expand(100);
+				rv = Star(grid, 100);
+
+			if (!IsReal)
+				Utils.Assert(rv, 8410L);
+			else
+				Utils.Assert(rv, 726820169514L);
+			//726820169514
+			return rv;
+		}
+		long Star(Grid11 grid, int expandTo)
+		{
+			grid.WriteCounts(true, "og");
+			grid.Expand(expandTo);
 			grid.WriteCounts(true, "ex");
+			long rv = 0L;
 			var stars = grid.GetStars();
 			foreach (var from in stars)
 			{
@@ -67,73 +59,44 @@ namespace Advent23
 
 			}
 			grid.WriteCounts(false, "ex");
-			if (!IsReal)
-				Utils.Assert(rv, 8410L);
-			else
-				Utils.Assert(rv, 726820169514L);
-			//726820169514
 			return rv;
-		}
 
+		}
 	}
-	public class Node11
+	public class Node11 : Node
 	{
-		public Node11(Point pt, char c)
+		public Node11(Point pt, char c) : base(pt, c)
 		{
-			Pt = pt;
-			Char = c;
 		}
 
-		public Node11(int row, int col, char c)
-		{
-			Pt = new Point(row, col);
-			Char = c;
-		}
 		public override string ToString()
 		{
-			return $"{Pt} '{Char}' s:{StarNum}";
+			return $"{base.ToString()} s:{StarNum}";
 		}
 
-		public Point Pt { get; }
-		public char Char { get; private set; }
 		public int? StarNum { get; internal set; }
 	}
-	public class Grid11
+	public class Grid11 : Grid<Node11>
 	{
-		Dictionary<Point, Node11> _dict = [];
-		private int _rows;
-		private int _cols;
 		Dictionary<int, int> _rowSizes = [];
 		Dictionary<int, int> _colSizes = [];
 
 		public Grid11(List<Node11> nodes)
 		{
-			foreach (var node in nodes)
-				_dict.Add(node.Pt, node);
-			_rows = nodes.Max(n => n.Pt.Row) + 1;
-			_cols = nodes.Max(n => n.Pt.Col) + 1;
+			Init(nodes);
 			for (int iRow = 0; iRow < _rows; iRow++)
 				_rowSizes[iRow] = 1;
 			for (int iCol = 0; iCol < _cols; iCol++)
 				_colSizes[iCol] = 1;
 		}
-
-		static public Grid11 FromLines(string[] lines)
+		internal static Grid11 FromLines(string[] lines)
 		{
-			int iRow = 0;
-			var nodes = new List<Node11>();
-			foreach (var line in lines)
-			{
-				int iCol = 0;
-				foreach (var c in line)
-					nodes.Add(new Node11(iRow, iCol++, c));
-				iRow++;
-			}
-			return new Grid11(nodes);
+			return new Grid11(GetNodes(lines));
 		}
+
 		public List<Node11> GetStars()
 		{
-			var stars = _dict.Values.Where(v => v.Char == '#').OrderBy(v => v.Pt.GetHashCode()).ToList();
+			var stars = this.Values.Where(v => v.Char == '#').OrderBy(v => v.Pt.GetHashCode()).ToList();
 			int i = 1;
 			foreach (var star in stars)
 				star.StarNum = i++;
@@ -143,13 +106,13 @@ namespace Advent23
 		{
 			for (int iRow = 0; iRow < _rows; iRow++)
 			{
-				var nodesInRow = _dict.Values.Where(n => n.Pt.Row == iRow).ToList();
+				var nodesInRow = this.Values.Where(n => n.Pt.Row == iRow).ToList();
 				if (nodesInRow.All(c => c.Char == '.'))
 					_rowSizes[iRow] = expandTo;
 			}
 			for (int iCol = 0; iCol < _cols; iCol++)
 			{
-				var nodesInCol = _dict.Values.Where(n => n.Pt.Col == iCol).ToList();
+				var nodesInCol = this.Values.Where(n => n.Pt.Col == iCol).ToList();
 				if (nodesInCol.All(c => c.Char == '.'))
 					_colSizes[iCol] = expandTo;
 			}
@@ -193,7 +156,7 @@ namespace Advent23
 			int newRows = 0;
 			for (int iRow = 0; iRow < _rows; iRow++)
 			{
-				var cols = _dict.Values.Where(n => n.Pt.Row == iRow).ToList();
+				var cols = this.Values.Where(n => n.Pt.Row == iRow).ToList();
 				for (int iCol = 0; iCol < _cols; iCol++)
 				{
 					var pt = new Point(iRow + newRows, iCol);
@@ -213,14 +176,14 @@ namespace Advent23
 			return rv;
 		}
 
-		Node11? Find(Point pt)
-		{
-			if (!_dict.TryGetValue(pt, out Node11? value))
-				return null;
-			return value;
-		}
 		public void WriteCounts(bool raw, string tag)
 		{
+			if (raw)
+			{
+				WriteCounts(tag);
+				return;
+
+			}	
 			var lines = new List<string>();
 			for (int row = 0; row < _rows; row++)
 			{
@@ -228,10 +191,7 @@ namespace Advent23
 				for (int col = 0; col < _cols; col++)
 				{
 					var v = Find(new Point(row, col))!;
-					if (raw)
-						parts.Add(v.Char.ToString());
-					else
-						parts.Add(v.StarNum?.ToString()??" ");
+					parts.Add(v.StarNum?.ToString()??" ");
 				}
 				lines.Add(string.Join(",", parts));
 			}
@@ -254,5 +214,7 @@ namespace Advent23
 				rv += _rowSizes[iRow];
 			return rv;
 		}
+
+
 	}
 }
