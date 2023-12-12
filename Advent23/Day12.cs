@@ -1,12 +1,10 @@
 using AoCLibrary;
-using System;
-using System.Runtime.InteropServices.Marshalling;
 
 namespace Advent23
 {
 	internal class Day12 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 		// Day https://adventofcode.com/2023/day/12
 		// Input https://adventofcode.com/2023/day/12/input
 		public object? Star1()
@@ -47,21 +45,24 @@ namespace Advent23
 			StarCheck check;
 			var key = new StarCheckKey(StarEnum.Star2, IsReal);
 			if (IsReal)
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 11461095383315L);
 			else
 				check = new StarCheck(key, 525152L);
 
 			var lines = Program.GetLines(check.Key);
+			var iLine = 0;
+			var multiplier = 5;
+			ElfHelper.DayLog($"{check} m:{multiplier}");
 			foreach (var line in lines)
 			{
-				var rec = new Record11(line, 5);
+				var rec = new Record11(line, multiplier);
 				if (rec.Check(rec.Record))
 					rv++;
 				else
 				{
-					//ElfHelper.DayLog($"{rec} c:{rec.Record.Count(r => r == '?')}");
+					ElfHelper.DayLog($"{++iLine} {rec} c:{rec.Record.Count(r => r == '?')}");
 					var found = rec.Options();
-					ElfHelper.DayLog($"{rec} f:{found}");
+					ElfHelper.DayLog($"{iLine} {rec} f:{found}");
 					rv += found;
 				}
 			}
@@ -145,14 +146,16 @@ namespace Advent23
 			rv.AddRange(UkOptions(stub + ".", uks - 1, hits));
 			return rv;
 		}
-		bool CheckSoFar(string record)
+		bool CheckSoFar(string record, CheckCurrent cur)
 		{
-			var iNum = 0;
+			var iNum = cur.INum;
 			var numSize = 0;
 			bool inNum = false;
 			bool badPattern = false;
-			foreach(var c in record)
+			for(int i = cur.Index; i < record.Length; i++)
+			//foreach(var c in record)
 			{
+				var c = record[i];
 				if (c == '?')
 				{
 					if (inNum && Nums[iNum] < numSize)
@@ -173,6 +176,7 @@ namespace Advent23
 							break;
 						}
 					}
+					cur.Index = i;
 					numSize = 0;
 				}
 				else if (c == '#')
@@ -185,50 +189,68 @@ namespace Advent23
 					numSize++;
 				}
 			}
+			cur.INum = iNum;
 			if (inNum == true)
 			{
-				if (Nums[iNum++] != numSize)
+				if (Nums[iNum] != numSize)
 					badPattern = true;
 			}
 			return !badPattern;
 		}
-		Dictionary<string, int> _cons = [];
-		internal long BuildOptions(string record, long uks, long hits)
+		//Dictionary<string, int> _cons = [];
+		internal long BuildOptions(string record, long unknowns, long hitsToPlace, CheckCurrent cur)
 		{
-			_cons.Add(record, 0);
+			//_cons.Add(record, 0);
 
-			if (uks < 0 || hits < 0)
+			if (unknowns < 0 || hitsToPlace < 0)
 			{
-				_cons[record] = -1;
+				//_cons[record] = -1;
+				//_cons.Remove(record);
 				return 0;
 			}
-			if (!CheckSoFar(record))
+			if (!CheckSoFar(record, cur))
 			{
-				_cons[record] = -2;
+				//_cons[record] = -2;
+				//_cons.Remove(record);
 				return 0;
 			}
-			if (uks == 0)
+			if (unknowns == 0)
 			{
-				if (hits == 0)
+				if (hitsToPlace == 0)
 				{
-					_cons[record] = 3;
+					//_cons[record] = 3;
+					//_cons.Remove(record);
 					// if (Check(record)) already checked
 					return 1;
 				}
 				else
 				{
-					_cons[record] = -4;
-					_cons.Remove(record);
+					//_cons[record] = -4;
+					//_cons.Remove(record);
 					return 0;
 				}
 			}
-			_cons[record] = 5;
+			//_cons[record] = 5;
 			var next = record.IndexOf('?');
+			if (hitsToPlace == 0)
+				return BuildOptions(record.Replace('?', '.'), 0, hitsToPlace, new CheckCurrent(cur));
+
 			long rv = 0;
-			rv += BuildOptions(ReplaceChar(record, next, '.'), uks - 1, hits);
-			if (uks >= hits)
-				rv += BuildOptions(ReplaceChar(record, next, '#'), uks - 1, hits - 1);
+			var key = CheckKey(record, cur);
+			if (_cache.ContainsKey(key))
+				return _cache[key];
+
+			rv += BuildOptions(ReplaceChar(record, next, '.'), unknowns - 1, hitsToPlace, new CheckCurrent(cur));
+			if (unknowns >= hitsToPlace && hitsToPlace > 0)
+				rv += BuildOptions(ReplaceChar(record, next, '#'), unknowns - 1, hitsToPlace - 1, new CheckCurrent(cur));
+			if (cur.Index > 10)
+				_cache[key] = rv;
 			return rv;
+		}
+		Dictionary<string, long> _cache = new Dictionary<string, long>();
+		string CheckKey(string record, CheckCurrent cur)
+		{
+			return $"{record.Substring(cur.Index)} {cur}";
 		}
 		static string ReplaceChar(string srce, int index, char c)
 		{
@@ -238,10 +260,10 @@ namespace Advent23
 		}
 		internal long Options()
 		{
-			_cons.Clear();
+			//_cons.Clear();
 			var unknowns = Record.Count(r => r == '?');
 			var toPlace = Nums.Sum(n => n) - Record.Count(r => r == '#');
-			var rv = BuildOptions(Record, unknowns, toPlace);
+			var rv = BuildOptions(Record, unknowns, toPlace, new CheckCurrent());
 			return rv;
 		}
 		internal List<string> BulkOptions()
@@ -312,5 +334,24 @@ namespace Advent23
 		}
 
 
+	}
+	internal class CheckCurrent
+	{
+		public CheckCurrent()
+		{
+			
+		}
+		public CheckCurrent(CheckCurrent other)
+		{
+			Index = other.Index;
+			INum = other.INum;
+		}
+		public override string ToString()
+		{
+			return $"o:{Index} n:{INum}";
+		}
+
+		public int Index { get; set; }
+		public int INum { get; set; }
 	}
 }
