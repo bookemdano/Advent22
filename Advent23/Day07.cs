@@ -12,7 +12,7 @@ namespace Advent23
 		private long Star(StarEnum star)
 		{
 			var rv = 0L;
-			Utils.TestLog("Star() " + star);
+			ElfHelper.DayLog("Star() " + star);
 			var lines = Program.GetLines(star, IsReal);
 			var hands = new List<Hand>();
 			foreach(var line in lines)
@@ -25,10 +25,10 @@ namespace Advent23
 			{
 				rv += hand.Bid * i;
 				if (!IsReal)
-					Utils.TestLog(i.ToString() + " " + hand);
+					ElfHelper.DayLog(i.ToString() + " " + hand);
                 i++;
 			}
-			Utils.TestLog("rv= " + rv);
+			ElfHelper.DayLog("rv= " + rv);
 			return rv;
 		}
 		public object? Star1()

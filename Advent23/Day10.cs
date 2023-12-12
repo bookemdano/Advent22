@@ -65,13 +65,13 @@ namespace Advent23
 				var grdOrig = Grid10.FromLines(lines);
 				int step = 0;
 				var grd = grdOrig.AddSpaces();
-				grd.WriteCounts("add");
+				grd.WriteBase("add");
 				var starts = grd.FindStarts().ToArray();
 
 				while (starts.Count() > 0)
 				{
 					step++;
-					Utils.TestLog($"{step} Starts:{starts.Count()}");
+					ElfHelper.DayLog($"{step} Starts:{starts.Count()}");
 					var newStarts = new List<Node10>();
 					foreach (var start in starts)
 					{
@@ -83,12 +83,12 @@ namespace Advent23
 					}
 					starts = newStarts.ToArray();
 				}
-				grd.WriteCounts(false, "pre");
+				grd.WriteLocal("pre");
 
 
 				rv = grd.Insides();
 				// now shrink
-				grd.WriteCounts(false, "done");
+				grd.WriteLocal("done");
 				check.Compare(rv);
 			}
 			return rv;
@@ -275,7 +275,7 @@ namespace Advent23
         {
 			if (DateTime.Now > _nextLog)
 			{
-				WriteCounts(false, "can");
+				WriteLocal("can");
 				_nextLog = DateTime.Now.AddSeconds(1);
 			}
 			if (node.Escape != null)
@@ -346,7 +346,7 @@ namespace Advent23
 				count = Values.Count(n => n.Escape == null);
 				foreach (var node in Values.Where(n => n.Escape == null))
 					CanEscape(node, new List<Point>());
-				WriteCounts(false, "can");
+				WriteLocal("can");
 
 			}
 			return Values.Count(n => n.Escape == null && n.Og == true);
@@ -360,8 +360,8 @@ namespace Advent23
 			var last = 0;
 			while (Values.Count(n => n.Escape == null) != last)
 			{
-				Utils.TestLog("Remaining " + Values.Count(n => n.Escape == null));
-				WriteCounts(false, "calc");
+				ElfHelper.DayLog("Remaining " + Values.Count(n => n.Escape == null));
+				WriteLocal("calc");
 				last = Values.Count(n => n.Escape == null);
 				foreach (var kvp in this.Where(kvp => kvp.Value.Escape == null))
 				{
@@ -381,13 +381,11 @@ namespace Advent23
 				}
 			}
 			Values.Where(n => n.Escape == null).ToList().ForEach(n => n.Escape = false);
-			WriteCounts(false, "calc");
+			WriteLocal("calc");
 		}
 
-		public void WriteCounts(bool raw, string tag)
+		public void WriteLocal(string tag)
         {
-			if (raw)
-				WriteCounts(tag);
             var lines = new List<string>();
             for (int row = 0; row < _rows; row++)
             {
@@ -395,24 +393,19 @@ namespace Advent23
                 for (int col = 0; col < _cols; col++)
                 {
                     var v = Find(new Point(row, col))!;
-					if (raw)
-						parts.Add(v.Char.ToString());
-					else
-					{
-						if (v.IsWall())
-							parts.Add(v.CornerChar.ToString());
-							//parts.Add(v.Count.Value.ToString());
-						else if (v.Escape == false)
-							parts.Add("I");
-						else if (v.Escape == true)
-							parts.Add("0");
-						else 
-							parts.Add(" ");
-					}
+					if (v.IsWall())
+						parts.Add(v.CornerChar.ToString());
+						//parts.Add(v.Count.Value.ToString());
+					else if (v.Escape == false)
+						parts.Add("I");
+					else if (v.Escape == true)
+						parts.Add("0");
+					else 
+						parts.Add(" ");
 				}
                 lines.Add(string.Join(",", parts));
             }
-            File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{ElfHelper.DayString()}{raw}{tag}.csv"), lines);
+			ElfUtils.WriteLines("Grid10", tag, lines);
         }
         public List<Node10> FindStarts()
         {

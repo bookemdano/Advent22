@@ -69,7 +69,7 @@ namespace Advent23
 				return null;
 			return value;
 		}
-		public void WriteCounts(string tag)
+		public void WriteBase(string tag)
 		{
 			var lines = new List<string>();
 			for (int row = 0; row < _rows; row++)
@@ -82,7 +82,7 @@ namespace Advent23
 				}
 				lines.Add(string.Join(",", parts));
 			}
-			File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{ElfHelper.DayString()}{tag}.csv"), lines);
+			ElfUtils.WriteLines("Base", tag, lines);
 		}
 
 	}
@@ -112,6 +112,10 @@ namespace Advent23
 	}
 	internal class ElfUtils
 	{
+		internal static void WriteLines(string stub, string tag, List<string> lines)
+		{
+			File.WriteAllLines(Path.Combine(ElfHelper.DayDir, $"{stub}Day{ElfHelper.DayString}-{tag}.csv"), lines);
+		}
 	}
 
 	public class StarCheckKey
@@ -149,5 +153,31 @@ namespace Advent23
 			Utils.Log($"Compare {this} ?= a:{answer}");
 			Utils.Assert(answer, Expected);
 		}
+	}
+	public interface IRace
+	{
+		// winSearch- searching for first win(true) or first loss(false)
+		static public long BinSearch(long min, long max, IRace race, bool winSearch)
+		{
+			while (max != min + 1)
+			{
+				var t = (long)(min + (max - min) / 2);
+				var b = race.Compare(t, winSearch);
+				if (b)
+					max = t;
+				else
+					min = t;
+			}
+			return max;
+		}
+		public bool Compare(long t, bool winSearch)
+		{
+			ElfHelper.DayLog($"Compare({t}) for {this} w:{winSearch}");
+			if (winSearch)
+				return Win(t);
+			else
+				return !Win(t);
+		}
+		bool Win(long t);
 	}
 }

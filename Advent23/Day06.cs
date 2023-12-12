@@ -48,7 +48,7 @@ namespace Advent23
 			Utils.Assert(race.Win(lastWin), "lastWin");
 			Utils.Assert(!race.Win(lastWin + 1), "firstLateLoss");
 			var wins = lastWin - firstWin + 1;
-			Utils.TestLog($"{race} w:{wins}");
+			ElfHelper.DayLog($"{race} w:{wins}");
 			return wins;
 		}
 
@@ -64,7 +64,7 @@ namespace Advent23
 			Utils.Assert(race.Win(lastWin), "lastWin");
 			Utils.Assert(!race.Win(lastWin + 1), "firstLateLoss");
 			var wins = lastWin - firstWin + 1;
-			Utils.TestLog($"{race} w:{wins}");
+			ElfHelper.DayLog($"{race} w:{wins}");
 			return wins;
 		}
 

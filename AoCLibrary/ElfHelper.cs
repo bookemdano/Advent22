@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.IO;
 
 namespace AoCLibrary
@@ -30,10 +31,7 @@ namespace AoCLibrary
 
 		internal static int DayIndex => Day - 1;
 
-		public static string DayString()
-		{
-			return $"{Day:00}";
-		}
+		public static string DayString => $"{Day:00}";
 
 		static public string CodeDir()
 		{
@@ -139,7 +137,30 @@ namespace AoCLibrary
 		//https://adventofcode.com/2023/day/4/input/
 		public static string DailyUrl => DayUrl(Day);
 		static public string LeaderUrl => $"https://adventofcode.com/{ElfHelper.Year}/leaderboard/private/view/1403088";
+		static public string DayDir
+		{
+			get
+			{
+				var dir = Path.Combine(Utils.Dir, "Day" + DayString);
+				Directory.CreateDirectory(dir);
+				return dir;
+			}
+		}
+		static readonly string _dayLogFile = $"day{DayString}-{DateTime.Today:yyyyMMdd}.log";
+		public static void ResetDayLog()
+		{
+			File.Delete(Path.Combine(DayDir, _dayLogFile));
+		}
 
+		public static void DayLog(object o, Stopwatch? sw = null)
+		{
+			var str = o?.ToString() ?? "";
+			if (sw != null)
+				str += $" {sw.ElapsedMilliseconds:0}ms";
+			str = $"{DateTime.Now} {str}";
+			File.AppendAllText(Path.Combine(DayDir, _dayLogFile), str + Environment.NewLine);
+			//Console.WriteLine(str);
+		}
 		public static int NextEmptyDay()
 		{
 			for (int day = Day; day <= 25; day++)
@@ -186,7 +207,7 @@ namespace AoCLibrary
 				{ "Jesse Rakowski", "https://ca.slack-edge.com/TB4KLF92L-U020KKDNX5K-d8b8f0cfa119-512" },
 				{ "iangohjhu", "https://ca.slack-edge.com/TB4KLF92L-UB6DY5ELV-b2bcc72bd21e-512" },
 				{ "Jim Green", "https://jhuis.slack.com/archives/D068QSW145P/p1701696243394289" }
-	};
+		};
 
 		static public string? GetUrl(string name)
 		{

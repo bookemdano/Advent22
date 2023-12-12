@@ -40,7 +40,7 @@ namespace Advent23
 				var wins = Wins(line);
 				if (wins > 0)
 				{
-					Utils.TestLog($"Card: {i + 1} Wins: {wins}");
+					ElfHelper.DayLog($"Card: {i + 1} Wins: {wins}");
 					//rv += Score(winsOn);
 					for (var j = i + 1; j < i + wins + 1; j++)
 					{
@@ -51,7 +51,7 @@ namespace Advent23
 			foreach(var kvp in dict)
 			{
 				var score = Score(lines[kvp.Key]);
-				Utils.TestLog($"Card: {kvp.Key + 1} Score: {score} Count: {kvp.Value}");
+				ElfHelper.DayLog($"Card: {kvp.Key + 1} Score: {score} Count: {kvp.Value}");
 			}
 			rv = dict.Values.Sum();
 			return rv;

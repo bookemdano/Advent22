@@ -8,7 +8,7 @@ namespace AoCLibrary
 	{
         static public bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        static public string Dir { get; }
+		static public string Dir { get; }
 		static Utils()
 		{
 			if (IsWindows)
@@ -29,20 +29,7 @@ namespace AoCLibrary
 			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
 			Console.WriteLine(str);
 		}
-		static readonly string _testLogFile = $"elf{DateTime.Today:yyyyMMdd}.log";
-		public static void ResetTestLog()
-		{
-			File.Delete(Path.Combine(Dir, _testLogFile));
-		}
-		public static void TestLog(object o, Stopwatch? sw = null)
-		{
-			var str = o?.ToString() ?? "";
-			if (sw != null)
-				str += $" {sw.ElapsedMilliseconds:0}ms";
-			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Utils.Dir, _testLogFile), str + Environment.NewLine);
-			//Console.WriteLine(str);
-		}
+
         static public void Assert(long l1, long l2)
         {
 			Assert(l1 == l2, $"{l1} != {l2}");
@@ -178,30 +165,4 @@ namespace AoCLibrary
             return Split(sep, line).Select(s => long.Parse(s)).ToArray();
         }
     }
-	public interface IRace
-	{
-		// winSearch- searching for first win(true) or first loss(false)
-		static public long BinSearch(long min, long max, IRace race, bool winSearch)
-		{
-			while (max != min + 1)
-			{
-				var t = (long)(min + (max - min) / 2);
-				var b = race.Compare(t, winSearch);
-				if (b)
-					max = t;
-				else
-					min = t;
-			}
-			return max;
-		}
-		public bool Compare(long t, bool winSearch)
-		{
-			Utils.TestLog($"Compare({t}) for {this} w:{winSearch}");
-			if (winSearch)
-				return Win(t);
-			else
-				return !Win(t);
-		}
-		bool Win(long t);
-	}
 }

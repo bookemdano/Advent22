@@ -13,7 +13,7 @@ namespace Advent23
 
 			var runner = GetDayRunner();
 			if (runner == null)
-                Utils.Log("No runner found for Day" + ElfHelper.DayString());
+                Utils.Log("No runner found for Day" + ElfHelper.DayString);
 			else
 			{
 				if (_crazyTimers)
@@ -33,8 +33,8 @@ namespace Advent23
 		}
 		static async Task<TimeSpan> RunAsync(IDayRunner runner)
 		{
-			Utils.ResetTestLog();
-			Utils.TestLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
+			ElfHelper.ResetDayLog();
+			ElfHelper.DayLog($"Run() {runner.GetType().Name} r:{runner.IsReal}");
 			if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
 			{
 				var str = await ElfHelper.WriteInputFileAsync(ElfHelper.Day); 
@@ -70,7 +70,7 @@ namespace Advent23
                 Utils.Log("No assembly[1] found!");
 				return null;
 			}
-			var className = $"Advent23.Day{ElfHelper.DayString()}";
+			var className = $"Advent23.Day{ElfHelper.DayString}";
 			var dayClass = advent.GetType(className);
 			if (dayClass == null)
 			{
@@ -96,19 +96,19 @@ namespace Advent23
 			string filename;
 			if (real)
 			{
-				filename = $"Day{ElfHelper.DayString()}.txt";
+				filename = $"Day{ElfHelper.DayString}.txt";
 			}
 			else
 			{
 				if (part == null)
-					filename = $"Day{ElfHelper.DayString()}Fake{star}.txt";
+					filename = $"Day{ElfHelper.DayString}Fake{star}.txt";
 				else
-					filename = $"Day{ElfHelper.DayString()}Fake{star}Part{part + 1}.txt";
+					filename = $"Day{ElfHelper.DayString}Fake{star}Part{part + 1}.txt";
 			}
 			var rv = Path.Combine("Assets", filename);
 			if (!IsFileThere(rv) && star == StarEnum.Star2 && real == false)
 			{
-				filename = $"Day{ElfHelper.DayString()}FakeStar1.txt";
+				filename = $"Day{ElfHelper.DayString}FakeStar1.txt";
 				rv = Path.Combine("Assets", filename);
 			}
 			return rv;

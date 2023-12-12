@@ -18,7 +18,7 @@ namespace Advent23
 			else
 				check = new StarCheck(key, 374L);
 
-			var lines = Program.GetLines(StarEnum.Star1, IsReal);
+			var lines = Program.GetLines(check.Key);
 			var grid = Grid11.FromLines(lines);
 			rv = Star(grid, expandTo: 2);
 
@@ -50,9 +50,9 @@ namespace Advent23
 		}
 		long Star(Grid11 grid, int expandTo)
 		{
-			grid.WriteCounts(true, "og");
+			grid.WriteBase("og");
 			grid.Expand(expandTo);
-			grid.WriteCounts(true, "ex");
+			grid.WriteBase("ex");
 			long rv = 0L;
 			var stars = grid.GetStars();
 			foreach (var from in stars)
@@ -63,11 +63,11 @@ namespace Advent23
 						continue;	// only do one way
 					var d = grid.Distance(from.Pt, to.Pt);
 					if (!IsReal)
-						Utils.TestLog($"{from.StarNum} {to.StarNum} d:{d}");
+						ElfHelper.DayLog($"{from.StarNum} {to.StarNum} d:{d}");
 					rv += d;
 				}
 			}
-			grid.WriteCounts(false, "ex");
+			grid.Write("ex");
 			return rv;
 
 		}
@@ -127,14 +127,8 @@ namespace Advent23
 			}
 		}
 
-		public void WriteCounts(bool raw, string tag)
+		public void Write(string tag)
 		{
-			if (raw)
-			{
-				WriteCounts(tag);
-				return;
-
-			}	
 			var lines = new List<string>();
 			for (int row = 0; row < _rows; row++)
 			{
@@ -146,7 +140,7 @@ namespace Advent23
 				}
 				lines.Add(string.Join(",", parts));
 			}
-			File.WriteAllLines(Path.Combine(Utils.Dir, $"counts{ElfHelper.DayString()}{raw}{tag}.csv"), lines);
+			ElfUtils.WriteLines("Grid11", tag, lines);
 		}
 
 		internal long Distance(Point from, Point to)
