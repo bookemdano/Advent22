@@ -16,9 +16,9 @@ namespace Advent23
 				check = new StarCheck(key, 0L);
 
 			var lines = Program.GetLines(check.Key);
+			var rv = 0L;
 			// magic
 
-			var rv = 0L;
 			check.Compare(rv);
 			return rv;
 		}
@@ -32,9 +32,9 @@ namespace Advent23
 				check = new StarCheck(key, 0L);
 
 			var lines = Program.GetLines(check.Key);
+			var rv = 0L;
 			// magic
 
-			var rv = 0L;
 			check.Compare(rv);
 			return rv;
 		}

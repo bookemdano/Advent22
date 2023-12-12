@@ -6,13 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Assets\Day10FakeStar1Part1.txt" />
-    <None Remove="Assets\Day10FakeStar2Part1.txt" />
-    <None Remove="Assets\Day10FakeStar2Part3.txt" />
-  </ItemGroup>
-
+	
   <ItemGroup>
     <Content Include="Assets\Day10FakeStar1Part1.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
