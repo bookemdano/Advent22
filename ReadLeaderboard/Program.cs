@@ -45,7 +45,7 @@ internal class Program
     }
     void Log(string str)
     {
-        Utils.Log(str);
+        Utils.MonthLog(str);
     }
 }
 

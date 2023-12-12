@@ -28,7 +28,7 @@ namespace Leaders
 
 		void Log(string str)
 		{
-			Utils.Log(str);
+			Utils.MonthLog(str);
 			lst.Items.Insert(0, $"{DateTime.Now} {str}");
 		}
 

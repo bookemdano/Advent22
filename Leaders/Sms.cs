@@ -1,13 +1,12 @@
 using AoCLibrary;
 using PrivateStash;
-using System;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
 namespace Leaders
 {
-    public class Sms
+	public class Sms
     {
         /// <summary>
         /// Sends message with Twilio- costs $.0075 per message and spamming will get us blocked so use sparingly
@@ -17,7 +16,7 @@ namespace Leaders
         /// <returns>returns false if phone number invalid</returns>
         static public bool SendMessage(string phone, string body)
         {
-			Utils.Log($"Sms.SendMessage({phone})");
+			Utils.MonthLog($"Sms.SendMessage({phone})");
             try
             {
                 phone = StripPhoneNumber(phone) ?? phone;
@@ -27,15 +26,15 @@ namespace Leaders
                     phone = "+" + phone;
                 if (phone?.Length != 12)
                 {
-					Utils.Log($"SMS.SendMessage() Invalid phone number {phone}");
+					Utils.MonthLog($"SMS.SendMessage() Invalid phone number {phone}");
                     return false;
                 }
 
-				Utils.Log($"SMS.SendMessage() to {phone}");
+				Utils.MonthLog($"SMS.SendMessage() to {phone}");
 
                 TwilioClient.Init(TwilioStash.AccountSid, TwilioStash.AuthToken);
 
-				Utils.Log("Sms.SendMessage() Really send");
+				Utils.MonthLog("Sms.SendMessage() Really send");
                 var message = MessageResource.Create(
                     to: new PhoneNumber(phone),
                     from: new PhoneNumber(TwilioStash.FromNumber),
@@ -45,7 +44,7 @@ namespace Leaders
             }
             catch (Exception ex)
             {
-				Utils.Log("SMS.SendMessage() " + ex);
+				Utils.MonthLog("SMS.SendMessage() " + ex);
                 return false;
             }
         }

@@ -110,10 +110,10 @@ namespace AoCLibrary
 			if (!force)
 				rv = ReadFromFile();
 
-			Utils.Log($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
+			Utils.MonthLog($"Read({force}) Data Time: {rv?.Timestamp} Data Expires: {rv?.Timestamp + MinApiRefresh}");
 			if (rv != null && rv.Timestamp + MinApiRefresh > DateTime.Now)
 			{
-				Utils.Log($"New enough");
+				Utils.MonthLog($"New enough");
 				return rv;  // new enough
 			}
 			
@@ -150,6 +150,11 @@ namespace AoCLibrary
 		public static void ResetDayLog()
 		{
 			File.Delete(Path.Combine(DayDir, _dayLogFile));
+		}
+		public static void MonthLogPlus(object o, Stopwatch? sw = null)
+		{
+			Utils.MonthLog(o, sw);
+			DayLog(o, sw);
 		}
 
 		public static void DayLog(object o, Stopwatch? sw = null)

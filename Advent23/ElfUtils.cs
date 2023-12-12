@@ -150,7 +150,8 @@ namespace Advent23
 		}
 		public void Compare(long answer)
 		{
-			Utils.Log($"Compare {this} ?= a:{answer}");
+			ElfHelper.DayLog($"Compare {this} ?= a:{answer}");
+			Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
 			Utils.Assert(answer, Expected);
 		}
 	}

@@ -20,24 +20,30 @@ namespace AoCLibrary
 		}
 
 		static public string AppName { get; set; } = string.Empty;
-		public static void Log(object o, Stopwatch? sw = null)
+		public static void MonthLog(object o, Stopwatch? sw = null)
 		{
 			var str = $"{AppName} {o}";
 			if (sw != null)
 				str += $" {sw.Elapsed.TotalMilliseconds:0.0}ms";
 			str = $"{DateTime.Now} {str}";
-			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), str + Environment.NewLine);
+			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyyMM}.log"), str + Environment.NewLine);
+			Console.WriteLine(str);
+		}
+		public static void CaptainsLog(object o)
+		{
+			var str = $"{DateTime.Now} {AppName} {o}";
+			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), $"{DateTime.Now} {AppName} {o}" + Environment.NewLine);
 			Console.WriteLine(str);
 		}
 
-        static public void Assert(long l1, long l2)
+		static public void Assert(long l1, long l2)
         {
 			Assert(l1 == l2, $"{l1} != {l2}");
         }
         static public void Assert(bool b, string str)
         {
             if (b == false)
-                Log("ASSERT FAILED " + str);
+                MonthLog("ASSERT FAILED " + str);
         }
         static public string TimeString(DateTime dt)
 		{
@@ -70,7 +76,7 @@ namespace AoCLibrary
 			}
 			catch (Exception ex)
 			{
-				Log($"Open({filename}) " + ex);
+				MonthLog($"Open({filename}) " + ex);
 			}
 		}
 
