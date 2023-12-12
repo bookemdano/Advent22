@@ -93,25 +93,22 @@ namespace Advent23
 		}
 		static internal string InputFile(bool real, StarEnum star, int? part = null)
 		{
-			string filename;
 			if (real)
+				return Path.Combine("Assets", $"Day{ElfHelper.DayString}.txt");
+
+
+			var partString = string.Empty;
+			if (part != null)
+				partString = $"Part{part + 1}";
+
+			string filename = Path.Combine("Assets", $"Day{ElfHelper.DayString}Fake{partString}.txt");
+			if (!IsFileThere(filename))
 			{
-				filename = $"Day{ElfHelper.DayString}.txt";
+				filename = Path.Combine("Assets", $"Day{ElfHelper.DayString}Fake{star}{partString}.txt");
+				if (!IsFileThere(filename))	// try start 1
+					filename = Path.Combine("Assets", $"Day{ElfHelper.DayString}Fake{StarEnum.Star1}{partString}.txt");
 			}
-			else
-			{
-				if (part == null)
-					filename = $"Day{ElfHelper.DayString}Fake{star}.txt";
-				else
-					filename = $"Day{ElfHelper.DayString}Fake{star}Part{part + 1}.txt";
-			}
-			var rv = Path.Combine("Assets", filename);
-			if (!IsFileThere(rv) && star == StarEnum.Star2 && real == false)
-			{
-				filename = $"Day{ElfHelper.DayString}FakeStar1.txt";
-				rv = Path.Combine("Assets", filename);
-			}
-			return rv;
+			return filename;
 		}
 		static Dictionary<string, string[]> _dictLines = [];
 		static internal string[] GetLines(StarCheckKey key)

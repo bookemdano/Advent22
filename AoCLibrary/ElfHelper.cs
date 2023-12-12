@@ -25,7 +25,7 @@ namespace AoCLibrary
 		{
 			get
 			{
-				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
+				return 11;	// (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
 			}
 		}
 
@@ -70,8 +70,7 @@ namespace AoCLibrary
 			cs = cs.Replace("|DD|", strDay);
 			File.WriteAllText(Path.Combine(codeDir, $"Day{strDay}.cs"), cs);
 			await WriteInputFileAsync(day);
-			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar1.txt"), "");
-			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}FakeStar2.txt"), "");
+			File.WriteAllText(Path.Combine(assetDir, $"Day{strDay}Fake.txt"), "");
 
 			if (updatePrj)
 			{
