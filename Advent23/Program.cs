@@ -111,24 +111,32 @@ namespace Advent23
 			return filename;
 		}
 		static Dictionary<string, string[]> _dictLines = [];
-		static internal string[] GetLines(StarCheckKey key)
+		static internal string[] GetLines(StarCheckKey key, bool raw = false)
 		{
 			return GetLines(key.Star, key.IsReal, key.Part);
 		}
-		static internal string[] GetLines(StarEnum star, bool real, int? part = null)
+		static internal string[] GetLines(StarEnum star, bool real, int? part = null, bool raw = false)
 		{
 			var filename = InputFile(real, star, part);
 			if (!_dictLines.ContainsKey(filename))
 			{
 				ElfHelper.MonthLogPlus("ReadLines- " + filename);
-				_dictLines[filename] = File.ReadAllLines(filename).Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
+				var lines = File.ReadAllLines(filename);
+				if (!raw)
+					_dictLines[filename] = lines.ToArray();
+				else
+					_dictLines[filename] = lines.Where(l => !string.IsNullOrWhiteSpace(l)).ToArray();
 			}
 			return _dictLines[filename];
 		}
 		static Dictionary<string, string> _dictText = [];
-		static internal string GetText(StarEnum star, bool real)
+		static internal string GetText(StarCheckKey key)
 		{
-			var filename = InputFile(real, star);
+			return GetText(key.Star, key.IsReal, key.Part);
+		}
+		static internal string GetText(StarEnum star, bool real, int? part)
+		{
+			var filename = InputFile(real, star, part);
 			if (!_dictText.ContainsKey(filename))
 			{
 				ElfHelper.MonthLogPlus("ReadText- " + filename);

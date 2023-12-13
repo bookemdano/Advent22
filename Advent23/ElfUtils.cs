@@ -43,7 +43,7 @@ namespace Advent23
 			_rows = nodes.Max(n => n.Pt.Row) + 1;
 			_cols = nodes.Max(n => n.Pt.Col) + 1;
 		}
-		static protected List<T> GetNodes(string[] lines)
+		static protected List<T> GetNodes(IEnumerable<string> lines)
 		{
 			int iRow = 0;
 			var nodes = new List<T>();
@@ -84,7 +84,19 @@ namespace Advent23
 			}
 			ElfUtils.WriteLines("Base", tag, lines);
 		}
+		protected IList<T> NodesInCol(int iCol)
+		{
+			return this.Values.Where(n => n.Pt.Col == iCol).ToList();
+		}
+		protected IList<T> NodesInRow(int iRow)
+		{
+			return this.Values.Where(n => n.Pt.Row == iRow).ToList();
+		}
 
+		internal string NodesToString(IList<Node> nodes)
+		{
+			return string.Join("", nodes.Select(n => n.Char));
+		}
 	}
 	public class Point
 	{
@@ -150,7 +162,7 @@ namespace Advent23
 		}
 		public void Compare(long answer)
 		{
-			ElfHelper.DayLog($"Compare {this} ?= a:{answer}");
+			ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
 			Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
 			Utils.Assert(answer, Expected);
 		}
