@@ -77,28 +77,7 @@ namespace Advent23
 			return rv;
 		}
 	}
-	public class Mirrors
-	{
-		public Mirrors(int min, List<int> rows, List<int> cols)
-		{
-			_tolerance = min;
-			Rows = rows;
-			Cols = cols;
-		}
-		public long GetScore()
-		{
-			var rv = 0;
-			foreach (var col in Cols)
-				rv += col;
-			foreach (var row in Rows)
-				rv += row * 100;
-			ElfHelper.DayLog($"r:{string.Join(",", Rows)} c:{string.Join(",", Cols)} = {rv}");
-			return rv;
-		}
-		int _tolerance;
-		internal List<int> Rows { get;  }
-		internal List<int> Cols { get; }
-	}
+
 	public class Grid13 : Grid<Node>
 	{
 		public Grid13(List<Node> nodes)
@@ -157,7 +136,6 @@ namespace Advent23
 					break;
 			}
 
-
 			var symRows = new List<Possible>();
 			for (var iRow = 1; iRow < _rows; iRow++)
 				symRows.Add(new Possible(iRow));
@@ -176,33 +154,7 @@ namespace Advent23
 				rv += row.Position * 100;
 			return rv;
 		}
-		internal Mirrors FindMirrors()
-		{
-			var symCols = new List<int>();
-			for (var iCol = 1; iCol < _cols; iCol++)
-				symCols.Add(iCol);
 
-			for (var iRow = 0; iRow < _rows; iRow++)
-			{
-				var str = NodesToString(NodesInRow(iRow));
-				symCols = FindMirrorsForLine(str, symCols);
-				if (!symCols.Any())
-					break;
-			}
-
-			var symRows = new List<int>();
-			for (var iRow = 1; iRow < _rows; iRow++)
-				symRows.Add(iRow);
-
-			for (var iCol = 0; iCol < _cols; iCol++)
-			{
-				var str = NodesToString(NodesInCol(iCol));
-				symRows = FindMirrorsForLine(str, symRows);
-				if (!symRows.Any())
-					break;
-			}
-			return new Mirrors(0, symRows, symCols);
-		}
 		static int Diffs(string str, int pos)
 		{
 			return DiffList(str, pos).Count();
@@ -243,50 +195,6 @@ namespace Advent23
 					rv.Add(new Possible(pos, list));
 			}
 			return rv;
-		}
-
-		internal long FindNearMirrors(Mirrors mirrors)
-		{
-			/*
-			var symCols = mirrors.Cols;
-			var rvCols = new List<int>();
-			foreach(var col in symCols)
-			{
-				var str = NodesToString(NodesInCol(col));
-				for (int i = 0; i < str.Length; i++)
-				{
-					var chars = str.ToCharArray();
-					if (chars[i] == '.')
-						chars[i] = '#';
-					else
-						chars[i] = '.';
-					var newStr = string.Join("", chars);
-					for (int pos = 1; pos < str.Length; pos++)
-					{
-						if (Diffs(newStr, pos) == 0)
-						{
-							rvCols += 
-						}
-					}
-				}
-
-			}
-
-			for (var iRow = 0; iRow < _rows; iRow++)
-			{
-				var str = NodesToString(NodesInRow(iRow));
-				for (int i = 0; i < str.Length; i++)
-				{
-					symCols = FindMirrors(str, symCols, min);
-					if (!symCols.Any())
-						break;
-					for (int pos = 0; pos < str.Length; pos++)
-
-
-				}
-			}
-			*/
-			return 0L;
 		}
 	}
 	public class Possible
