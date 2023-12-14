@@ -115,6 +115,25 @@ namespace Advent23
 			return string.Join("", nodes.Select(n => n.Char));
 		}
 	}
+	public class GridPlain : Grid<Node>
+	{
+		protected GridPlain()
+		{
+			// in case child wants to init
+		}
+		public GridPlain(List<Node> nodes)
+		{
+			Init(nodes);
+		}
+		public override string ToString()
+		{
+			return $"({_rows}, {_cols})";
+		}
+		internal static GridPlain FromLines(string[] lines)
+		{
+			return new GridPlain(GetNodes(lines));
+		}
+	}
 	public class Point : IEquatable<Point>
 	{
 		public Point(int row, int col)

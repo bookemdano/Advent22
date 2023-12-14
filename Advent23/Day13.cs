@@ -24,14 +24,14 @@ namespace Advent23
 			{
 				if (string.IsNullOrEmpty(line))
 				{
-					grids.Add(Grid13.FromLines(clump));
+					grids.Add(new Grid13(clump.ToArray()));
 					clump = new List<string>();
 				}
 				else
 					clump.Add(line);
 			}
 			if (clump.Any())
-				grids.Add(Grid13.FromLines(clump));
+				grids.Add(new Grid13(clump.ToArray()));
 
 			foreach (var grid in grids)
 				rv += grid.FindCompleteMirror1();
@@ -59,14 +59,14 @@ namespace Advent23
 			{
 				if (string.IsNullOrEmpty(line))
 				{
-					grids.Add(Grid13.FromLines(clump));
+					grids.Add(new Grid13([..clump]));
 					clump = new List<string>();
 				}
 				else
 					clump.Add(line);
 			}
 			if (clump.Any())
-				grids.Add(Grid13.FromLines(clump));
+				grids.Add(new Grid13([.. clump]));
 
 			foreach (var grid in grids)
 				rv += grid.FindNearMirrors();
@@ -78,15 +78,11 @@ namespace Advent23
 		}
 	}
 
-	public class Grid13 : Grid<Node>
+	public class Grid13 : GridPlain
 	{
-		public Grid13(List<Node> nodes)
+		public Grid13(string[] lines)
 		{
-			Init(nodes);
-		}
-		internal static Grid13 FromLines(IEnumerable<string> lines)
-		{
-			return new Grid13(GetNodes(lines));
+			Init(GetNodes(lines));
 		}
 		internal long FindCompleteMirror1()
 		{

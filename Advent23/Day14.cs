@@ -1,4 +1,5 @@
 using AoCLibrary;
+using System.Xml.Linq;
 
 namespace Advent23
 {
@@ -25,7 +26,7 @@ namespace Advent23
 				rv = 0L;
 				var lines = Program.GetLines(check.Key);
 				// magic
-				var grd = Grid14.FromLines(lines);
+				var grd = new Grid14(lines);
 				var sl = grd.SupportLong();
 				grd.TiltNorth();
 				rv = grd.Support();
@@ -53,11 +54,12 @@ namespace Advent23
 			int patternStartIndex = 1;
 			var patternSize = 7;
 
-			var grd = Grid14.FromLines(lines);
+			var grd = new Grid14(lines);
 			var scores = new List<int>();
 
 			if (IsReal)
 			{
+				// save from previous run- took  2-5 minutes.
 				scores = new List<int>() { { 100593 }, { 100318 }, { 100211 }, { 100017 }, { 99841 }, { 99759 }, { 99648 }, { 99611 }, { 99569 }, { 99528 }, { 99432 }, { 99402 }, { 99421 }, { 99471 }, { 99504 }, { 99497 }, { 99506 }, { 99559 }, { 99602 }, { 99651 }, { 99678 }, { 99720 }, { 99728 }, { 99766 }, { 99781 }, { 99809 }, { 99829 }, { 99858 }, { 99853 }, { 99875 }, { 99880 }, { 99864 }, { 99845 }, { 99829 }, { 99812 }, { 99776 }, { 99726 }, { 99677 }, { 99651 }, { 99642 }, { 99661 }, { 99688 }, { 99719 }, { 99766 }, { 99811 }, { 99851 }, { 99891 }, { 99957 }, { 100028 }, { 100074 }, { 100081 }, { 100101 }, { 100121 }, { 100125 }, { 100098 }, { 100087 }, { 100066 }, { 100072 }, { 100087 }, { 100105 }, { 100135 }, { 100147 }, { 100166 }, { 100206 }, { 100246 }, { 100284 }, { 100316 }, { 100338 }, { 100373 }, { 100402 }, { 100428 }, { 100471 }, { 100521 }, { 100572 }, { 100620 }, { 100665 }, { 100693 }, { 100732 }, { 100767 }, { 100792 }, { 100821 }, { 100859 }, { 100900 }, { 100940 }, { 100959 }, { 100961 }, { 100956 }, { 100946 }, { 100915 }, { 100876 }, { 100839 }, { 100778 }, { 100707 }, { 100635 }, { 100581 }, { 100551 }, { 100518 }, { 100487 }, { 100481 }, { 100475 }, { 100459 }, { 100463 }, { 100467 }, { 100476 }, { 100481 }, { 100485 }, { 100501 }, { 100521 }, { 100542 }, { 100574 }, { 100613 }, { 100654 }, { 100701 }, { 100740 }, { 100783 }, { 100821 }, { 100859 }, { 100900 }, { 100940 }, { 100959 }, { 100961 }, { 100956 }, { 100946 }, { 100915 }, { 100876 }, { 100839 }, { 100778 }, { 100707 }, { 100635 }, { 100581 }, { 100551 }, { 100518 }, { 100487 }, { 100481 }, { 100475 }, { 100459 }, { 100463 }, { 100467 }, { 100476 }, { 100481 }, { 100485 }, { 100501 }, { 100521 }, { 100542 }, { 100574 }, { 100613 }, { 100654 }, { 100701 }, { 100740 }, { 100783 }, { 100821 }, { 100859 }, { 100900 }, { 100940 }, { 100959 }, { 100961 } };
 				/*
 				for (int i = 0; i < minPattern; i++)
@@ -73,15 +75,13 @@ namespace Advent23
 				*/
 				patternStartIndex = 80;
 				patternSize = 35;
-				for (int c = 115; c < 150; c++)
+				/*for (int c = 115; c < 150; c++)
 				{
 					var goal = (int)((c - patternStartIndex) % patternSize) + patternStartIndex;
 					ElfHelper.DayLog($"c:{c} g:{goal} s:{scores[goal]} aC:{c} aS:{scores[c]}");
 				}
-
+				*/
 				//ElfHelper.DayLog($"c:{cycles} g:{goalTotal} s:{scores[goalTotal]}");
-				//rv = scores[goalTotal];
-
 			}
 			else
 			{
@@ -103,26 +103,23 @@ namespace Advent23
 				//ElfHelper.DayLog($"c:{cycles} l:{lastScore} g:{goal} s:{scores[goal]} b:{scores.IndexOf(lastScore)}");
 				//Utils.Assert(lastScore, scores[goal]);
 			}
-			var mod = (int)(cycles - patternStartIndex) % patternSize;
-
-			var iGoal = mod + patternStartIndex - 1;
-			//var iGoal = (int) ((cycles - patternStartIndex) % patternSize) + patternStartIndex;
+			var iGoal = ((int)(cycles - patternStartIndex) % patternSize) + patternStartIndex - 1;
 			rv = scores[iGoal];
-			check.Compare(rv);
 			//100839 too low
 			//100876
+
+			check.Compare(rv);
 			return rv;
 		}
 	}
-	public class Grid14 : Grid<Node>
+	public class Grid14 : GridPlain
 	{
-		Dictionary<int, int> _rowSizes = [];
-		Dictionary<int, int> _colSizes = [];
 		List<Point> _sprites = [];
 		private int _spriteCount;
 
-		public Grid14(List<Node> nodes)
+		public Grid14(string[] lines)
 		{
+			var nodes = GetNodes(lines);
 			var os = nodes.Where(n => n.Char == 'O').ToList();
 			foreach (var node in os)
 			{
@@ -133,78 +130,10 @@ namespace Advent23
 
 			Init(nodes);
 		}
+
 		public override string ToString()
 		{
-			return $"({_rows}, {_cols}) s:{_spriteCount}";
-		}
-		internal static Grid14 FromLines(string[] lines)
-		{
-			return new Grid14(GetNodes(lines));
-		}
-		internal void TiltNorthLong()
-		{
-			var spritePts = _sprites.ToList();
-			foreach (var spritePt in spritePts)
-			{
-				var newPt = spritePt;
-				for (int iRow = spritePt.Row - 1; iRow >= 0; iRow--)
-				{
-					var pt = new Point(iRow, spritePt.Col);
-					var c = FindAny(pt);
-					if (c == 'O' || c == '#')
-						break;
-					else if (c == '.')
-						newPt = pt;
-				}
-				MoveSprite(spritePt, newPt);
-				//WriteLocal("tilting");
-			}
-		}
-		internal void TiltWestLong()
-		{
-			var spritePts = _sprites.ToList();
-			foreach (var spritePt in spritePts)
-			{
-				var newPt = spritePt;
-				for (int iCol = spritePt.Col - 1; iCol >= 0; iCol--)
-				{
-					var pt = new Point(spritePt.Row, iCol);
-					var c = FindAny(pt);
-					if (c == 'O' || c == '#')
-						break;
-					else if (c == '.')
-						newPt = pt;
-				}
-				MoveSprite(spritePt, newPt);
-
-				//WriteLocal("tilting");
-			}
-		}
-		internal void TiltSouthLong()
-		{
-			var spritePts = _sprites.ToList();
-			spritePts.Reverse();
-			foreach (var spritePt in spritePts)
-			{
-				int lastPos = spritePt.Row;
-				var moved = false;
-				for (int iRow = spritePt.Row + 1; iRow < _rows; iRow++)
-				{
-					var c = FindAny(new Point(iRow, spritePt.Col));
-					if (c == 'O' || c == '#')
-					{
-						MoveSprite(spritePt, new Point(lastPos, spritePt.Col));
-						moved = true;
-						break;
-					}
-					else if (c == '.')
-						lastPos = iRow;
-				}
-				if (!moved)
-					MoveSprite(spritePt, new Point(lastPos, spritePt.Col));
-
-				//WriteLocal("tilting");
-			}
+			return $"{base.ToString()} s:{_spriteCount}";
 		}
 		internal void TiltNorth()
 		{
@@ -214,7 +143,7 @@ namespace Advent23
 		{
 			TiltNorthSouth(1);
 		}
-		internal void TiltNorthSouth(int offset)
+		void TiltNorthSouth(int offset)
 		{
 			var spritePts = _sprites.OrderBy(s => s.Row).ToList();
 			if (offset > 0)
@@ -232,7 +161,7 @@ namespace Advent23
 				MoveSprite(spritePts[iSprite], spritePt);
 			}
 		}
-		internal void TiltEastWest(int offset)
+		void TiltEastWest(int offset)
 		{
 			var spritePts = _sprites.OrderBy(s => s.Col).ToList();
 			if (offset > 0)
@@ -275,7 +204,6 @@ namespace Advent23
 			return Find(pt)?.Char;
 		}
 
-
 		internal int Support()
 		{
 			var rv = 0;
@@ -283,7 +211,7 @@ namespace Advent23
 				rv += _rows - sprite.Row;
 			return rv;
 		}
-
+		// don't need to tiltnorth first
 		internal int SupportLong()
 		{
 			var rv = 0;
@@ -327,6 +255,5 @@ namespace Advent23
 			}
 			ElfUtils.WriteLines("Base", tag, lines);
 		}
-
 	}
 }
