@@ -6,9 +6,24 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\Day14FakeStar1Part1.txt" />
+    <None Remove="Assets\Day14FakeStar1Part2.txt" />
+    <None Remove="Assets\Day14FakeStar2.txt" />
+  </ItemGroup>
 	
   <ItemGroup>
     <Content Include="Assets\Day14.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Day14FakeStar1Part1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Day14FakeStar1Part2.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Day14FakeStar2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Day14Fake.txt">

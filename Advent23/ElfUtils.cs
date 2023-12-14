@@ -14,6 +14,11 @@ namespace Advent23
 			Pt = pt;
 			Char = c;
 		}
+		public Node(Node other)
+		{
+			Pt = other.Pt;
+			Char = other.Char;
+		}
 		public override string ToString()
 		{ 
 			return $"{Pt} '{Char}'";
@@ -27,6 +32,11 @@ namespace Advent23
 			rv.Add(new(Pt.Row, Pt.Col - 1));
 
 			return rv;
+		}
+
+		internal void SetChar(char c)
+		{
+			Char = c;
 		}
 
 		public Point Pt { get; }
@@ -84,11 +94,18 @@ namespace Advent23
 			}
 			ElfUtils.WriteLines("Base", tag, lines);
 		}
-		protected IList<T> NodesInCol(int iCol)
+		protected List<List<T>> AllCols()
+		{
+			var rv = new List<List<T>>();
+			for (var iCol = 0; iCol < _cols; iCol++)
+				rv.Add(NodesInCol(iCol));
+			return rv;
+		}
+		protected List<T> NodesInCol(int iCol)
 		{
 			return this.Values.Where(n => n.Pt.Col == iCol).ToList();
 		}
-		protected IList<T> NodesInRow(int iRow)
+		protected List<T> NodesInRow(int iRow)
 		{
 			return this.Values.Where(n => n.Pt.Row == iRow).ToList();
 		}
@@ -98,7 +115,7 @@ namespace Advent23
 			return string.Join("", nodes.Select(n => n.Char));
 		}
 	}
-	public class Point
+	public class Point : IEquatable<Point>
 	{
 		public Point(int row, int col)
 		{
@@ -119,6 +136,12 @@ namespace Advent23
 		{
 			return $"({Row}, {Col})";
 		}
+
+		public bool Equals(Point? other)
+		{
+			return (other?.Row == Row && other?.Col == Col);
+		}
+
 		public int Row { get; }
 		public int Col { get; }
 	}
