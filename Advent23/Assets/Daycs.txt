@@ -10,7 +10,7 @@ namespace Advent23
 		{
 			var key = new StarCheckKey(StarEnum.Star1, IsReal);
 			StarCheck check;
-			if (IsReal)
+			if (!IsReal)
 				check = new StarCheck(key, 0L);
 			else
 				check = new StarCheck(key, 0L);
@@ -26,7 +26,7 @@ namespace Advent23
 		{
 			var key = new StarCheckKey(StarEnum.Star2, IsReal);
 			StarCheck check;
-			if (IsReal)
+			if (!IsReal)
 				check = new StarCheck(key, 0L);
 			else
 				check = new StarCheck(key, 0L);

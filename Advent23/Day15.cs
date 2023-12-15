@@ -48,50 +48,53 @@ namespace Advent23
 			foreach (var part in parts)
 			{
 				var splits = part.Split("=-".ToCharArray());
+
 				var label = splits[0];
-				var cv = Hash(label);
-				if (!boxes.ContainsKey(cv))
-					boxes.Add(cv, new List<Lens>());
-				if (part.Contains('-'))
-					boxes[cv].RemoveAll(l => l.Label == label);
+				var hash = Hash(label);
+
+				if (!boxes.ContainsKey(hash))
+					boxes.Add(hash, new List<Lens>());
+
+				var oldLens = boxes[hash].FirstOrDefault(l => l.Label == label);
+
+				if (part.Contains('-') && oldLens != null)
+					boxes[hash].Remove(oldLens);
 				else if (part.Contains('='))
 				{
-					var oldLens = boxes[cv].FirstOrDefault(l => l.Label == label);
+					var focus = int.Parse(splits[1]);
 					if (oldLens == null)
-						boxes[cv].Add(new Lens(label, int.Parse(splits[1])));
-					else
-						oldLens.Focus = int.Parse(splits[1]);
+						boxes[hash].Add(new Lens(label, focus));
+					else if (oldLens != null)
+						oldLens.Focus = focus;
 				}
 			}
 
 			foreach(var box in boxes)
 			{
-				var val = 0L;
 				int slot = 1;
 				foreach(var lens in box.Value)
 				{
-					val += (box.Key + 1) * slot * lens.Focus;
+					rv += (box.Key + 1) * slot * lens.Focus;
 					slot++;
 				}
-				rv += val;
 			}
 			check.Compare(rv);
 			//		rv	259356	long
 
 			return rv;
 		}
-		Dictionary<string, int> _dict = [];
+		Dictionary<string, int> _dictHash = [];
 
 		int Hash(string str)
 		{
-			if (!_dict.ContainsKey(str))
+			if (!_dictHash.ContainsKey(str))
 			{
-				int cv = 0;
+				int hash = 0;
 				foreach (var c in str)
-					cv = (cv + c) * 17 % 256;
-				_dict[str] = cv;
+					hash = (hash + c) * 17 % 256;
+				_dictHash[str] = hash;
 			}
-			return _dict[str];
+			return _dictHash[str];
 		}
 	}
 	public class Lens
