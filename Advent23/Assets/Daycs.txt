@@ -4,6 +4,7 @@ namespace Advent23
 	internal class Day|DD| : IDayRunner
 	{
 		public bool IsReal => false;
+
 		// Day |URL|
 		// Input |INPUTURL|
 		public object? Star1()

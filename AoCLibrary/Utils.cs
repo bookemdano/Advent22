@@ -33,7 +33,7 @@ namespace AoCLibrary
 		{
 			var str = $"{DateTime.Now} {AppName} {o}";
 			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), $"{DateTime.Now} {AppName} {o}" + Environment.NewLine);
-			Console.WriteLine(str);
+			//Console.WriteLine(str);
 		}
 
 		static public void Assert(long l1, long l2)

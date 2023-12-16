@@ -1,9 +1,11 @@
 using AoCLibrary;
+
 namespace Advent23
 {
 	internal class Day16 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
+
 		// Day https://adventofcode.com/2023/day/16
 		// Input https://adventofcode.com/2023/day/16/input
 		public object? Star1()
@@ -71,6 +73,8 @@ namespace Advent23
                 v.Energized = false;
 			Beam.Rows = _rows;
 			Beam.Cols = _cols;
+			var paths = new List<List<Point>>();
+
 			beams.Add(new Beam(pt, from));
 			while(beams.Any())
 			{
@@ -78,16 +82,41 @@ namespace Advent23
 				foreach(var beam in beams)
 				{
 					var node = Find(beam.Pt)!;
-
-                    node.Energized = true;
+					node.Energized = true;
+					bool endsOffGrid = false;
+					bool foundPath = true;
+					foreach (var path in paths.OrderByDescending(p => p.Count))
+					{
+						for(int i = 1; i < path.Count; i++)
+						{
+							var pathKey = $"{path[i-1]} to {path[i]}";
+							if (pathKey == beam.Key)
+							{
+								foundPath = true;
+								for (int j = i + 1; j < path.Count; j++)
+								{
+									var pathPt = path[j];
+									if (Beam.Valid(pathPt))
+									{
+										Find(pathPt)!.Energized = true;
+										beam.Move(pathPt);
+									}
+									else
+										endsOffGrid = true;
+								}
+							}
+						}
+						if (foundPath)
+							break;
+					}
+					if (endsOffGrid)
+						continue;
 					var dir = beam.GetDir();
 					if (node.Char == '|')
 					{
 						if (dir == DirEnum.East || dir == DirEnum.West)
 						{
-                            var newPt = Beam.Translate(beam.Pt, DirEnum.North);
-                            if (Beam.Valid(newPt))
-                                extraBeams.Add(new Beam(newPt, beam.Pt));
+                            extraBeams.Add(new Beam(beam.Pt, DirEnum.North));
                             beam.Move(DirEnum.South);
 						}
 						else if (dir == DirEnum.North || dir == DirEnum.South)
@@ -99,9 +128,7 @@ namespace Advent23
                     {
                         if (dir == DirEnum.North || dir == DirEnum.South)
                         {
-                            var newPt = Beam.Translate(beam.Pt, DirEnum.West);
-                            if (Beam.Valid(newPt))
-                                extraBeams.Add(new Beam(newPt, beam.Pt));
+							extraBeams.Add(new Beam(beam.Pt, DirEnum.West));
                             beam.Move(DirEnum.East);
                         }
                         else if (dir == DirEnum.East || dir == DirEnum.West)
@@ -136,9 +163,15 @@ namespace Advent23
                         beam.Move(dir);
                     }
                 }
-                beams.RemoveAll(b => !b.IsValid());
-                beams.AddRange(extraBeams);
-                WriteLocal("beamed", beams);
+
+				foreach (var beam in beams.Where(b => !b.IsValid()))
+				{
+					if (beam.Path.Count > 2)
+						paths.Add(beam.Path);
+				}
+				beams.RemoveAll(b => !b.IsValid());
+				beams.AddRange(extraBeams.Where(b => b.IsValid()));
+                //WriteLocal("beamed", beams);
 			}
             return this.Values.Count(n => n.Energized);
 		}
@@ -201,68 +234,83 @@ namespace Advent23
 		{
 			Pt = pt;
 			_lastPt = lastPt;
+			Path.Add(_lastPt);
+			Path.Add(pt);
+		}
+
+		public Beam(Point pt, DirEnum dir) : this(Translate(pt, dir), pt)
+		{
 		}
 
 		public DirEnum GetDir()
 		{
-            if (_lastPt.Col < Pt.Col)
-                return DirEnum.East;
-            else if (_lastPt.Col > Pt.Col)
-                return DirEnum.West;
-            else if (_lastPt.Row > Pt.Row)
-                return DirEnum.North;
-            else if (_lastPt.Row < Pt.Row)
-                return DirEnum.South;
+			if (_lastPt.Col < Pt.Col)
+				return DirEnum.East;
+			else if (_lastPt.Col > Pt.Col)
+				return DirEnum.West;
+			else if (_lastPt.Row > Pt.Row)
+				return DirEnum.North;
+			else if (_lastPt.Row < Pt.Row)
+				return DirEnum.South;
 			return DirEnum.NA;
-        }
-        public static Point Translate(Point pt, DirEnum dir)
-        {
+		}
+		static Point Translate(Point pt, DirEnum dir)
+		{
 			Point rv;
 			if (dir == DirEnum.North)
-                rv = new Point(pt.Row - 1, pt.Col);
+				rv = new Point(pt.Row - 1, pt.Col);
 			else if (dir == DirEnum.South)
-                rv = new Point(pt.Row + 1, pt.Col);
+				rv = new Point(pt.Row + 1, pt.Col);
 			else if (dir == DirEnum.East)
-                rv = new Point(pt.Row, pt.Col + 1);
+				rv = new Point(pt.Row, pt.Col + 1);
 			else //if (dir == DirEnum.West)
-                rv = new Point(pt.Row, pt.Col - 1);
+				rv = new Point(pt.Row, pt.Col - 1);
 			return rv;
-        }
+		}
 
-        public void Move(DirEnum dir)
+		public void Move(DirEnum dir)
 		{
 			var newPt = Translate(Pt, dir);
 			Move(newPt);
 		}
-        static public void Reset()
-        {
-            _visited.Clear();
-        }
-        static Dictionary<string, Beam> _visited = [];
-        public bool IsValid()
-        {
-            var key = $"{_lastPt} to {Pt}";
-            if (_visited.ContainsKey(key))
-            {
-                if (_visited[key] != this)
-                    return false;
-            }
-            else
-               _visited.Add(key, this);
-            return Valid(Pt);
-        }
+		public bool IsValid()
+		{
+			if (_repeat)
+				return false;
+			return Valid(Pt);
+		}
 
-        static public bool Valid(Point pt)
+		static public bool Valid(Point pt)
 		{
-            if (pt.Col < 0 || pt.Col >= Cols || pt.Row < 0 || pt.Row >= Rows)
-                return false;
+			if (pt.Col < 0 || pt.Col >= Cols || pt.Row < 0 || pt.Row >= Rows)
+				return false;
 			return true;
-        }
-        void Move(Point pt)
+		}
+		static List<string> _visited = [];
+		bool _repeat = false;
+		internal List<Point> Path { get; } =  [];
+		static public void Reset()
 		{
+			_visited.Clear();
+		}
+		public string Key
+		{
+			get
+			{
+				return $"{_lastPt} to {Pt}";
+			}
+		}
+		internal void Move(Point pt)
+		{
+			if (_visited.Contains(Key))
+				_repeat = true;
+			else
+				_visited.Add(Key);
+			Path.Add(pt);
 			_lastPt = Pt;
 			Pt = pt;
 		}
+
 		public Point Pt { get; private set; }
         public static int Rows { get; internal set; }
         public static int Cols { get; internal set; }
