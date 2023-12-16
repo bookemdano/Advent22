@@ -4,7 +4,7 @@ namespace Advent23
 {
 	internal class Day16 : IDayRunner
 	{
-		public bool IsReal => true;
+		public bool IsReal => false;
 
 		// Day https://adventofcode.com/2023/day/16
 		// Input https://adventofcode.com/2023/day/16/input
@@ -65,6 +65,8 @@ namespace Advent23
         {
             return new Grid16(GetNodes(lines));
         }
+		//MOVE PATH to instance so part 2 can use it. Now it is looping
+		static Dictionary<string, List<Point>> _allPaths = [];
         public long Light(Point pt, Point from)
 		{
 			var beams = new List<Beam>();
@@ -73,109 +75,113 @@ namespace Advent23
                 v.Energized = false;
 			Beam.Rows = _rows;
 			Beam.Cols = _cols;
-			var paths = new List<List<Point>>();
-
+			
 			beams.Add(new Beam(pt, from));
-			while(beams.Any())
+			while (beams.Any())
 			{
-                var extraBeams = new List<Beam>();
-				foreach(var beam in beams)
+				var extraBeams = new List<Beam>();
+				foreach (var beam in beams)
 				{
 					var node = Find(beam.Pt)!;
 					node.Energized = true;
-					bool endsOffGrid = false;
-					bool foundPath = true;
-					foreach (var path in paths.OrderByDescending(p => p.Count))
-					{
-						for(int i = 1; i < path.Count; i++)
-						{
-							var pathKey = $"{path[i-1]} to {path[i]}";
-							if (pathKey == beam.Key)
-							{
-								foundPath = true;
-								for (int j = i + 1; j < path.Count; j++)
-								{
-									var pathPt = path[j];
-									if (Beam.Valid(pathPt))
-									{
-										Find(pathPt)!.Energized = true;
-										beam.Move(pathPt);
-									}
-									else
-										endsOffGrid = true;
-								}
-							}
-						}
-						if (foundPath)
-							break;
-					}
-					if (endsOffGrid)
-						continue;
 					var dir = beam.GetDir();
-					if (node.Char == '|')
+
+					if (node.Char == '.')
+					{
+						beam.Move(dir);
+					}
+					else if (node.Char == '|')
 					{
 						if (dir == DirEnum.East || dir == DirEnum.West)
 						{
-                            extraBeams.Add(new Beam(beam.Pt, DirEnum.North));
-                            beam.Move(DirEnum.South);
+							extraBeams.Add(AddBeam(beam.Pt, DirEnum.North));
+							extraBeams.Add(AddBeam(beam.Pt, DirEnum.South));
+							beam.End();
 						}
 						else if (dir == DirEnum.North || dir == DirEnum.South)
-                        {
-                            beam.Move(dir);
-                        }
-                    }
-                    else if (node.Char == '-')
-                    {
-                        if (dir == DirEnum.North || dir == DirEnum.South)
-                        {
-							extraBeams.Add(new Beam(beam.Pt, DirEnum.West));
-                            beam.Move(DirEnum.East);
-                        }
-                        else if (dir == DirEnum.East || dir == DirEnum.West)
-                        {
-                            beam.Move(dir);
-                        }
-                    }
-                    else if (node.Char == '\\')
-                    {
-                        if (dir == DirEnum.North)
-                            beam.Move(DirEnum.West);
-                        else if (dir == DirEnum.East)
-                            beam.Move(DirEnum.South);
-                        else if (dir == DirEnum.South)
-                            beam.Move(DirEnum.East);
-                        else if (dir == DirEnum.West)
-                            beam.Move(DirEnum.North);
-                    }
-                    else if (node.Char == '/')
-                    {
-                        if (dir == DirEnum.North)
-                            beam.Move(DirEnum.East);
-                        else if (dir == DirEnum.West)
-                            beam.Move(DirEnum.South);
-                        else if (dir == DirEnum.South)
-                            beam.Move(DirEnum.West);
-                        else if (dir == DirEnum.East)
-                            beam.Move(DirEnum.North);
-                    }
-                    else if (node.Char == '.')
-                    {
-                        beam.Move(dir);
-                    }
-                }
+						{
+							beam.Move(dir);
+						}
+					}
+					else if (node.Char == '-')
+					{
+						if (dir == DirEnum.North || dir == DirEnum.South)
+						{
+							extraBeams.Add(AddBeam(beam.Pt, DirEnum.East));
+							extraBeams.Add(AddBeam(beam.Pt, DirEnum.West));
+							beam.End();
+						}
+						else if (dir == DirEnum.East || dir == DirEnum.West)
+						{
+							beam.Move(dir);
+						}
+					}
+					else if (node.Char == '\\')
+					{
+						if (dir == DirEnum.North)
+							beam.Move(DirEnum.West);
+						else if (dir == DirEnum.East)
+							beam.Move(DirEnum.South);
+						else if (dir == DirEnum.South)
+							beam.Move(DirEnum.East);
+						else if (dir == DirEnum.West)
+							beam.Move(DirEnum.North);
+					}
+					else if (node.Char == '/')
+					{
+						if (dir == DirEnum.North)
+							beam.Move(DirEnum.East);
+						else if (dir == DirEnum.West)
+							beam.Move(DirEnum.South);
+						else if (dir == DirEnum.South)
+							beam.Move(DirEnum.West);
+						else if (dir == DirEnum.East)
+							beam.Move(DirEnum.North);
+					}
+				}
+				Loops forever somewhere.
 
 				foreach (var beam in beams.Where(b => !b.IsValid()))
 				{
-					if (beam.Path.Count > 2)
-						paths.Add(beam.Path);
+					if (beam.Path.Count() <= 2)
+						continue;
+					if (!_allPaths.ContainsKey(beam.HeadKey))
+						_allPaths.Add(beam.HeadKey, beam.Path); // log ending paths
+					else
+						ElfHelper.DayLog("Repeat path " + beam.HeadKey); 
 				}
+
 				beams.RemoveAll(b => !b.IsValid());
 				beams.AddRange(extraBeams.Where(b => b.IsValid()));
                 //WriteLocal("beamed", beams);
 			}
             return this.Values.Count(n => n.Energized);
 		}
-        public void WriteLocal(string tag, List<Beam> beams)
+
+		private Beam AddBeam(Point pt, DirEnum dir)
+		{
+			var newBeam = new Beam(pt, dir);
+			if (_allPaths.ContainsKey(newBeam.HeadKey))
+			{
+				ElfHelper.DayLog("FoundPath " + newBeam.HeadKey + " c:" + _allPaths[newBeam.HeadKey].Count());
+				var pts = _allPaths[newBeam.HeadKey];
+				foreach (var pathPt in pts)
+				{
+					if (Beam.Valid(pathPt))
+					{
+						Find(pathPt)!.Energized = true;
+					}
+				}
+				newBeam = new Beam(pts[pts.Count() - 1], pts[pts.Count() - 2]);
+			}
+			else
+			{
+				ElfHelper.DayLog("NewPath " + newBeam.HeadKey);
+			}
+			return newBeam;
+		}
+
+		public void WriteLocal(string tag, List<Beam> beams)
         {
             var lines = new List<string>();
             for (int row = 0; row < _rows; row++)
@@ -198,7 +204,9 @@ namespace Advent23
 
         internal long BestLight()
         {
-            var best = 0L;
+			_allPaths.Clear();
+
+			var best = 0L;
             for(int iRow = 0; iRow < _rows; iRow++)
             {
                 var val = Light(new Point(iRow, 0), new Point(iRow, -1));
@@ -254,7 +262,7 @@ namespace Advent23
 				return DirEnum.South;
 			return DirEnum.NA;
 		}
-		static Point Translate(Point pt, DirEnum dir)
+		internal static Point Translate(Point pt, DirEnum dir)
 		{
 			Point rv;
 			if (dir == DirEnum.North)
@@ -275,7 +283,7 @@ namespace Advent23
 		}
 		public bool IsValid()
 		{
-			if (_repeat)
+			if (_over)
 				return false;
 			return Valid(Pt);
 		}
@@ -287,11 +295,19 @@ namespace Advent23
 			return true;
 		}
 		static List<string> _visited = [];
-		bool _repeat = false;
+		bool _over = false;
 		internal List<Point> Path { get; } =  [];
 		static public void Reset()
 		{
 			_visited.Clear();
+		}
+		public string HeadKey
+		{
+			get
+			{
+				Utils.Assert(Path.Count() >= 2, "Enough path");
+				return $"{Path[0]} to {Path[1]}";
+			}
 		}
 		public string Key
 		{
@@ -300,15 +316,21 @@ namespace Advent23
 				return $"{_lastPt} to {Pt}";
 			}
 		}
+
 		internal void Move(Point pt)
 		{
 			if (_visited.Contains(Key))
-				_repeat = true;
+				_over = true;
 			else
 				_visited.Add(Key);
 			Path.Add(pt);
 			_lastPt = Pt;
 			Pt = pt;
+		}
+
+		internal void End()
+		{
+			_over = true;
 		}
 
 		public Point Pt { get; private set; }
