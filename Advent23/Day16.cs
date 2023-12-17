@@ -1,4 +1,5 @@
 using AoCLibrary;
+using System.Xml.Linq;
 
 namespace Advent23
 {
@@ -21,11 +22,11 @@ namespace Advent23
 			var rv = 0L;
 			// magic
 			var grd = Grid16.FromLines(lines);
-            rv = grd.Light(new Point(0, 0), new Point(0, -1));
+			rv = grd.Light(new Point(0, 0), new Point(0, -1));
 
-            check.Compare(rv);
+			check.Compare(rv);
 
-            //7415
+			//7415
 			return rv;
 		}
 		public object? Star2()
@@ -39,195 +40,110 @@ namespace Advent23
 
 			var lines = Program.GetLines(check.Key);
 			// magic
-            var grd = Grid16.FromLines(lines);
-            var rv = grd.BestLight();
-         
-      
-            check.Compare(rv);
-            //	rv	7943	
-            return rv;
+			var grd = Grid16.FromLines(lines);
+			var rv = grd.BestLight();
+
+
+			check.Compare(rv);
+			//	rv	7943	
+			return rv;
 		}
 	}
 	public class Node16 : Node
 	{
-        public Node16(Point pt, char c) : base(pt, c)
-        {
-        }
-        public bool Energized { get; set; }
+		public Node16(Point pt, char c) : base(pt, c)
+		{
+		}
+		public bool Energized { get; set; }
 	}
 	public class Grid16 : Grid<Node16>
 	{
-        public Grid16(List<Node16> nodes)
-        {
-            Init(nodes);
-        }
-        internal static Grid16 FromLines(string[] lines)
-        {
-            return new Grid16(GetNodes(lines));
-        }
+		public Grid16(List<Node16> nodes)
+		{
+			Init(nodes);
+		}
+		internal static Grid16 FromLines(string[] lines)
+		{
+			return new Grid16(GetNodes(lines));
+		}
 		//MOVE PATH to instance so part 2 can use it. Now it is looping
 		static Dictionary<string, List<Point>> _allPaths = [];
-        public long Light(Point pt, Point from)
+		public long Light(Point pt, Point from)
 		{
 			var beams = new List<Beam>();
-            Beam.Reset();
-            foreach (var v in Values)
-                v.Energized = false;
-			Beam.Rows = _rows;
-			Beam.Cols = _cols;
-			
-			beams.Add(new Beam(pt, from));
-			while (beams.Any())
+			foreach (var v in Values)
+				v.Energized = false;
+			var root = new Beam(from);
+			root.Add(pt);
+			while (!root.IsDone(this, true))
 			{
-				var extraBeams = new List<Beam>();
-				foreach (var beam in beams)
-				{
-					var node = Find(beam.Pt)!;
-					node.Energized = true;
-					var dir = beam.GetDir();
-
-					if (node.Char == '.')
-					{
-						beam.Move(dir);
-					}
-					else if (node.Char == '|')
-					{
-						if (dir == DirEnum.East || dir == DirEnum.West)
-						{
-							extraBeams.Add(AddBeam(beam.Pt, DirEnum.North));
-							extraBeams.Add(AddBeam(beam.Pt, DirEnum.South));
-							beam.End();
-						}
-						else if (dir == DirEnum.North || dir == DirEnum.South)
-						{
-							beam.Move(dir);
-						}
-					}
-					else if (node.Char == '-')
-					{
-						if (dir == DirEnum.North || dir == DirEnum.South)
-						{
-							extraBeams.Add(AddBeam(beam.Pt, DirEnum.East));
-							extraBeams.Add(AddBeam(beam.Pt, DirEnum.West));
-							beam.End();
-						}
-						else if (dir == DirEnum.East || dir == DirEnum.West)
-						{
-							beam.Move(dir);
-						}
-					}
-					else if (node.Char == '\\')
-					{
-						if (dir == DirEnum.North)
-							beam.Move(DirEnum.West);
-						else if (dir == DirEnum.East)
-							beam.Move(DirEnum.South);
-						else if (dir == DirEnum.South)
-							beam.Move(DirEnum.East);
-						else if (dir == DirEnum.West)
-							beam.Move(DirEnum.North);
-					}
-					else if (node.Char == '/')
-					{
-						if (dir == DirEnum.North)
-							beam.Move(DirEnum.East);
-						else if (dir == DirEnum.West)
-							beam.Move(DirEnum.South);
-						else if (dir == DirEnum.South)
-							beam.Move(DirEnum.West);
-						else if (dir == DirEnum.East)
-							beam.Move(DirEnum.North);
-					}
-				}
-				Loops forever somewhere.
-
-				foreach (var beam in beams.Where(b => !b.IsValid()))
-				{
-					if (beam.Path.Count() <= 2)
-						continue;
-					if (!_allPaths.ContainsKey(beam.HeadKey))
-						_allPaths.Add(beam.HeadKey, beam.Path); // log ending paths
-					else
-						ElfHelper.DayLog("Repeat path " + beam.HeadKey); 
-				}
-
-				beams.RemoveAll(b => !b.IsValid());
-				beams.AddRange(extraBeams.Where(b => b.IsValid()));
-                //WriteLocal("beamed", beams);
+				root.Step(this, from);
+				root.Prune();
+				//WriteLocal("beamed", beams);
 			}
-            return this.Values.Count(n => n.Energized);
+			return this.Values.Count(n => n.Energized);
 		}
 
-		private Beam AddBeam(Point pt, DirEnum dir)
-		{
-			var newBeam = new Beam(pt, dir);
-			if (_allPaths.ContainsKey(newBeam.HeadKey))
-			{
-				ElfHelper.DayLog("FoundPath " + newBeam.HeadKey + " c:" + _allPaths[newBeam.HeadKey].Count());
-				var pts = _allPaths[newBeam.HeadKey];
-				foreach (var pathPt in pts)
-				{
-					if (Beam.Valid(pathPt))
-					{
-						Find(pathPt)!.Energized = true;
-					}
-				}
-				newBeam = new Beam(pts[pts.Count() - 1], pts[pts.Count() - 2]);
-			}
-			else
-			{
-				ElfHelper.DayLog("NewPath " + newBeam.HeadKey);
-			}
-			return newBeam;
-		}
 
 		public void WriteLocal(string tag, List<Beam> beams)
-        {
-            var lines = new List<string>();
-            for (int row = 0; row < _rows; row++)
-            {
-                var parts = new List<string>();
-                for (int col = 0; col < _cols; col++)
-                {
+		{
+			var lines = new List<string>();
+			for (int row = 0; row < _rows; row++)
+			{
+				var parts = new List<string>();
+				for (int col = 0; col < _cols; col++)
+				{
 					var node = Find(new Point(row, col))!;
-                    if (beams.Any(b => b.Pt.Equals(node.Pt)))
-                        parts.Add("B");
-                    else if (node.Energized)
-                        parts.Add("#");
-                    else
-                        parts.Add(node.Char.ToString());
-                }
-                lines.Add(string.Join(",", parts));
-            }
-            ElfUtils.WriteLines("Base", tag, lines);
-        }
+					if (beams.Any(b => b.Pt.Equals(node.Pt)))
+						parts.Add("B");
+					else if (node.Energized)
+						parts.Add("#");
+					else
+						parts.Add(node.Char.ToString());
+				}
+				lines.Add(string.Join(",", parts));
+			}
+			ElfUtils.WriteLines("Base", tag, lines);
+		}
 
-        internal long BestLight()
-        {
+		internal long BestLight()
+		{
 			_allPaths.Clear();
 
 			var best = 0L;
-            for(int iRow = 0; iRow < _rows; iRow++)
-            {
-                var val = Light(new Point(iRow, 0), new Point(iRow, -1));
-                if (val > best)
-                    best = val;
-                val = Light(new Point(iRow, _cols-1), new Point(iRow, _cols));
-                if (val > best)
-                    best = val;
-            }
-            for (int iCol = 0; iCol < _cols; iCol++)
-            {
-                var val = Light(new Point(0, iCol), new Point(-1, iCol));
-                if (val > best)
-                    best = val;
-                val = Light(new Point(_rows-1, iCol), new Point(_rows, iCol));
-                if (val > best)
-                    best = val;
-            }
-            return best;
-        }
-    }
+			for (int iRow = 0; iRow < _rows; iRow++)
+			{
+				var val = Light(new Point(iRow, 0), new Point(iRow, -1));
+				if (val > best)
+					best = val;
+				val = Light(new Point(iRow, _cols - 1), new Point(iRow, _cols));
+				if (val > best)
+					best = val;
+			}
+			for (int iCol = 0; iCol < _cols; iCol++)
+			{
+				var val = Light(new Point(0, iCol), new Point(-1, iCol));
+				if (val > best)
+					best = val;
+				val = Light(new Point(_rows - 1, iCol), new Point(_rows, iCol));
+				if (val > best)
+					best = val;
+			}
+			return best;
+		}
+		internal Node16? Find16(Point pt)
+		{
+			return Find(pt);
+		}
+
+
+		internal bool Valid(Point pt)
+		{
+			if (pt.Col < 0 || pt.Col >= _cols || pt.Row < 0 || pt.Row >= _rows)
+				return false;
+			return true;
+		}
+	}
 	public enum DirEnum
 	{
 		NA,
@@ -236,33 +152,108 @@ namespace Advent23
 		South,
 		West
 	}
+
 	public class Beam
 	{
-		public Beam(Point pt, Point lastPt)
+		public Beam(Point pt)
 		{
 			Pt = pt;
-			_lastPt = lastPt;
-			Path.Add(_lastPt);
-			Path.Add(pt);
+		}
+		public Point Pt { get; private set; }
+
+		List<Beam> _children = [];
+
+		internal void Add(Point pt)
+		{
+			_children.Add(new Beam(pt));
+			Utils.Assert(_children.Count() <= 2, "up to two children");
 		}
 
-		public Beam(Point pt, DirEnum dir) : this(Translate(pt, dir), pt)
+		internal void Step(Grid16 grd, Point? from)
 		{
+			if (!_children.Any() && from != null && grd.Valid(Pt))
+			{
+				var dir = GetDir(from, Pt);
+				var node = grd.Find16(Pt)!;
+
+				if (node.Char == '.')
+					Add(Translate(Pt, dir));
+				else if (node.Char == '|')
+				{
+					if (dir == DirEnum.East || dir == DirEnum.West)
+					{
+						Add(Translate(Pt, DirEnum.North));
+						Add(Translate(Pt, DirEnum.South));
+					}
+					else
+					{
+						Add(Translate(Pt, dir));
+					}
+				}
+				else if (node.Char == '-')
+				{
+					if (dir == DirEnum.North || dir == DirEnum.South)
+					{
+						Add(Translate(Pt, DirEnum.East));
+						Add(Translate(Pt, DirEnum.West));
+					}
+					else
+					{
+						Add(Translate(Pt, dir));
+					}
+				}
+				else if (node.Char == '\\')
+				{
+					if (dir == DirEnum.North)
+						Add(Translate(Pt, DirEnum.West));
+					else if (dir == DirEnum.East)
+						Add(Translate(Pt, DirEnum.South));
+					else if (dir == DirEnum.South)
+						Add(Translate(Pt, DirEnum.East));
+					else if (dir == DirEnum.West)
+						Add(Translate(Pt, DirEnum.North));
+				}
+				else if (node.Char == '/')
+				{
+					if (dir == DirEnum.North)
+						Add(Translate(Pt, DirEnum.East));
+					else if (dir == DirEnum.West)
+						Add(Translate(Pt, DirEnum.South));
+					else if (dir == DirEnum.South)
+						Add(Translate(Pt, DirEnum.West));
+					else if (dir == DirEnum.East)
+						Add(Translate(Pt, DirEnum.North));
+				}
+			}
+			else
+			{
+				foreach(var child in _children)
+					child.Step(grd, Pt);
+			}
+		}
+		public override string ToString()
+		{
+			return $"{Pt}({Size()}) [{string.Join(',', _children)}]";
+		}
+		internal int Size()
+		{
+			return 1 + _children.Sum(c => c.Size());
+		}
+		public bool IsDone(Grid16 grd, bool root)
+		{
+			if (!root && !grd.Valid(Pt))
+				return true;
+			if (!_children.Any())
+				return false;
+
+			foreach (var child in _children)
+				if (!child.IsDone(grd, false))
+					return false;
+			return true;
 		}
 
-		public DirEnum GetDir()
-		{
-			if (_lastPt.Col < Pt.Col)
-				return DirEnum.East;
-			else if (_lastPt.Col > Pt.Col)
-				return DirEnum.West;
-			else if (_lastPt.Row > Pt.Row)
-				return DirEnum.North;
-			else if (_lastPt.Row < Pt.Row)
-				return DirEnum.South;
-			return DirEnum.NA;
-		}
-		internal static Point Translate(Point pt, DirEnum dir)
+
+		static Point Translate(Point pt, DirEnum dir)
 		{
 			Point rv;
 			if (dir == DirEnum.North)
@@ -276,67 +267,50 @@ namespace Advent23
 			return rv;
 		}
 
-		public void Move(DirEnum dir)
+		static DirEnum GetDir(Point from, Point to)
 		{
-			var newPt = Translate(Pt, dir);
-			Move(newPt);
-		}
-		public bool IsValid()
-		{
-			if (_over)
-				return false;
-			return Valid(Pt);
+			if (from.Col < to.Col)
+				return DirEnum.East;
+			else if (from.Col > to.Col)
+				return DirEnum.West;
+			else if (from.Row > to.Row)
+				return DirEnum.North;
+			else if (from.Row < to.Row)
+				return DirEnum.South;
+			return DirEnum.NA;
 		}
 
-		static public bool Valid(Point pt)
+		internal void Prune()
 		{
-			if (pt.Col < 0 || pt.Col >= Cols || pt.Row < 0 || pt.Row >= Rows)
-				return false;
-			return true;
-		}
-		static List<string> _visited = [];
-		bool _over = false;
-		internal List<Point> Path { get; } =  [];
-		static public void Reset()
-		{
-			_visited.Clear();
-		}
-		public string HeadKey
-		{
-			get
+			foreach(var child in _children)
 			{
-				Utils.Assert(Path.Count() >= 2, "Enough path");
-				return $"{Path[0]} to {Path[1]}";
+				var key = $"{Pt} + {child.Pt}";
+				var b = child.FindBeam(key);
+				if (b != null)
+				{
+					b.Pt = InvalidPt;
+					b._children.Clear();
+				}
+				child.Prune();
 			}
 		}
-		public string Key
+		readonly Point InvalidPt = new Point(-1, -1);
+		Beam? FindBeam(string key)
 		{
-			get
+			foreach (var child in _children)
 			{
-				return $"{_lastPt} to {Pt}";
+				if (child.Pt.Equals(InvalidPt))
+					continue;
+
+				var subKey = $"{Pt} + {child.Pt}";
+				if (subKey == key)
+					return child;
+				var found = child.FindBeam(key);
+				if (found != null)
+					return found;
 			}
+			return null;
 		}
-
-		internal void Move(Point pt)
-		{
-			if (_visited.Contains(Key))
-				_over = true;
-			else
-				_visited.Add(Key);
-			Path.Add(pt);
-			_lastPt = Pt;
-			Pt = pt;
-		}
-
-		internal void End()
-		{
-			_over = true;
-		}
-
-		public Point Pt { get; private set; }
-        public static int Rows { get; internal set; }
-        public static int Cols { get; internal set; }
-
-        Point _lastPt;
 	}
+
 }
