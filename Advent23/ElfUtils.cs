@@ -73,13 +73,19 @@ namespace Advent23
 			}
 			return nodes;
 		}
-		protected T? Find(Point pt)
+		internal T? Find(Point pt)
 		{
 			if (!this.TryGetValue(pt, out T? value))
 				return null;
 			return value;
 		}
-		public void WriteBase(string tag)
+		internal bool IsValid(Point pt)
+		{
+            if (pt.Col < 0 || pt.Col >= _cols || pt.Row < 0 || pt.Row >= _rows)
+                return false;
+            return true;
+        }
+        public void WriteBase(string tag)
 		{
 			var lines = new List<string>();
 			for (int row = 0; row < _rows; row++)
@@ -161,7 +167,31 @@ namespace Advent23
 			return (other?.Row == Row && other?.Col == Col);
 		}
 
-		public int Row { get; }
+        internal DirEnum GetDir(Point to)
+        {
+            if (Col < to.Col)
+                return DirEnum.East;
+            else if (Col > to.Col)
+                return DirEnum.West;
+            else if (Row > to.Row)
+                return DirEnum.North;
+            else// if (from.Row < to.Row)
+                return DirEnum.South;
+        }
+        public Point Translate(DirEnum dir)
+        {
+            Point rv;
+            if (dir == DirEnum.North)
+                rv = new Point(Row - 1, Col);
+            else if (dir == DirEnum.South)
+                rv = new Point(Row + 1, Col);
+            else if (dir == DirEnum.East)
+                rv = new Point(Row, Col + 1);
+            else //if (dir == DirEnum.West)
+                rv = new Point(Row, Col - 1);
+            return rv;
+        }
+        public int Row { get; }
 		public int Col { get; }
 	}
 	internal class ElfUtils
