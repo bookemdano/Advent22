@@ -5,7 +5,7 @@ namespace Advent23
 {
 	internal class Day16 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 
 		// Day https://adventofcode.com/2023/day/16
 		// Input https://adventofcode.com/2023/day/16/input
@@ -73,15 +73,21 @@ namespace Advent23
 			var beams = new List<Beam>();
 			foreach (var v in Values)
 				v.Energized = false;
-			var root = new Beam(from);
+			var root = new Beam(from, this);
 			root.Add(pt);
-			while (!root.IsDone(this, true))
-			{
-				root.Step(this, from);
-				root.Prune();
-				//WriteLocal("beamed", beams);
-			}
-			return this.Values.Count(n => n.Energized);
+			while (!root.IsDone(true))
+				root.Step(from);
+            /*
+			var allPts = root.AllPts().Distinct().OrderBy(p => p.GetHashCode()).ToList();
+            foreach (var pt1 in allPts)
+            {
+                var node = Find(pt1);
+                if (node != null)
+                    node.Energized = true;
+            }
+            WriteLocal("beamed", beams);
+			*/
+            return root.AllPts().Distinct().Count();
 		}
 
 
@@ -136,7 +142,6 @@ namespace Advent23
 			return Find(pt);
 		}
 
-
 		internal bool Valid(Point pt)
 		{
 			if (pt.Col < 0 || pt.Col >= _cols || pt.Row < 0 || pt.Row >= _rows)
@@ -155,26 +160,59 @@ namespace Advent23
 
 	public class Beam
 	{
-		public Beam(Point pt)
-		{
-			Pt = pt;
-		}
-		public Point Pt { get; private set; }
+        public Beam(Point pt, Grid16 grd)
+        {
+            Pt = pt;
+            _parent = null;
+            _grd = grd;
+            _processed = true;
+        }
 
-		List<Beam> _children = [];
+        public Beam(Point pt, Beam parent)
+        {
+            Pt = pt;
+            _parent = parent;
+			_grd = parent._grd;
+        }
 
+
+        public Point Pt { get; private set; }
+		Grid16 _grd;
+		Beam?[] _children = new Beam?[2];
+		int _iChildren = 0;
+		Beam? _parent = null;
+		bool _processed;
 		internal void Add(Point pt)
 		{
-			_children.Add(new Beam(pt));
-			Utils.Assert(_children.Count() <= 2, "up to two children");
+			if (!_grd.Valid(pt))
+				return;
+            var key = $"{Pt} to {pt}";
+            var root = GetRoot();
+			if (root.HasBeam(key))
+				return;
+            _children[_iChildren++] = new Beam(pt, this);
+			Utils.Assert(_iChildren <= 2, "up to two children");
 		}
-
-		internal void Step(Grid16 grd, Point? from)
+		string Key
 		{
-			if (!_children.Any() && from != null && grd.Valid(Pt))
+			get
+			{
+                return $"{_parent?.Pt} to {Pt}";
+            }
+		}
+		Beam GetRoot()
+		{
+			if (_parent == null)
+				return this;
+			else
+				return _parent.GetRoot();
+		}
+		internal void Step(Point? from)
+		{
+	        if (!_processed)
 			{
 				var dir = GetDir(from, Pt);
-				var node = grd.Find16(Pt)!;
+				var node = _grd.Find16(Pt)!;
 
 				if (node.Char == '.')
 					Add(Translate(Pt, dir));
@@ -224,30 +262,39 @@ namespace Advent23
 					else if (dir == DirEnum.East)
 						Add(Translate(Pt, DirEnum.North));
 				}
+				_processed = true;
 			}
 			else
 			{
 				foreach(var child in _children)
-					child.Step(grd, Pt);
+					child?.Step(Pt);
 			}
 		}
 		public override string ToString()
 		{
-			return $"{Pt}({Size()}) [{string.Join(',', _children)}]";
+			return $"{Pt}({Size()}) [{string.Join(',', _children?.ToString())}]";
 		}
 		internal int Size()
 		{
 			return 1 + _children.Sum(c => c.Size());
 		}
-		public bool IsDone(Grid16 grd, bool root)
+		internal List<Point> AllPts()
 		{
-			if (!root && !grd.Valid(Pt))
-				return true;
-			if (!_children.Any())
+			var rv = new List<Point>();
+            if (_grd.Valid(Pt))
+                rv.Add(Pt);
+            foreach (var child in _children)
+				if (child != null)
+					rv.AddRange(child.AllPts());
+            return rv;
+        }
+        public bool IsDone(bool root)
+		{
+			if (!_processed)
 				return false;
 
 			foreach (var child in _children)
-				if (!child.IsDone(grd, false))
+				if (child?.IsDone(false) == false)
 					return false;
 			return true;
 		}
@@ -267,50 +314,30 @@ namespace Advent23
 			return rv;
 		}
 
-		static DirEnum GetDir(Point from, Point to)
+		static DirEnum GetDir(Point? from, Point to)
 		{
+			if (from == null)
+				return DirEnum.NA;
+
 			if (from.Col < to.Col)
 				return DirEnum.East;
 			else if (from.Col > to.Col)
 				return DirEnum.West;
 			else if (from.Row > to.Row)
 				return DirEnum.North;
-			else if (from.Row < to.Row)
+			else// if (from.Row < to.Row)
 				return DirEnum.South;
-			return DirEnum.NA;
 		}
 
-		internal void Prune()
+		//readonly Point InvalidPt = new Point(-1, -1);
+		bool HasBeam(string key)
 		{
-			foreach(var child in _children)
-			{
-				var key = $"{Pt} + {child.Pt}";
-				var b = child.FindBeam(key);
-				if (b != null)
-				{
-					b.Pt = InvalidPt;
-					b._children.Clear();
-				}
-				child.Prune();
-			}
-		}
-		readonly Point InvalidPt = new Point(-1, -1);
-		Beam? FindBeam(string key)
-		{
+			if (Key == key)
+				return true;
 			foreach (var child in _children)
-			{
-				if (child.Pt.Equals(InvalidPt))
-					continue;
-
-				var subKey = $"{Pt} + {child.Pt}";
-				if (subKey == key)
-					return child;
-				var found = child.FindBeam(key);
-				if (found != null)
-					return found;
-			}
-			return null;
-		}
+				if (child?.HasBeam(key) == true)
+					return true;
+			return false;
+        }
 	}
-
 }
