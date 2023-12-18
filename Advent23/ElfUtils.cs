@@ -181,6 +181,11 @@ namespace Advent23
 			Row = row;
 			Col = col;
 		}
+		public Point(Point other)
+		{
+			Row = other.Row;
+			Col = other.Col;
+		}
 		public override int GetHashCode()
 		{
 			return Row * 100000 + Col;
@@ -214,21 +219,35 @@ namespace Advent23
 			else
 				return DirEnum.NA;
         }
-        public Point Translate(DirEnum dir)
+        public Point Translate(DirEnum dir, int len)
         {
             Point rv;
             if (dir == DirEnum.North)
-                rv = new Point(Row - 1, Col);
+                rv = new Point(Row - len, Col);
             else if (dir == DirEnum.South)
-                rv = new Point(Row + 1, Col);
+                rv = new Point(Row + len, Col);
             else if (dir == DirEnum.East)
-                rv = new Point(Row, Col + 1);
+                rv = new Point(Row, Col + len);
             else //if (dir == DirEnum.West)
-                rv = new Point(Row, Col - 1);
+                rv = new Point(Row, Col - len);
             return rv;
         }
-        public int Row { get; }
+
+		internal static DirEnum OtherDir(DirEnum dir)
+		{
+			if (dir == DirEnum.North)
+				return DirEnum.South;
+			else if (dir == DirEnum.South)
+				return DirEnum.North;
+			else if (dir == DirEnum.East)
+				return DirEnum.West;
+			else //if (dir == DirEnum.West)
+				return DirEnum.East;
+		}
+
+		public int Row { get; }
 		public int Col { get; }
+
 	}
 	internal class ElfUtils
 	{

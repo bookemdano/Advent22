@@ -145,7 +145,7 @@ namespace Advent23
 		}
 		internal Vector17 Continue()
 		{
-			return new Vector17(Pt.Translate(Dir), Dir, Streak + 1);
+			return new Vector17(Pt.Translate(Dir, 1), Dir, Streak + 1);
 		}
 		//public long Score { get; set; }
 	}
@@ -214,7 +214,7 @@ namespace Advent23
 
 		private Path17? CopyThis(DirEnum dir)
 		{
-			var newPt = Current.Pt.Translate(dir);
+			var newPt = Current.Pt.Translate(dir, 1);
 			if (!_grd.IsValid(newPt))	// on board
 				return null;
 
@@ -262,7 +262,7 @@ namespace Advent23
         bool _processed;
         internal void Add(Point oldPt, DirEnum dir)
         {
-            var newPt = oldPt.Translate(dir);
+            var newPt = oldPt.Translate(dir, 1);
             Add(newPt);
         }
         internal void Add(Point pt)

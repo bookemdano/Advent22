@@ -1,8 +1,5 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.Design.Serialization;
-using System.IO.IsolatedStorage;
-using System.Xml.Linq;
 using AoCLibrary;
+using System.Text.Unicode;
 namespace Advent23
 {
 	internal class Day18 : IDayRunner
@@ -24,25 +21,17 @@ namespace Advent23
 			var rv = 0L;
 			// magic
 			//var grd = new GridPlain(lines);
-			var start = new Point18(0, 0, DirEnum.East);
-			var lastPt = start;
+			var start = new Point(0, 0);
 			var edgePts = new List<Point18>();
-			edgePts.Add(lastPt);
+			var lastPt = new Point18(start, DirEnum.West, DirEnum.East, 0);
 			foreach (var line in lines)
 			{
 				var (dir, len) = SplitLine(line, key.Star);
-				for (int i = 0; i < len; i++)
-				{
-					var movePt = lastPt.Translate(dir);
-
-					//Utils.Assert(pt.Row >= 0, "valid");
-					var newPt = new Point18(movePt.Row, movePt.Col, movePt.GetDir(lastPt));
-					edgePts.Add(newPt);
-					lastPt.InDir = lastPt.GetDir(newPt);
-					lastPt = newPt;
-				}
+				var newPt = new Point18(lastPt.EndPt, Point.OtherDir(lastPt.Dir), dir, len);
+				edgePts.Add(newPt);
+				lastPt = newPt;
 			}
-			edgePts.First().InDir = start.GetDir(lastPt);
+			edgePts.First().LastDir = Point.OtherDir(lastPt.Dir);
 			edgePts = edgePts.OrderBy(p => p.GetHashCode()).ToList();
 			//Normalize(edgePts);
 			WritePts(edgePts);
@@ -122,7 +111,7 @@ namespace Advent23
 				var len = int.Parse(dist, System.Globalization.NumberStyles.HexNumber);
 				for (int i = 0; i < len; i++)
 				{
-					pt = pt.Translate(dir);
+					pt = pt.Translate(dir, 1);
 					//Utils.Assert(pt.Row >= 0, "valid");
 					//edgePts.Add(pt);
 				}
@@ -162,45 +151,106 @@ namespace Advent23
 		{
 			var insides = edgePts.Count();
 			var cols = edgePts.Select(p => p.Col).Distinct().Order();
-			foreach(var col in cols)
+			long rv = 0L;
+			var rowRangeDict = new Dictionary<int, RangeList>();
+			//insideList.Add(new Range(0, 1));
+			var runningList = new RangeList();
+			foreach (var col in cols)
 			{
 				var allPtsInCol = edgePts.Where(e => e.Col == col).ToList();
-				Point18? ptStartInside = null;
+				var colList = RangeList.FromCol(edgePts, col);
+				bool inside = false;
 				foreach (var pt in allPtsInCol)
 				{
-					if (ptStartInside == null)
+					var allPtsInRow = edgePts.Where(e => e.Row == pt.Row).ToList();
+
+					if (!rowRangeDict.ContainsKey(pt.Row))
+						rowRangeDict[pt.Row] = RangeList.FromRow(edgePts, pt.Row);
+					var rowRanges = rowRangeDict[pt.Row];
+					var rowPt = allPtsInRow.FirstOrDefault(r => r.Contains(pt));
+					if (rowPt != null)
 					{
-						if (pt.OutDir != DirEnum.South)
-							ptStartInside = pt;
-						continue;
+						if (rowPt.Equals(pt) || rowPt.EndPt.Equals(pt))
+							inside = !inside;
 					}
 					else
 					{
-						if (pt.OutDir != DirEnum.South)
+						if (!inside && runningList.Any(r => r.Overlaps(pt.Row)))
 						{
-							var insideCount = Math.Abs(pt.Row - ptStartInside.Row) - 1;
-							insides += insideCount;
-							ptStartInside = null;
+							break out
 						}
 					}
 				}
+
+				//bool inside = false;
+				/*				if (!lastColList.Any())
+				{
+					lastColList = colList;
+					continue;
+				}
+
+				 * foreach (var pt in allPtsInCol)
+				{
+					if (!rowRangeDict.ContainsKey(pt.Row))
+						rowRangeDict[pt.Row] = RangeList.FromRow(edgePts, pt.Row);
+					var rowRanges = rowRangeDict[pt.Row];
+					//colList.MergeRange(pt.GetRowRange());
+				}*/
+				foreach (var range in colList)
+					runningList.MergeRange(range);
+				rv += runningList.Sum(r => r.Len);
 			}
-			return insides;
+			return rv;
 		}
 	}
 	public class Point18 : Point
 	{
-		public DirEnum InDir { get; set; }
-		public DirEnum OutDir { get; }
-		public Point18(int row, int col, DirEnum fromDir) : base(row, col)
+		public DirEnum LastDir { get; set; }
+		public DirEnum Dir { get; }
+		public int Len { get; set; }
+		public Point18(Point pt, DirEnum lastDir, DirEnum dir, int len) : base(pt)
 		{
-			OutDir = fromDir;
+			LastDir = lastDir;
+			Dir = dir;
+			Len = len;
 		}
-		public bool IsCorner => InDir != OutDir;
+		public bool Contains(Point pt)
+		{
+			if (pt.Col != Col && pt.Row != Row)
+				return false;
+			if (Dir == DirEnum.East &&
+				pt.Row == Row && pt.Col >= Col && pt.Col <= EndPt.Col)
+				return true;
+			else if (Dir == DirEnum.West &&
+				pt.Row == Row && pt.Col <= Col && pt.Col >= EndPt.Col)
+				return true;
+			else if (Dir == DirEnum.South &&
+				pt.Col == Col && pt.Row >= Row && pt.Row <= EndPt.Row)
+				return true;
+			else if (Dir == DirEnum.North &&
+				pt.Col == Col && pt.Row <= Row && pt.Row >= EndPt.Row)
+				return true;
+			return false;
+
+			{
+
+			}
+
+		}
+		public bool IsCorner => LastDir != Dir;
+
+		public Point EndPt
+		{
+			get
+			{
+				return Translate(Dir, Len);
+			}
+		}
+
 		internal char CornerChar()
 		{
-			var dir1 = (DirEnum)Math.Min((int)InDir, (int)OutDir);
-			var dir2 = (DirEnum)Math.Max((int)InDir, (int)OutDir);
+			var dir1 = (DirEnum)Math.Min((int)LastDir, (int)Dir);
+			var dir2 = (DirEnum)Math.Max((int)LastDir, (int)Dir);
 			char rv;
 			if (dir1 == DirEnum.North && dir2 == DirEnum.South)
 				rv = '|';
@@ -223,8 +273,27 @@ namespace Advent23
 			// NESW
 			return $"{base.ToString()} {CornerChar()} c:{IsCorner}";
 		}
+
+		internal Range18 GetRowRange()
+		{
+			if (Dir == DirEnum.South)
+				return new Range18(Row, Len);
+			else if(Dir == DirEnum.North)
+				return new Range18(Row, 0 - Len);
+			else
+				return new Range18(Row, 1);
+		}
+		internal Range18 GetColRange()
+		{
+			if (Dir == DirEnum.East)
+				return new Range18(Col, Len);
+			else if (Dir == DirEnum.West)
+				return new Range18(Col, 0 - Len);
+			else 
+				return new Range18(Col, 1);
+		}
 	}
-    public class Node18 : Node
+	public class Node18 : Node
     {
         public Node18(Point pt, char c) : base(pt, c)
         {
@@ -367,4 +436,109 @@ namespace Advent23
             ElfUtils.WriteLines("Base", tag, lines);
         }
     }
+	internal class Range18
+	{
+		internal void Merge(Range18 range)
+		{
+			Utils.Assert(Overlaps(range), "Merge Not Overlapped");
+			if (Start > range.Start)
+				Start = range.Start;
+			if (End < range.End)
+				End = range.End;
+		}
+		internal bool Overlaps(Range18 range)    // or touch, identical is not consider overlap
+		{
+			if (Equals(range))
+				return false;
+			if ((range.Start >= Start && range.Start <= End) ||
+				(range.End >= Start && range.End <= End))
+				return true;
+			if (Start == range.End + 1 || End + 1 == range.Start)
+				return true;
+			return false;
+		}
+		internal bool Overlaps(int i)    // or touch, identical is not consider overlap
+		{
+			return (i >= Start && i <= End);
+		}
+		public Range18(int start, int len)
+		{
+			if (len < 0)
+			{
+				End = start;
+				Start = start + len + 1;
+			}
+			else
+			{
+				Start = start;
+				End = start + len - 1;
+			}
+			
+		}
+		public int Len => (End - Start + 1);
+		public override string ToString()
+		{
+			return $"{Start}-{End}";
+		}
+		public int Start { get; set; }
+		public int End { get; set; }
+		public override int GetHashCode()
+		{
+			return ToString().GetHashCode();
+		}
+		public override bool Equals(object? obj)
+		{
+			if (obj is Range18 other)
+			{
+				return other.Start == Start && other.End == End;
+			}
+			return false;
+		}
+	}
+	internal class RangeList : List<Range18>
+	{
+		static public RangeList FromRow(IEnumerable<Point18> pts, int iRow)
+		{
+			var rv = new RangeList();
+			foreach (var pt in pts.Where(e => e.Row == iRow))
+				rv.MergeRange(pt.GetColRange());
+			return rv;
+		}
+		static public RangeList FromCol(IEnumerable<Point18> pts, int iCol)
+		{
+			var rv = new RangeList();
+			foreach (var pt in pts.Where(e => e.Col == iCol))
+				rv.MergeRange(pt.GetRowRange());
+			return rv;
+		}
+
+		internal void MergeRange(Range18 newRange)
+		{
+			if (this.Any(r => r.Equals(newRange)))
+				return;
+
+			var overlaps = this.FirstOrDefault(r => r.Overlaps(newRange));
+			if (overlaps == null)
+			{
+				Add(newRange);
+				return;
+			}
+
+			var tryToMerge = newRange;
+			overlaps.Merge(tryToMerge);
+
+			tryToMerge = overlaps;
+			while (true)
+			{
+				overlaps = this.FirstOrDefault(r => r.Overlaps(tryToMerge));
+				if (overlaps == null)
+					break;
+				overlaps.Merge(tryToMerge);
+				Remove(tryToMerge);
+				tryToMerge = overlaps;
+
+			}
+		}
+	}
+
 }
