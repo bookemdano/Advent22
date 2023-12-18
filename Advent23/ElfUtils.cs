@@ -1,6 +1,7 @@
 
 using AoCLibrary;
 using System.IO;
+using System.Xml.Linq;
 
 namespace Advent23
 {
@@ -41,7 +42,7 @@ namespace Advent23
 		}
 
 		public Point Pt { get; }
-		public char Char { get; protected set; }
+		public char Char { get; internal set; }
 	}
 	public class Grid<T> : Dictionary<Point, T> where T : Node
 	{
@@ -128,7 +129,11 @@ namespace Advent23
 		{
 			// in case child wants to init
 		}
-		public GridPlain(List<Node> nodes)
+        public GridPlain(string[] lines)
+        {
+            Init(GetNodes(lines));
+        }
+        public GridPlain(List<Node> nodes)
 		{
 			Init(nodes);
 		}
@@ -140,7 +145,8 @@ namespace Advent23
 		{
 			return new GridPlain(GetNodes(lines));
 		}
-	}
+
+    }
 	public class Vector
 	{
 		public Vector(Point pt, DirEnum dir)
