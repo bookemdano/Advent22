@@ -209,8 +209,10 @@ namespace Advent23
                 return DirEnum.West;
             else if (Row > to.Row)
                 return DirEnum.North;
-            else// if (from.Row < to.Row)
+            else if (Row < to.Row)
                 return DirEnum.South;
+			else
+				return DirEnum.NA;
         }
         public Point Translate(DirEnum dir)
         {

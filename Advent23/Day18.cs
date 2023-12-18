@@ -1,3 +1,6 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.Design.Serialization;
+using System.IO.IsolatedStorage;
 using System.Xml.Linq;
 using AoCLibrary;
 namespace Advent23
@@ -21,36 +24,68 @@ namespace Advent23
 			var rv = 0L;
 			// magic
 			//var grd = new GridPlain(lines);
-			var pt = new Point18(0, 0);
+			var start = new Point18(0, 0, DirEnum.East);
+			var lastPt = start;
 			var edgePts = new List<Point18>();
-            edgePts.Add(pt);
-			foreach(var line in lines)
+			edgePts.Add(lastPt);
+			foreach (var line in lines)
 			{
-				var parts = Utils.Split(' ', line);
-				var dir = ParseDir(parts[0]);
-				var len = int.Parse(parts[1]);
+				var (dir, len) = SplitLine(line, key.Star);
 				for (int i = 0; i < len; i++)
 				{
-					var movePt = pt.Translate(dir);
+					var movePt = lastPt.Translate(dir);
+
 					//Utils.Assert(pt.Row >= 0, "valid");
-                    edgePts.Add(pt);
-                }
+					var newPt = new Point18(movePt.Row, movePt.Col, movePt.GetDir(lastPt));
+					edgePts.Add(newPt);
+					lastPt.InDir = lastPt.GetDir(newPt);
+					lastPt = newPt;
+				}
 			}
-            var minRow = edgePts.Min(n => n.Row);
-            var minCol = edgePts.Min(n => n.Col);
-            var edgeNodes = new List<Node18>();
-			foreach (var edgePt in edgePts)
-				edgeNodes.Add(new Node18(new Point(edgePt.Row + Math.Abs(minRow), edgePt.Col + Math.Abs(minCol)), '#'));
-		
-			var grd = Grid18.FromSparse(edgeNodes);
-			grd.WriteBase("edge");
-			rv = grd.CountInside();
-			var rv1 = GetInsides(edgePts.Skip(1));
-			Utils.Assert(rv, rv1);
+			edgePts.First().InDir = start.GetDir(lastPt);
+			edgePts = edgePts.OrderBy(p => p.GetHashCode()).ToList();
+			//Normalize(edgePts);
+			WritePts(edgePts);
+			rv = GetInsides(edgePts);
+
 			check.Compare(rv);
 			//53844
 			return rv;
 		}
+
+		private void WritePts(List<Point18> pts)
+		{
+			var minRow = pts.Min(p => p.Row);
+			var maxRow = pts.Max(p => p.Row);
+			var minCol = pts.Min(p => p.Col);
+			var maxCol = pts.Max(p => p.Col);
+			var lines = new List<string>();
+			for (int row = minRow; row <= maxRow; row++)
+			{
+				var parts = new List<string>();
+				for (int col = minCol; col <= maxCol; col++)
+				{
+					var pt = new Point(row, col);
+					var foundPt = pts.FirstOrDefault(p => p.Equals(pt));
+					if (foundPt == null)
+						parts.Add(" ");
+					else
+						parts.Add($"{foundPt.CornerChar()}");
+				}
+				lines.Add(string.Join(",", parts));
+			}
+			ElfUtils.WriteLines("Base", "pts", lines);
+		}
+
+		private static void Normalize(List<Point18> edgePts)
+		{
+			var minRow = edgePts.Min(n => n.Row);
+			var minCol = edgePts.Min(n => n.Col);
+			var edgeNodes = new List<Node18>();
+			foreach (var edgePt in edgePts)
+				edgeNodes.Add(new Node18(new Point(edgePt.Row + Math.Abs(minRow), edgePt.Col + Math.Abs(minCol)), '#'));
+		}
+
 		DirEnum ParseDir(string dir)
 		{
 			if (dir == "R" || dir == "0")
@@ -77,7 +112,7 @@ namespace Advent23
 			var rv = 0L;
 			// magic
 			var pt = new Point(0, 0);
-			var edgePts = new List<Point>();
+			var edgePts = new List<Point18>();
 			//edgePts.Add(pt);
 			foreach (var line in lines)
 			{
@@ -89,7 +124,7 @@ namespace Advent23
 				{
 					pt = pt.Translate(dir);
 					//Utils.Assert(pt.Row >= 0, "valid");
-					edgePts.Add(pt);
+					//edgePts.Add(pt);
 				}
 			}
 			GetInsides(edgePts);
@@ -106,39 +141,47 @@ namespace Advent23
 			check.Compare(rv);
 			return rv;
 		}
-		long GetInsides(IEnumerable<Point> edgePts)
+		Tuple<DirEnum, int> SplitLine(string line, StarEnum star)
 		{
-			var last = new Point(0, 0);
-			var insideDir = DirEnum.South;
-			var lastDir = DirEnum.East;
-			var insides = 0L;
-			foreach (var edgePt in edgePts)
+			var parts = Utils.Split(' ', line);
+			if (star == StarEnum.Star1)
 			{
-				var dir = last.GetDir(edgePt);
-				if (dir == lastDir)
+				var dir = ParseDir(parts[0]);
+				var len = int.Parse(parts[1]);
+				return new Tuple<DirEnum, int>(dir, len);
+			}
+			else
+			{
+				var dist = parts[2].Substring(2, 5);
+				var dir = ParseDir(parts[2].Substring(7, 1));
+				var len = int.Parse(dist, System.Globalization.NumberStyles.HexNumber);
+				return new Tuple<DirEnum, int>(dir, len);
+			}
+		}
+		long GetInsides(IEnumerable<Point18> edgePts)
+		{
+			var insides = edgePts.Count();
+			var cols = edgePts.Select(p => p.Col).Distinct().Order();
+			foreach(var col in cols)
+			{
+				var allPtsInCol = edgePts.Where(e => e.Col == col).ToList();
+				Point18? ptStartInside = null;
+				foreach (var pt in allPtsInCol)
 				{
-
-				}
-				if (insideDir == DirEnum.South)
-				{
-					var pts = edgePts.Where(p => p.Col == edgePt.Col && p.Row > edgePt.Row).OrderBy(p => p.GetHashCode()).ToList();
-					bool inside = true;
-					insides += pts.Count;
-					var lastPt = edgePt;
-					foreach (var pt in pts)
+					if (ptStartInside == null)
 					{
-						var diff = Math.Abs(pt.Row - lastPt.Row);
-						if (diff == 1)
-							continue;
-						if (inside)
+						if (pt.OutDir != DirEnum.South)
+							ptStartInside = pt;
+						continue;
+					}
+					else
+					{
+						if (pt.OutDir != DirEnum.South)
 						{
-							var insideCount = Math.Abs(pt.Row - lastPt.Row) - 1;
+							var insideCount = Math.Abs(pt.Row - ptStartInside.Row) - 1;
 							insides += insideCount;
-							inside = false;
+							ptStartInside = null;
 						}
-						else
-							inside = true;
-						lastPt = pt;
 					}
 				}
 			}
@@ -147,9 +190,38 @@ namespace Advent23
 	}
 	public class Point18 : Point
 	{
-		public Point18(int row, int col) : base(row, col)
+		public DirEnum InDir { get; set; }
+		public DirEnum OutDir { get; }
+		public Point18(int row, int col, DirEnum fromDir) : base(row, col)
 		{
-			
+			OutDir = fromDir;
+		}
+		public bool IsCorner => InDir != OutDir;
+		internal char CornerChar()
+		{
+			var dir1 = (DirEnum)Math.Min((int)InDir, (int)OutDir);
+			var dir2 = (DirEnum)Math.Max((int)InDir, (int)OutDir);
+			char rv;
+			if (dir1 == DirEnum.North && dir2 == DirEnum.South)
+				rv = '|';
+			else if (dir1 == DirEnum.North && dir2 == DirEnum.East)
+				rv = '└';
+			else if (dir1 == DirEnum.North && dir2 == DirEnum.West)
+				rv = '┘';
+			else if (dir1 == DirEnum.East && dir2 == DirEnum.South)
+				rv = '┌';
+			else if (dir1 == DirEnum.East && dir2 == DirEnum.West)
+				rv = '─';
+			else if (dir1 == DirEnum.South && dir2 == DirEnum.West)
+				rv = '┐';
+			else
+				rv ='x';
+			return rv;
+		}
+		public override string ToString()
+		{
+			// NESW
+			return $"{base.ToString()} {CornerChar()} c:{IsCorner}";
 		}
 	}
     public class Node18 : Node
