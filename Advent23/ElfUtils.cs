@@ -1,5 +1,6 @@
 
 using AoCLibrary;
+using System.IO;
 
 namespace Advent23
 {
@@ -138,6 +139,33 @@ namespace Advent23
 		internal static GridPlain FromLines(string[] lines)
 		{
 			return new GridPlain(GetNodes(lines));
+		}
+	}
+	public class Vector
+	{
+		public Vector(Point pt, DirEnum dir)
+		{
+			Pt = pt;
+			Dir = dir;
+		}
+		public Point Pt { get; }
+		public DirEnum Dir { get; }
+
+		public override bool Equals(object? obj)
+		{
+			if (obj is Vector17 other)
+			{
+				return other.Pt.Equals(Pt) && other.Dir == Dir;
+			}
+			return false;
+		}
+		public override int GetHashCode()
+		{
+			return Pt.GetHashCode() * ((int)Dir + 1);
+		}
+		public override string ToString()
+		{
+			return $"{Pt} {Dir}";
 		}
 	}
 	public class Point : IEquatable<Point>

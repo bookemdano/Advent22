@@ -14,13 +14,13 @@ namespace Advent23
 			if (!IsReal)
 				check = new StarCheck(key, 102L);
 			else
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 859L);
 
 			var lines = Program.GetLines(check.Key);
 			var rv = 0L;
-            // magic
-            var grd = new Grid17(lines);
-            grd.FindPaths();
+			// magic
+			var grd = Grid17.FromLines(lines);
+            grd.FindPaths2();
 
 			check.Compare(rv);
 			return rv;
@@ -30,46 +30,74 @@ namespace Advent23
 			var key = new StarCheckKey(StarEnum.Star2, IsReal);
 			StarCheck check;
 			if (!IsReal)
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 71L);
 			else
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 1027L);
 
 			var lines = Program.GetLines(check.Key);
 			var rv = 0L;
 			// magic
+			var grd = Grid17.FromLines(lines);
+			grd.FindPaths2();
 
 			check.Compare(rv);
 			return rv;
 		}
 	}
-	public class Grid17 : GridPlain
+	public class Node17 : Node
 	{
-        public Grid17(string[] lines)
-        {
-            var nodes = GetNodes(lines);
-            Init(nodes);
-        }
+		public Node17(Point pt, char c) : base(pt, c)
+		{
+		}
+		public long MinSum { get; set; } = -1;
+		public override string ToString()
+		{
+			return $"{base.ToString()} m:{MinSum}";
+		}
+		public long Cooling => Char - '0';
+	}
+	public class Grid17 : Grid<Node17>
+	{
+		public Grid17(List<Node17> nodes)
+		{
+			Init(nodes);
+		}
+		internal static Grid17 FromLines(string[] lines)
+		{
+			return new Grid17(GetNodes(lines));
+		}
 
 
-        internal void FindPaths()
+		internal void FindPaths2()
         {
-            var from = new Point(0, -1);
-            var root = new Walk17(from, this);
-            var start = new Point(0, 0);
-            root.Add(start);
-            while (!root.IsDone())
+			foreach (var node in Values)
+				node.MinSum = -1;
+
+			var start = new Point(0, 0);
+
+			var paths = new List<Path17>();
+			paths.Add(new Path17(this, start));
+
+
+			while (!paths.All(p => p.IsDone()))
             {
-                root.Step(from);
-                WriteLocal("step", root.AllPts());
-            }
-            var completes = root.Completes();
+				var newPaths = new List<Path17>();
+				foreach (var path in paths)	//.OrderByDescending(p => p.Path.Count()).Take(1000))
+					newPaths.AddRange(path.AddAll());
+				paths.AddRange(newPaths);
+				paths.RemoveAll(p => p.IsDone() && !p.Won());
+				ElfHelper.DayLog($"{paths.Count()} a:{paths.Count(p => !p.IsDone())} w:{paths.Count(p => p.Won())}");
+				WriteLocal("step");
+			}
 
         }
+
+		static List<Point> _pointCache = [];
         internal Point EndPoint()
         {
             return new Point(_rows - 1, _cols - 1);
         }
-        public void WriteLocal(string tag, List<Point> pts)
+        public void WriteLocal(string tag)
         {
             var lines = new List<string>();
             for (int row = 0; row < _rows; row++)
@@ -78,17 +106,138 @@ namespace Advent23
                 for (int col = 0; col < _cols; col++)
                 {
                     var node = Find(new Point(row, col))!;
-                    if (pts.Contains(node.Pt))
-                        parts.Add("B");
-                    else
-                        parts.Add(node.Char.ToString());
+					var min = Path17.GetMin(node.Pt);
+					//if (pts.Contains(node.Pt))
+					//    parts.Add("B");
+					if (min > 0)
+					    parts.Add(min.ToString("000"));
+					else
+						parts.Add($" {node.Char} ");
                 }
                 lines.Add(string.Join(",", parts));
             }
             ElfUtils.WriteLines("Base", tag, lines);
         }
     }
-    public class Walk17
+	public class Vector17 : Vector
+	{
+		public Vector17(Point pt, DirEnum dir, int streak) : base(pt, dir)
+		{
+			Streak = streak;
+		}
+		public int Streak { get; }
+
+		public override bool Equals(object? obj)
+		{
+			if (obj is Vector17 other)
+			{
+				return base.Equals(other) && Streak == Streak;
+			}
+			return false;
+		}
+		public override int GetHashCode()
+		{
+			return base.GetHashCode() * Streak;
+		}
+		public override string ToString()
+		{
+			return $"{base.ToString()} s:{Streak}";
+		}
+		internal Vector17 Continue()
+		{
+			return new Vector17(Pt.Translate(Dir), Dir, Streak + 1);
+		}
+		//public long Score { get; set; }
+	}
+	public class Path17
+	{
+		private Grid17 _grd;
+
+		public Vector17 Current { get; private set; }
+		public long Score { get; set; }
+		private bool _done = false;
+		
+		private Path17(Path17 other, Vector17 vector)
+		{
+			_grd = other._grd;
+			Score = other.Score;
+			SetCurrent(vector);
+			//grd.Find(to)!.MinSum = Score;
+		}
+		static public long GetMin(Point pt)
+		{
+			var ptVecs = _vecs.Where(v => v.Key.Pt.Equals(pt));
+			if (ptVecs.Any())
+				return ptVecs.Min(v => v.Value);
+			return 0;
+		}
+		static Dictionary<Vector17, long> _vecs = [];
+		void SetCurrent(Vector17 vector)
+		{
+			Current = vector;
+			Score += _grd.Find(Current.Pt)!.Cooling;
+			if (_vecs.ContainsKey(vector) && _vecs[vector] < Score)
+				_done = true;
+			else
+				_vecs[vector] = Score;
+		}
+		// only to initialize
+		public Path17(Grid17 grd, Point to)
+		{
+			_grd = grd;
+			Current = new Vector17(to, DirEnum.East, 1);
+			// don't score first block
+			//grd.Find(to)!.MinSum = Score;
+		}
+		
+		internal List<Path17> AddAll()
+		{
+			var rv = new List<Path17?>();	
+			if (Current.Dir != DirEnum.South && Current.Dir != DirEnum.North)
+			{
+				rv.Add(CopyThis(DirEnum.North));
+				rv.Add(CopyThis(DirEnum.South));
+			}
+			if (Current.Dir != DirEnum.West && Current.Dir != DirEnum.East)
+			{
+				rv.Add(CopyThis(DirEnum.East));
+				rv.Add(CopyThis(DirEnum.West));
+			}
+			var newV = Current.Continue();
+			if (newV.Streak <= 3 && _grd.IsValid(newV.Pt))
+				SetCurrent(newV);
+			else
+				_done = true;
+
+			return rv.Where(p => p != null).ToList()!;
+		}
+
+		private Path17? CopyThis(DirEnum dir)
+		{
+			var newPt = Current.Pt.Translate(dir);
+			if (!_grd.IsValid(newPt))	// on board
+				return null;
+
+			return new Path17(this, new Vector17(newPt, dir, 1));
+		}
+
+		static List<Vector17> _used = [];
+		internal bool IsDone()
+		{
+			return (_done || Won());
+		}
+		internal bool Won()
+		{
+			return Current.Pt.Equals(_grd.EndPoint());
+		}
+
+		public override string ToString()
+		{
+			return $"{Current} w:{Won()} d:{_done}";
+		}
+	}
+
+	public class Walk17
     {
         public Walk17(Point pt, Grid17 grd)
         {
@@ -258,5 +407,5 @@ namespace Advent23
                     return true;
             return false;
         }
-    }
+	}
 }
