@@ -1,7 +1,4 @@
 using AoCLibrary;
-using System.Data;
-using System.Security.AccessControl;
-
 namespace Advent23
 {
 	internal class Day19 : IDayRunner
@@ -101,8 +98,7 @@ namespace Advent23
 					ElfHelper.DayLog("Workflow " + workflow);
 					foreach (var rule in workflow.Rules)
 					{
-						var lims = limitSet.Overlaps(rule);
-						if (!lims.Any())
+						if (rule.Condition == null)
 						{
 							Utils.Assert(rule.Condition == null, "Condition is null");
 							limitSet.Output = rule.Output;
@@ -118,8 +114,9 @@ namespace Advent23
 					}
 				}
 				limitSets.AddRange(newLims);
+				limitSets.RemoveAll(l => Rule19.IsReject(l.Output));
 			}
-			var accepts = limitSets.RemoveAll(l => Rule19.IsReject(l.Output));
+			//var accepts = limitSets.RemoveAll(l => Rule19.IsReject(l.Output));
 			foreach(var limitSet in limitSets)
 				rv += limitSet.Combinations();
 			check.Compare(rv);
@@ -130,30 +127,26 @@ namespace Advent23
 	}
 	public class LimitSet19
 	{
-		public string? Output { get; set; }
+		public string Output { get; set; }
+		Dictionary<char, Limit19> _limits = [];
+
 		public LimitSet19(LimitSet19 other)
 		{
 			var ratings = "xmas".ToCharArray();
 			foreach(var rating in ratings)
 			{
-				_limits.Add(rating, new List<Limit19>());
-				foreach (var limit in other.GetLimits(rating))
-					_limits[rating].Add(new Limit19(limit));
+				_limits.Add(rating, new Limit19(other._limits[rating]));
 			}
-		}
-		List<Limit19> GetLimits(char rating)
-		{
-			return _limits[rating];
+			Output = "x";
 		}
 		public LimitSet19()
 		{
-			_limits.Add('x', new List<Limit19>() { new Limit19(1, 4000) });
-			_limits.Add('m', new List<Limit19>() { new Limit19(1, 4000) });
-			_limits.Add('a', new List<Limit19>() { new Limit19(1, 4000) });
-			_limits.Add('s', new List<Limit19>() { new Limit19(1, 4000) });
+			_limits.Add('x', new Limit19(1, 4000));
+			_limits.Add('m', new Limit19(1, 4000));
+			_limits.Add('a', new Limit19(1, 4000));
+			_limits.Add('s', new Limit19(1, 4000));
 			Output = "in";
 		}
-		Dictionary<char, List<Limit19>> _limits = [];
 
 		internal LimitSet19? Split(Rule19 rule)
 		{
@@ -179,16 +172,14 @@ namespace Advent23
 		{
 			Utils.Assert(rule.Condition != null, "blank condition");
 			var condition = rule.Condition!;
-			foreach (var limit in _limits[condition.Rating])
+			var limit = _limits[condition.Rating];
+			if (limit.Contains(condition.Value))
 			{
-				if (limit.Contains(condition.Value))
-				{
-					if (condition.Relation == ">")
-						limit.End = condition.Value;
-					else if (condition.Relation == "<")
-						limit.Start = condition.Value;
-					return true;
-				}
+				if (condition.Relation == ">")
+					limit.End = condition.Value;
+				else if (condition.Relation == "<")
+					limit.Start = condition.Value;
+				return true;
 			}
 			return false;
 		}
@@ -196,44 +187,23 @@ namespace Advent23
 		{
 			Utils.Assert(rule.Condition != null, "blank condition");
 			var condition = rule.Condition!;
-			foreach (var limit in _limits[condition.Rating])
+			var limit = _limits[condition.Rating];
+			if (limit.Contains(condition.Value))
 			{
-				if (limit.Contains(condition.Value))
-				{
-					if (condition.Relation == ">")
-						limit.Start = condition.Value + 1;
-					else if (condition.Relation == "<")
-						limit.End = condition.Value - 1;
-					limit.Output = rule.Output;
-					return true;
-				}
+				if (condition.Relation == ">")
+					limit.Start = condition.Value + 1;
+				else if (condition.Relation == "<")
+					limit.End = condition.Value - 1;
+				return true;
 			}
 			return false;
-		}
-
-		internal List<Limit19> Overlaps(Rule19 rule)
-		{
-			var rv = new List<Limit19>();
-			if (rule.Condition == null)
-				return rv;
-			var rating = rule.Condition.Rating;
-			var limits = _limits[rating];
-			foreach(var limit in limits)
-			{
-				if (rule.Condition.Evaluate(limit.Start) || rule.Condition.Evaluate(limit.End))
-					rv.Add(limit);
-			}
-			return rv;
 		}
 
 		internal long Combinations()
 		{
 			long rv = 1L;
-			foreach (var limit in _limits)
-			{
-				var limitOne = limit.Value.First();
-				rv *= (long)(limitOne.End - limitOne.Start + 1);
-			}
+			foreach (var limit in _limits.Values)
+				rv *= (long)(limit.End - limit.Start + 1);
 			return rv;
 		}
 	}
@@ -306,7 +276,7 @@ namespace Advent23
 		{
 			if (line.Contains('>'))
 				Relation = ">";
-			else if (line.Contains("<"))
+			else //if (line.Contains("<"))
 				Relation = "<";
 			var parts = line.Split("><".ToCharArray());
 			Rating = parts[0].First();
