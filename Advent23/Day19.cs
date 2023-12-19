@@ -6,7 +6,7 @@ namespace Advent23
 {
 	internal class Day19 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 
 		// Day https://adventofcode.com/2023/day/19
 		// Input https://adventofcode.com/2023/day/19/input
@@ -80,50 +80,57 @@ namespace Advent23
 			var key = new StarCheckKey(StarEnum.Star2, IsReal);
 			StarCheck check;
 			if (!IsReal)
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 167409079868000L);
 			else
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 132186256794011L);
 
 			var lines = Program.GetLines(check.Key);
-			var rv = 0L;
+			long rv = 0L;
 			// magic
 			var workflows = GetWorkflows(lines);
 			var queue = new List<Workflow19>();
 			var limitSets = new List<LimitSet19>();
 			limitSets.Add(new LimitSet19());
-			var stack = new Stack<Workflow19>();
-			stack.Push(workflows["in"]);
-			while(stack.Any())
+			while(limitSets.Any(l => !Rule19.IsFinal(l.Output)))
 			{
 				var newLims = new List<LimitSet19>();
-				foreach (var limitSet in limitSets)
+				foreach (var limitSet in limitSets.Where(l => !Rule19.IsFinal(l.Output)))
 				{
-					var workflow = stack.Pop();
+					ElfHelper.DayLog("Eval " + limitSet);
+					var workflow = workflows[limitSet.Output];
+					ElfHelper.DayLog("Workflow " + workflow);
 					foreach (var rule in workflow.Rules)
 					{
 						var lims = limitSet.Overlaps(rule);
 						if (!lims.Any())
 						{
-							limitSet.SetOutput(rule.Output);
+							Utils.Assert(rule.Condition == null, "Condition is null");
+							limitSet.Output = rule.Output;
 							continue;
 						}
 						// break apart
 						var newLimitSet = limitSet.Split(rule);
 						if (newLimitSet != null)
 						{
+							ElfHelper.DayLog("New " + newLimitSet);
 							newLims.Add(newLimitSet);
-							stack.Push(workflows[rule.Output]);
 						}
 					}
 				}
 				limitSets.AddRange(newLims);
 			}
+			var accepts = limitSets.RemoveAll(l => Rule19.IsReject(l.Output));
+			foreach(var limitSet in limitSets)
+				rv += limitSet.Combinations();
 			check.Compare(rv);
+			// 		rv	132186256794011	long
+
 			return rv;
 		}
 	}
 	public class LimitSet19
 	{
+		public string? Output { get; set; }
 		public LimitSet19(LimitSet19 other)
 		{
 			var ratings = "xmas".ToCharArray();
@@ -140,10 +147,11 @@ namespace Advent23
 		}
 		public LimitSet19()
 		{
-			_limits.Add('x', new List<Limit19>() { new Limit19(0, 4000) });
-			_limits.Add('m', new List<Limit19>() { new Limit19(0, 4000) });
-			_limits.Add('a', new List<Limit19>() { new Limit19(0, 4000) });
-			_limits.Add('s', new List<Limit19>() { new Limit19(0, 4000) });
+			_limits.Add('x', new List<Limit19>() { new Limit19(1, 4000) });
+			_limits.Add('m', new List<Limit19>() { new Limit19(1, 4000) });
+			_limits.Add('a', new List<Limit19>() { new Limit19(1, 4000) });
+			_limits.Add('s', new List<Limit19>() { new Limit19(1, 4000) });
+			Output = "in";
 		}
 		Dictionary<char, List<Limit19>> _limits = [];
 
@@ -155,6 +163,7 @@ namespace Advent23
 			if (FutherLimitInverse(rule))
 			{
 				rv.FutherLimit(rule);
+				rv.Output = rule.Output;
 				return rv;
 			}
 			return null;
@@ -164,7 +173,7 @@ namespace Advent23
 			var parts = new List<string>();
 			foreach (var kvp in _limits)
 				parts.Add($"{kvp.Key} ({string.Join("|", kvp.Value)})");
-			return string.Join(",", parts);
+			return $"o:{Output} {string.Join(",", parts)}";
 		}
 		private bool FutherLimitInverse(Rule19 rule)
 		{
@@ -217,15 +226,15 @@ namespace Advent23
 			return rv;
 		}
 
-		internal void SetOutput(string output)
+		internal long Combinations()
 		{
-			foreach(var kvp in _limits)
+			long rv = 1L;
+			foreach (var limit in _limits)
 			{
-				foreach(var limit in kvp.Value)
-				{
-					limit.Output = output;
-				}
+				var limitOne = limit.Value.First();
+				rv *= (long)(limitOne.End - limitOne.Start + 1);
 			}
+			return rv;
 		}
 	}
 	public class Limit19
@@ -234,7 +243,6 @@ namespace Advent23
 		{
 			Start = other.Start;
 			End = other.End;
-			Output = other.Output;
 		}
 		public bool Contains(int value)
 		{
@@ -244,15 +252,13 @@ namespace Advent23
 		{
 			Start = start;
 			End = end;
-			Output = "";
 		}
 		public override string ToString()
 		{
-			return $"s:{Start}-e:{End} o:{Output}";
+			return $"s:{Start}-e:{End}";// o:{Output}";
 		}
 		public int Start { get; set; }
 		public int End { get; set; }
-		public string Output { get; set; }
 	}
 	public class Workflow19
 	{
@@ -280,6 +286,10 @@ namespace Advent23
 					return o;
 			}
 			return null;
+		}
+		public override string ToString()
+		{
+			return $"n:{Name} r:{string.Join(";", Rules)}";
 		}
 
 	}
@@ -335,8 +345,10 @@ namespace Advent23
 				Condition = new Condition19(parts[0]);
 			}
 		}
-		static public bool IsFinal(string output)
+		static public bool IsFinal(string? output)
 		{
+			if (output == null)
+				return false;
 			return IsAccept(output) || IsReject(output);
 		}
 		static public bool IsAccept(string output)
