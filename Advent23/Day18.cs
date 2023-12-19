@@ -177,7 +177,7 @@ namespace Advent23
 					{
 						if (!inside && runningList.Any(r => r.Overlaps(pt.Row)))
 						{
-							break out
+							break;
 						}
 					}
 				}
