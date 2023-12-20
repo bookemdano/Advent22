@@ -1,6 +1,8 @@
 using AoCLibrary;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection.Metadata;
+using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -173,6 +175,12 @@ namespace Leaders
 		private void Leaderboard_Click(object sender, RoutedEventArgs e)
 		{
 			Utils.Open(ElfHelper.LeaderUrl);
+		}
+
+		private void Slack_Click(object sender, RoutedEventArgs e)
+		{
+			var channelId = "C02NY1HMTN0";
+			Utils.Open($"slack://channel?team=TB4KLF92L&id={channelId}");
 		}
 	}
 }

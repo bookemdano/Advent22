@@ -13,12 +13,13 @@
 			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>
 			<Button Click="Puzzle_Click" Margin="3" Padding="3">Puzzle</Button>
 			<Button Click="Leaderboard_Click" Margin="3" Padding="3">Leaderboard</Button>
+			<Button Click="Slack_Click" Margin="3" Padding="3">Slack</Button>
 		</StackPanel>
 		<DataGrid x:Name="grd"/>
 		<StackPanel Orientation="Horizontal"  Background="Black">
 			<TextBlock x:Name="staNext" Margin="3" Foreground="PaleGreen" FontFamily="Courier New"/>
 			<TextBlock x:Name="staLeft" Margin="3" Background="Black" Foreground="PaleGreen" FontFamily="Courier New"/>
 		</StackPanel>
-		<ListBox x:Name="lst"/>
+		<ListBox x:Name="lst" MaxHeight="500"/>
 	</StackPanel>
 </Window>
