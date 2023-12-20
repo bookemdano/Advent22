@@ -82,25 +82,12 @@ namespace Advent23
             }
             rv = pathLens[0];
             foreach(var len in pathLens)
-                rv = FindLCM(rv, len);
+                rv = Misc.FindLCM(rv, len);
             if (!IsReal)
                 Utils.Assert(rv, 6L);
             return rv;
         }
 
-        // https://www.c-sharpcorner.com/UploadFile/0c1bb2/program-to-find-lcm-lowest-common-multiples-of-two-numbers/
-        public static long FindLCM(long a, long b)
-        {
-            if (a < b)
-                (b, a) = (a, b);
-         
-            for (long i = 1; i <= b; i++)
-            {
-                if ((a * i) % b == 0)
-                    return i * a;
-            }
-            return b;
-        }
     }
     public class Row
 	{

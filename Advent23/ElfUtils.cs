@@ -294,6 +294,23 @@ namespace Advent23
 			Utils.Assert(answer, Expected);
 		}
 	}
+	static public class Misc
+	{
+		// https://www.c-sharpcorner.com/UploadFile/0c1bb2/program-to-find-lcm-lowest-common-multiples-of-two-numbers/
+		public static long FindLCM(long a, long b)
+		{
+			if (a < b)
+				(b, a) = (a, b);
+
+			for (long i = 1; i <= b; i++)
+			{
+				if ((a * i) % b == 0)
+					return i * a;
+			}
+			return b;
+		}
+
+	}
 	public interface IRace
 	{
 		// winSearch- searching for first win(true) or first loss(false)
