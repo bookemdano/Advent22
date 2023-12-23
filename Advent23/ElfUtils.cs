@@ -1,4 +1,5 @@
 using AoCLibrary;
+using System.Net.Security;
 
 namespace Advent23
 {
@@ -110,17 +111,30 @@ namespace Advent23
 		{
 			return this.Values.Where(n => n.Pt.Col == iCol).ToList();
 		}
-		protected List<T> NodesInRow(int iRow)
+		internal List<T> NodesInRow(int iRow)
 		{
 			return this.Values.Where(n => n.Pt.Row == iRow).ToList();
 		}
 
-		internal string NodesToString(IList<Node> nodes)
+		internal string NodesToString(IList<T> nodes)
 		{
 			return string.Join("", nodes.Select(n => n.Char));
 		}
-	}
-	public class GridPlain : Grid<Node>
+        internal List<T> Neighbors(T node)
+        {
+			var pts = node.Neighbors();
+			var rv = new List<T>();
+			foreach (var pt in pts)
+			{
+				var near = Find(pt);
+				if (near != null)
+					rv.Add(near);
+			}
+			return rv;
+        }
+
+    }
+    public class GridPlain : Grid<Node>
 	{
 		protected GridPlain()
 		{

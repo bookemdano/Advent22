@@ -36,7 +36,26 @@ namespace AoCLibrary
 			//Console.WriteLine(str);
 		}
 
-		static public void Assert(long l1, long l2)
+		static public string CompactNumber(int n, int maxLen)
+		{
+			const string poss = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ€$";
+			var len = poss.Length;
+
+            var rv = string.Empty;
+            while (rv.Length < maxLen)
+			{
+				if (n > 0)
+				{
+                    var mod = n % len;
+					rv = poss[mod] + rv;
+                }
+                else
+					rv = "0" + rv;
+                n = n / len;
+            }
+			return rv;
+        }
+        static public void Assert(long l1, long l2)
         {
 			Assert(l1 == l2, $"{l1} != {l2}");
         }
