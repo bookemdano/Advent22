@@ -87,10 +87,10 @@ namespace Advent23
 		internal long FindCompleteMirror1()
 		{
 			var symCols = new List<int>();
-			for (var iCol = 1; iCol < _cols; iCol++)
+			for (var iCol = 1; iCol < Cols; iCol++)
 				symCols.Add(iCol);
 
-			for (var iRow = 0; iRow < _rows; iRow++)
+			for (var iRow = 0; iRow < Rows; iRow++)
 			{
 				var str = NodesToString(NodesInRow(iRow));
 				symCols = FindMirrorsForLine(str, symCols);
@@ -99,10 +99,10 @@ namespace Advent23
 			}
 
 			var symRows = new List<int>();
-			for (var iRow = 1; iRow < _rows; iRow++)
+			for (var iRow = 1; iRow < Rows; iRow++)
 				symRows.Add(iRow);
 
-			for (var iCol = 0; iCol < _cols; iCol++)
+			for (var iCol = 0; iCol < Cols; iCol++)
 			{
 				var str = NodesToString(NodesInCol(iCol));
 				symRows = FindMirrorsForLine(str, symRows);
@@ -121,10 +121,10 @@ namespace Advent23
 		internal long FindNearMirrors()
 		{
 			var symCols = new List<Possible>();
-			for (var iCol = 1; iCol < _cols; iCol++)
+			for (var iCol = 1; iCol < Cols; iCol++)
 				symCols.Add(new Possible(iCol));
 
-			for (var iRow = 0; iRow < _rows; iRow++)
+			for (var iRow = 0; iRow < Rows; iRow++)
 			{
 				var str = NodesToString(NodesInRow(iRow));
 				symCols = FindNearMirrorsForLine(str, symCols);
@@ -133,10 +133,10 @@ namespace Advent23
 			}
 
 			var symRows = new List<Possible>();
-			for (var iRow = 1; iRow < _rows; iRow++)
+			for (var iRow = 1; iRow < Rows; iRow++)
 				symRows.Add(new Possible(iRow));
 
-			for (var iCol = 0; iCol < _cols; iCol++)
+			for (var iCol = 0; iCol < Cols; iCol++)
 			{
 				var str = NodesToString(NodesInCol(iCol));
 				symRows = FindNearMirrorsForLine(str, symRows);

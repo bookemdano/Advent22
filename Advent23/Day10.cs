@@ -236,10 +236,10 @@ namespace Advent23
 			var newNodes = new List<Node10>();
 			var newRow = 0;
 			// add cols
-			for (int row = 0; row < _rows; row++)
+			for (int row = 0; row < Rows; row++)
 			{
 				var newCol = 0;
-				for (int col = 0; col < _cols; col++)
+				for (int col = 0; col < Cols; col++)
 				{
 					var node = Find(new Point(row, col))!;
 					newNodes.Add(new Node10(new Point(newRow, newCol), node.Char, node.StartTag, og: true));
@@ -285,7 +285,7 @@ namespace Advent23
 				node.Escape = false;
 				return false;
 			}
-			else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == _rows - 1 || node.Pt.Col == _cols - 1)
+			else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == Rows - 1 || node.Pt.Col == Cols - 1)
 			{
 				node.Escape = true;
 				return true;
@@ -368,7 +368,7 @@ namespace Advent23
 					var node = kvp.Value;
 					if (node.IsWall())
 						node.Escape = false;
-					else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == _rows - 1 || node.Pt.Col == _cols - 1)
+					else if (node.Pt.Row == 0 || node.Pt.Col == 0 || node.Pt.Row == Rows - 1 || node.Pt.Col == Cols - 1)
 						node.Escape = true;
 					else
 					{
@@ -387,10 +387,10 @@ namespace Advent23
 		public void WriteLocal(string tag)
         {
             var lines = new List<string>();
-            for (int row = 0; row < _rows; row++)
+            for (int row = 0; row < Rows; row++)
             {
                 var parts = new List<string>();
-                for (int col = 0; col < _cols; col++)
+                for (int col = 0; col < Cols; col++)
                 {
                     var v = Find(new Point(row, col))!;
 					if (v.IsWall())

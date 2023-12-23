@@ -95,15 +95,15 @@ namespace Advent23
 		static List<Point> _pointCache = [];
         internal Point EndPoint()
         {
-            return new Point(_rows - 1, _cols - 1);
+            return new Point(Rows - 1, Cols - 1);
         }
         public void WriteLocal(string tag)
         {
             var lines = new List<string>();
-            for (int row = 0; row < _rows; row++)
+            for (int row = 0; row < Rows; row++)
             {
                 var parts = new List<string>();
-                for (int col = 0; col < _cols; col++)
+                for (int col = 0; col < Cols; col++)
                 {
                     var node = Find(new Point(row, col))!;
 					var min = Path17.GetMin(node.Pt);

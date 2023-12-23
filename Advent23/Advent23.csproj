@@ -8,10 +8,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Assets\Day22.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Day22Fake.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\Day21.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\Day21Fake.txt">
+    <Content Include="Assets\Day21FakeStar1.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\Day21FakeStar2.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="Assets\Day20.txt">
@@ -61,6 +70,7 @@
     <None Remove="Assets\Day14FakeStar2.txt" />
     <None Remove="Assets\Day20FakeStar1Part1.txt" />
     <None Remove="Assets\Day20FakeStar1Part2.txt" />
+    <None Remove="Assets\Day21FakeStar1.txt" />
   </ItemGroup>
 	
   <ItemGroup>

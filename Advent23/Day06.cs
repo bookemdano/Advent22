@@ -10,8 +10,8 @@ namespace Advent23
 		{
 			var rv = 1L;
 			var lines = Program.GetLines(StarEnum.Star1, IsReal);
-            var times = Utils.SplitNums(' ', Utils.RemoveLabel(lines[0]));
-            var dists = Utils.SplitNums(' ', Utils.RemoveLabel(lines[1]));
+            var times = Utils.SplitLongs(' ', Utils.RemoveLabel(lines[0]));
+            var dists = Utils.SplitLongs(' ', Utils.RemoveLabel(lines[1]));
 			for (int i = 0; i < times.Count(); i++)
 				rv *= GetWinQuad(times[i], dists[i]);
 				//rv *= GetWinBinarys(times[i], dists[i]);

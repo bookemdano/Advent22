@@ -94,10 +94,10 @@ namespace Advent23
 		public void WriteLocal(string tag, List<Beam> beams)
 		{
 			var lines = new List<string>();
-			for (int row = 0; row < _rows; row++)
+			for (int row = 0; row < Rows; row++)
 			{
 				var parts = new List<string>();
-				for (int col = 0; col < _cols; col++)
+				for (int col = 0; col < Cols; col++)
 				{
 					var node = Find(new Point(row, col))!;
 					if (beams.Any(b => b.Pt.Equals(node.Pt)))
@@ -117,21 +117,21 @@ namespace Advent23
 			_allPaths.Clear();
 
 			var best = 0L;
-			for (int iRow = 0; iRow < _rows; iRow++)
+			for (int iRow = 0; iRow < Rows; iRow++)
 			{
 				var val = Light(new Point(iRow, 0), new Point(iRow, -1));
 				if (val > best)
 					best = val;
-				val = Light(new Point(iRow, _cols - 1), new Point(iRow, _cols));
+				val = Light(new Point(iRow, Cols - 1), new Point(iRow, Cols));
 				if (val > best)
 					best = val;
 			}
-			for (int iCol = 0; iCol < _cols; iCol++)
+			for (int iCol = 0; iCol < Cols; iCol++)
 			{
 				var val = Light(new Point(0, iCol), new Point(-1, iCol));
 				if (val > best)
 					best = val;
-				val = Light(new Point(_rows - 1, iCol), new Point(_rows, iCol));
+				val = Light(new Point(Rows - 1, iCol), new Point(Rows, iCol));
 				if (val > best)
 					best = val;
 			}
@@ -144,7 +144,7 @@ namespace Advent23
 
 		internal bool Valid(Point pt)
 		{
-			if (pt.Col < 0 || pt.Col >= _cols || pt.Row < 0 || pt.Row >= _rows)
+			if (pt.Col < 0 || pt.Col >= Cols || pt.Row < 0 || pt.Row >= Rows)
 				return false;
 			return true;
 		}

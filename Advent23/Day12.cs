@@ -84,7 +84,7 @@ namespace Advent23
 		{
 			var parts = Utils.Split(' ', line);
 			var nums = new List<long>();
-			OrigNums = Utils.SplitNums(',', parts[1]);
+			OrigNums = Utils.SplitLongs(',', parts[1]);
 			OrigRecord = parts[0];
 			var copies = new List<string>();
 			for (int i = 0; i < multiple; i++)

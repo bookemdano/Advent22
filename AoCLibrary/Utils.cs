@@ -166,9 +166,13 @@ namespace AoCLibrary
             return line.Split(sep, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public static long[] SplitNums(char sep, string line)
-        {
-            return Split(sep, line).Select(s => long.Parse(s)).ToArray();
-        }
-    }
+		public static long[] SplitLongs(char sep, string line)
+		{
+			return Split(sep, line).Select(s => long.Parse(s)).ToArray();
+		}
+		public static int[] SplitInts(char sep, string line)
+		{
+			return Split(sep, line).Select(s => int.Parse(s)).ToArray();
+		}
+	}
 }

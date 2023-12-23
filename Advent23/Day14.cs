@@ -208,7 +208,7 @@ namespace Advent23
 		{
 			var rv = 0;
 			foreach(var sprite in _sprites)
-				rv += _rows - sprite.Row;
+				rv += Rows - sprite.Row;
 			return rv;
 		}
 		// don't need to tiltnorth first
@@ -218,8 +218,8 @@ namespace Advent23
 			var allCols = AllCols();
 			foreach (var colNodes in allCols)
 			{
-				var loadRow = _rows;
-				var iRow = _rows;
+				var loadRow = Rows;
+				var iRow = Rows;
 				foreach (var node in colNodes)
 				{
 					if (_sprites.Contains(node.Pt))
@@ -241,10 +241,10 @@ namespace Advent23
 		public void WriteLocal(string tag)
 		{
 			var lines = new List<string>();
-			for (int row = 0; row < _rows; row++)
+			for (int row = 0; row < Rows; row++)
 			{
 				var parts = new List<string>();
-				for (int col = 0; col < _cols; col++)
+				for (int col = 0; col < Cols; col++)
 				{
 					if (_sprites.Contains(new Point(row, col)))
 						parts.Add("O");

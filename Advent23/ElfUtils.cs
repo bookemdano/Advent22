@@ -1,7 +1,4 @@
-
 using AoCLibrary;
-using System.IO;
-using System.Xml.Linq;
 
 namespace Advent23
 {
@@ -25,16 +22,6 @@ namespace Advent23
 		{ 
 			return $"{Pt} '{Char}'";
 		}
-		internal List<Point> Neighbors()
-		{
-			var rv = new List<Point>();
-			rv.Add(new(Pt.Row + 1, Pt.Col));
-			rv.Add(new(Pt.Row - 1, Pt.Col));
-			rv.Add(new(Pt.Row, Pt.Col + 1));
-			rv.Add(new(Pt.Row, Pt.Col - 1));
-
-			return rv;
-		}
 
 		internal void SetChar(char c)
 		{
@@ -43,17 +30,23 @@ namespace Advent23
 
 		public Point Pt { get; }
 		public char Char { get; internal set; }
+
+		internal List<Point> Neighbors()
+		{
+			return Pt.Neighbors();
+		}
+
 	}
 	public class Grid<T> : Dictionary<Point, T> where T : Node
 	{
-		protected int _rows;
-		protected int _cols;
+		internal int Rows { get; private set; }
+		internal int Cols { get; private set;}
 		protected void Init(List<T> nodes)
 		{
 			foreach (var node in nodes)
 				this.Add(node.Pt, node);
-			_rows = nodes.Max(n => n.Pt.Row) + 1;
-			_cols = nodes.Max(n => n.Pt.Col) + 1;
+			Rows = nodes.Max(n => n.Pt.Row) + 1;
+			Cols = nodes.Max(n => n.Pt.Col) + 1;
 		}
 		static protected List<T> GetNodes(IEnumerable<string> lines)
 		{
@@ -81,19 +74,23 @@ namespace Advent23
 				return null;
 			return value;
 		}
+		internal T? Find(char c)
+		{
+			return Values.FirstOrDefault(n => n.Char == c);
+		}
 		internal bool IsValid(Point pt)
 		{
-            if (pt.Col < 0 || pt.Col >= _cols || pt.Row < 0 || pt.Row >= _rows)
+            if (pt.Col < 0 || pt.Col >= Cols || pt.Row < 0 || pt.Row >= Rows)
                 return false;
             return true;
         }
         public void WriteBase(string tag)
 		{
 			var lines = new List<string>();
-			for (int row = 0; row < _rows; row++)
+			for (int row = 0; row < Rows; row++)
 			{
 				var parts = new List<string>();
-				for (int col = 0; col < _cols; col++)
+				for (int col = 0; col < Cols; col++)
 				{
 					var v = Find(new Point(row, col))!;
 					parts.Add(v.Char.ToString());
@@ -105,7 +102,7 @@ namespace Advent23
 		protected List<List<T>> AllCols()
 		{
 			var rv = new List<List<T>>();
-			for (var iCol = 0; iCol < _cols; iCol++)
+			for (var iCol = 0; iCol < Cols; iCol++)
 				rv.Add(NodesInCol(iCol));
 			return rv;
 		}
@@ -139,7 +136,7 @@ namespace Advent23
 		}
 		public override string ToString()
 		{
-			return $"({_rows}, {_cols})";
+			return $"({Rows}, {Cols})";
 		}
 		internal static GridPlain FromLines(string[] lines)
 		{
@@ -174,6 +171,44 @@ namespace Advent23
 			return $"{Pt} {Dir}";
 		}
 	}
+	public class Point3D : IEquatable<Point3D>
+	{
+		public Point3D(int x, int y, int z)
+		{
+			X = x;
+			Y = y;
+			Z = z;
+		}
+		static public Point3D FromXYZ(string str)
+		{
+			var parts = Utils.SplitInts(',', str);
+			return new Point3D(parts[0], parts[1], parts[2]);
+		}
+
+		public int X { get; set; }
+		public int Y { get; set; }
+		public int Z { get; set; }
+		public bool Equals(Point3D? other)
+		{
+			return other?.X == X && other?.Y == Y && other?.Z == Z;
+		}
+		public override int GetHashCode()
+		{
+			return (int)((X * 1E6) + (Y * 1E3) + Z);
+		}
+		public override bool Equals(object? obj)
+		{
+			if (obj is not Point3D other)
+				return false;
+
+		return Equals(other);
+		}
+		public override string ToString()
+		{
+			return $"({X}, {Y}, {Z})";
+		}
+	}
+
 	public class Point : IEquatable<Point>
 	{
 		public Point(int row, int col)
@@ -247,6 +282,17 @@ namespace Advent23
 
 		public int Row { get; }
 		public int Col { get; }
+
+		internal List<Point> Neighbors()
+		{
+			var rv = new List<Point>();
+			rv.Add(new(Row + 1, Col));
+			rv.Add(new(Row - 1, Col));
+			rv.Add(new(Row, Col + 1));
+			rv.Add(new(Row, Col - 1));
+
+			return rv;
+		}
 
 	}
 	internal class ElfUtils

@@ -13,7 +13,7 @@ namespace Advent23
 			var lines = Program.GetLines(star, IsReal);
 			foreach (var line in lines)
 			{
-				var nums = Utils.SplitNums(' ', line);
+				var nums = Utils.SplitLongs(' ', line);
 				var newLines = new List<long[]> { nums };
 				var last = nums.ToArray();
 				while (true)

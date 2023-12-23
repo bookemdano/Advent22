@@ -93,9 +93,9 @@ namespace Advent23
 		public Grid11(List<Node11> nodes)
 		{
 			Init(nodes);
-			for (int iRow = 0; iRow < _rows; iRow++)
+			for (int iRow = 0; iRow < Rows; iRow++)
 				_rowSizes[iRow] = 1;
-			for (int iCol = 0; iCol < _cols; iCol++)
+			for (int iCol = 0; iCol < Cols; iCol++)
 				_colSizes[iCol] = 1;
 		}
 		internal static Grid11 FromLines(string[] lines)
@@ -113,13 +113,13 @@ namespace Advent23
 		}
 		internal void Expand(int expandTo)
 		{
-			for (int iRow = 0; iRow < _rows; iRow++)
+			for (int iRow = 0; iRow < Rows; iRow++)
 			{
 				var nodesInRow = this.Values.Where(n => n.Pt.Row == iRow).ToList();
 				if (nodesInRow.All(c => c.Char == '.'))
 					_rowSizes[iRow] = expandTo;
 			}
-			for (int iCol = 0; iCol < _cols; iCol++)
+			for (int iCol = 0; iCol < Cols; iCol++)
 			{
 				var nodesInCol = this.Values.Where(n => n.Pt.Col == iCol).ToList();
 				if (nodesInCol.All(c => c.Char == '.'))
@@ -130,10 +130,10 @@ namespace Advent23
 		public void Write(string tag)
 		{
 			var lines = new List<string>();
-			for (int row = 0; row < _rows; row++)
+			for (int row = 0; row < Rows; row++)
 			{
 				var parts = new List<string>();
-				for (int col = 0; col < _cols; col++)
+				for (int col = 0; col < Cols; col++)
 				{
 					var v = Find(new Point(row, col))!;
 					parts.Add(v.StarNum?.ToString()??" ");
