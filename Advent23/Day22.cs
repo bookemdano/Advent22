@@ -61,7 +61,7 @@ namespace Advent23
 			if (!IsReal)
 				check = new StarCheck(key, 7L);
 			else
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 86556L);
 
 			var lines = Program.GetLines(check.Key);
 			var rv = 0L;
