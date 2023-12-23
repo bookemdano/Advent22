@@ -26,23 +26,12 @@ namespace Advent23
 				bricks.Add(new Brick22(i, line));
 				i++;
 			}
-			bool fell = true;
-			while(fell)
-			{
-				fell = false;
-				ElfHelper.DayLog("Fall");
-				bricks.Write("x", true);
-				bricks.Write("y", false);
-				var orderedBricks = bricks.OrderBy(b => b.MinZ).ToList();
-				foreach (var brick in orderedBricks)
-				{
-					 if (bricks.Falling(brick))
-					{
-						ElfHelper.DayLog("Falling " + brick);
-						fell = true;
-					}
-				}
-			}
+			ElfHelper.DayLog("Fall");
+			bricks.Write("x", true);
+			bricks.Write("y", false);
+			var orderedBricks = bricks.OrderBy(b => b.MinZ).ToList();
+			foreach (var brick in orderedBricks)
+				bricks.Falling(brick);
 			bricks.Write("x", true);
 			bricks.Write("y", false);
 
@@ -58,6 +47,8 @@ namespace Advent23
 			}
 			//var demos = bricks.Where(b => b.SoleSupporter == 0).ToList();
 			rv = bricks.Count(b => !b.SoleSupporter);
+			ElfHelper.DayLog($"Total:{bricks.Count()} Sole:{bricks.Count(b => b.SoleSupporter)}  Multi:{bricks.Count(b => !b.SoleSupporter)}");
+
 			// 506	too high
 			// 452 too low
 			check.Compare(rv);
@@ -82,22 +73,13 @@ namespace Advent23
 				bricks.Add(new Brick22(i, line));
 				i++;
 			}
-			bool fell = true;
-			while (fell)
+			ElfHelper.DayLog("Fall");
+			bricks.Write("x", true);
+			bricks.Write("y", false);
+			var orderedBricks = bricks.OrderBy(b => b.MinZ).ToList();
+			foreach (var brick in orderedBricks)
 			{
-				fell = false;
-				ElfHelper.DayLog("Fall");
-				bricks.Write("x", true);
-				bricks.Write("y", false);
-				var orderedBricks = bricks.OrderBy(b => b.MinZ).ToList();
-				foreach (var brick in orderedBricks)
-				{
-					if (bricks.Falling(brick))
-					{
-						ElfHelper.DayLog("Falling " + brick);
-						fell = true;
-					}
-				}
+				bricks.Falling(brick);
 			}
 			bricks.Write("x", true);
 			bricks.Write("y", false);
@@ -125,6 +107,8 @@ namespace Advent23
 			}
 			check.Compare(rv);
 			// 128505	too high!
+			// 86556
+			// 100 too low
 
 			return rv;
 		}
@@ -180,7 +164,7 @@ namespace Advent23
 		}
 		internal bool Falling(Brick22 brick)
 		{
-			if (brick.Id == 49)
+			if (brick.Id == 1097)
 				ElfHelper.DayLog(brick);
 			if (brick.MinZ <= 1)
 				return false;
@@ -212,9 +196,10 @@ namespace Advent23
 				}
 			}
 			var delta = minZ - nextZ - 1;
+			if (supportedBy != null)
+				brick.SupportedBy = supportedBy.DistinctBy(b => b.Id).ToList(); // inaccurate for some reason
 			if (delta <= 0)
 				return false;
-			brick.SupportedBy = supportedBy;	// inaccurate for some reason
 			brick.MoveFall(delta);
 			return true;
 
@@ -265,7 +250,7 @@ namespace Advent23
 				Crumbled.Add(brick);
 			foreach (var supports in brick.Supports)
 			{
-				if (AreSupportsLeft(supports))
+				if (!AreSupportsLeft(supports))
 					Crumble(supports);
 			}
 		}
@@ -273,12 +258,14 @@ namespace Advent23
 		{
 			if (brick.SupportedBy == null)
 				return false;
+			var supportCount = brick.SupportedBy.Count();
 			foreach (var supportedBy in brick.SupportedBy)
 			{
 				if (Crumbled.Any(b => b.Id == supportedBy.Id))
-					return true;
+					supportCount--;
 			}
-			return false;
+			Utils.Assert(supportCount >= 0, "SupportCount");
+			return supportCount > 0;
 		}
 
 	}
@@ -342,8 +329,8 @@ namespace Advent23
 
 		internal bool? Overlaps(Brick22 testBrick)
 		{
-			if (Id == 847)
-				ElfHelper.DayLog("Overlaps " + this);
+			//if (Id == 847)
+			//	ElfHelper.DayLog("Overlaps " + this);
 
 			if (testBrick.Id == Id)
 				return null;
