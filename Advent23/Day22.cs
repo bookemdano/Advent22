@@ -293,12 +293,12 @@ namespace Advent23
 			return $"{GetName()}({Id}) {End1}-{End2}";
 		}
 
-		internal int MinX => Math.Min(End1.X, End2.X);
-		internal int MaxX => Math.Max(End1.X, End2.X);
-		internal int MinY => Math.Min(End1.Y, End2.Y);
-		internal int MaxY => Math.Max(End1.Y, End2.Y);
-		internal int MinZ => Math.Min(End1.Z, End2.Z);
-		internal int MaxZ => Math.Max(End1.Z, End2.Z);
+		internal int MinX => (int) Math.Min(End1.X, End2.X);
+		internal int MaxX => (int)Math.Max(End1.X, End2.X);
+		internal int MinY => (int)Math.Min(End1.Y, End2.Y);
+		internal int MaxY => (int)Math.Max(End1.Y, End2.Y);
+		internal int MinZ => (int)Math.Min(End1.Z, End2.Z);
+		internal int MaxZ => (int)Math.Max(End1.Z, End2.Z);
 
 		//public IEnumerable<Brick22> SupportedBy { get; internal set; }
 		//public List<Brick22> Supports { get; internal set; } = [];

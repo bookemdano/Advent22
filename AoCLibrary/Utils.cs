@@ -55,6 +55,20 @@ namespace AoCLibrary
             }
 			return rv;
         }
+        static public string CompactName(int n)
+        {
+            const string poss = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            var len = poss.Length;
+
+			var rv = string.Empty;
+            while (n > 0 || rv.Length == 0)
+            {
+                var mod = n % len;
+                rv = poss[mod] + rv;
+                n = n / len;
+            }
+            return rv;
+        }
         static public void Assert(long l1, long l2)
         {
 			Assert(l1 == l2, $"{l1} != {l2}");
