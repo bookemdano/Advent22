@@ -94,8 +94,8 @@ namespace Advent23
             for (i = 0; i < stones.Count; i++)  // first point
             {
                 
-                var usedStones = new Dictionary<int, Stone23>();
-                usedStones.Add(1, stones[i]);
+                var usedStones = new List<Stone23>();
+                usedStones.Add(stones[i]);
                 var stonePt1 = stones[i].Move(t);
                 t++;
 
@@ -114,12 +114,12 @@ namespace Advent23
                         found = false;
                         for (int k = 0; k < stones.Count; k++) // second point
                         {
-                            if (usedStones.Any(n => n == stones[k].Name))
+                            if (usedStones.Any(s => s.Name == stones[k].Name))
                                 continue;
                             var stonePtK = stones[k].Move(usedStones.Count());
                             if (stonePtK.IsOnLine2D(slope, intercept))
                             {
-                                usedStones.Add(stones[k].Name);
+                                usedStones.Add(stones[k]);
                                 found = true;
                             }
                         }
