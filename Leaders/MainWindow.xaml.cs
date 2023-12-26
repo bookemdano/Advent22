@@ -36,13 +36,20 @@ namespace Leaders
 
 		async Task TickAsync(bool force)
 		{
-			var daysInto = (DateTime.Now - new DateTime(ElfHelper.Year, 12, 1)).TotalDays;
+			var daysInto = ElfHelper.RawDay;
 
-			Title = $"Day {ElfHelper.DayString} {(100 * daysInto / 25):0.0}%";
-
-			if (LastSentDay != ElfHelper.Day)
+			if (daysInto < 0)
+				Title = $"Coming in {(0 - daysInto).ToString("0")}";
+			else
 			{
-				Send(ElfHelper.DailyUrl);
+                Title = $"Day {ElfHelper.DayString} {(100 * daysInto / 25):0.0}%";
+
+            }
+
+            if (LastSentDay != ElfHelper.Day)
+			{
+				if (ElfHelper.IsActive)
+					Send(ElfHelper.DailyUrl);
 				LastSentDay = ElfHelper.Day;
 
 				if (ElfHelper.Day == ElfHelper.NextEmptyDay())

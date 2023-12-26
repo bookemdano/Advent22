@@ -21,15 +21,34 @@ namespace AoCLibrary
 		}
 
 		public static readonly int Year = DateTime.Today.Year;
-		public static int Day
-		{
-			get
-			{
-				return (int)(DateTime.Today - new DateTime(Year, 11, 30)).TotalDays;
-			}
-		}
+		public static readonly int TotalDays = 25;
+        public static bool IsActive
+        {
+            get
+            {
+				return (RawDay >= 1 && RawDay < TotalDays);
+            }
+        }
 
-		internal static int DayIndex => Day - 1;
+        public static double RawDay
+        {
+            get
+            {
+                return (DateTime.Now - new DateTime(Year, 11, 30)).TotalDays;
+            }
+        }
+        public static int Day
+        {
+            get
+            {
+                var rv = (int) RawDay;
+                if (rv > TotalDays)
+                    return TotalDays;
+                return rv;
+            }
+        }
+
+        internal static int DayIndex => Day - 1;
 
 		public static string DayString => $"{Day:00}";
 
@@ -167,7 +186,7 @@ namespace AoCLibrary
 		}
 		public static int NextEmptyDay()
 		{
-			for (int day = Day; day <= 25; day++)
+			for (int day = Day; day <= TotalDays; day++)
 			{
 				var dayFile = $"Day{day:00}.cs";
 				if (!File.Exists(Path.Combine(CodeDir(), dayFile)))
