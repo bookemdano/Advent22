@@ -1,14 +1,10 @@
 using AoCLibrary;
-using System.Collections.Frozen;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
 
 namespace Advent23
 {
     internal class Day25 : IDayRunner
 	{
-		public bool IsReal => false;
+		public bool IsReal => true;
 
 		// Day https://adventofcode.com/2023/day/25
 		// Input https://adventofcode.com/2023/day/25/input
@@ -19,7 +15,7 @@ namespace Advent23
 			if (!IsReal)
 				check = new StarCheck(key, 54);
 			else
-				check = new StarCheck(key, 0L);
+				check = new StarCheck(key, 582626);
 
 			var lines = Program.GetLines(check.Key);
 			var rv = 0L;
@@ -88,7 +84,8 @@ namespace Advent23
 				}
 			}*/
             check.Compare(rv);
-			return rv;
+            //582626
+            return rv;
 		}
 		public object? Star2()
 		{
@@ -143,11 +140,12 @@ namespace Advent23
         {
             var verts = GetVerts();
             var rv= new List<int>();
-            foreach (var vert in verts)
+            while(verts.Any())
             {
+                var vert = verts.First();
                 var path = GetPath(vert, cuts, new List<string>());
-                if (!rv.Contains(path.Count()))
-                    rv.Add(path.Count());
+                rv.Add(path.Count());
+                verts.RemoveAll(v => path.Contains(v));
             }
             return rv;
         }
