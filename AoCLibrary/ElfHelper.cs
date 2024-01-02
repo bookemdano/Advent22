@@ -20,7 +20,7 @@ namespace AoCLibrary
 			}
 		}
 
-		public static readonly int Year = DateTime.Today.Year;
+		public static readonly int Year = DateTime.Today.AddDays(-31).Year;
 		public static readonly int TotalDays = 25;
         public static bool IsActive
         {
