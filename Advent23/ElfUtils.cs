@@ -327,51 +327,7 @@ namespace Advent23
 		}
 
 	}
-	internal class ElfUtils
-	{
-		internal static void WriteLines(string stub, string tag, List<string> lines)
-		{
-			File.WriteAllLines(Path.Combine(ElfHelper.DayDir, $"{stub}Day{ElfHelper.DayString}-{tag}.csv"), lines);
-		}
-	}
 
-	public class StarCheckKey
-	{
-		public StarCheckKey(StarEnum star, bool isReal, int? part = null)
-		{
-			Star = star;
-			IsReal = isReal;
-			Part = part;
-		}
-		public override string ToString()
-		{
-			return $"{Star} r:{IsReal} p:{Part}";
-		}
-		public StarEnum Star { get; }
-		public bool IsReal { get; }
-		public int? Part { get; }
-	}
-	public class StarCheck
-	{
-		public StarCheck(StarCheckKey key, long expected)
-		{
-			Key = key;
-			Expected = expected;
-		}
-
-		public StarCheckKey Key { get; }
-		public long Expected { get; }
-		public override string ToString()
-		{
-			return $"{Key} e:{Expected}";
-		}
-		public void Compare(long answer)
-		{
-			ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
-			Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
-			Utils.Assert(answer, Expected);
-		}
-	}
 	static public class Misc
 	{
 		// https://www.c-sharpcorner.com/UploadFile/0c1bb2/program-to-find-lcm-lowest-common-multiples-of-two-numbers/

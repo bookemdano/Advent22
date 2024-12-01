@@ -145,10 +145,4 @@ namespace Advent23
 			return _dictText[filename];
 		}
 	}
-	public enum StarEnum
-	{
-		NA,
-		Star1,
-		Star2
-	}
 }

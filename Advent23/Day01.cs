@@ -1,3 +1,4 @@
+using AoCLibrary;
 using System.Diagnostics;
 
 namespace Advent23

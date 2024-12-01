@@ -1,3 +1,5 @@
+using AoCLibrary;
+
 namespace Advent23
 {
 	internal class Day02 : IDayRunner
