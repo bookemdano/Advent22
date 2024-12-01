@@ -59,8 +59,9 @@ namespace AoCLibrary
 				root = "C:\\repos";
 			else
 				root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Projects");
-			return Path.Combine(root, "Advent22", "Advent" + DateTime.Today.ToString("yy"));
+			return Path.Combine(root, "Advent22", "Advent" + Year2);
 		}
+		static public string Year2 => DateTime.Today.ToString("yy");
 		public static string SmallString(TimeSpan elapsed)
 		{
 			var ms = elapsed.TotalMilliseconds;
@@ -95,12 +96,12 @@ namespace AoCLibrary
 			{
 				var block = "\r\n    <Content Include=\"Assets\\Day|DD|.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>\r\n    <Content Include=\"Assets\\Day|DD|Fake.txt\">\r\n      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>\r\n    </Content>";
 				block = block.Replace("|DD|", strDay);
-				var prj = File.ReadAllText(Path.Combine(codeDir, "Advent23.csproj"));
+				var prj = File.ReadAllText(Path.Combine(codeDir, $"Advent{Year2}.csproj"));
 				var i = prj.IndexOf("<ItemGroup>");
 				if (i == -1)
 					return;
 				i += "<ItemGroup>".Length;
-				File.WriteAllText(Path.Combine(codeDir, "Advent23.csproj"), prj.Insert(i, block));
+				File.WriteAllText(Path.Combine(codeDir, $"Advent{Year2}.csproj"), prj.Insert(i, block));
 			}
 		}
 		public static ElfResult? ReadFromFile()
