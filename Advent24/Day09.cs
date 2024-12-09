@@ -1,4 +1,5 @@
 using AoCLibrary;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Advent24;
 
@@ -52,7 +53,8 @@ internal class Day09 : IDayRunner
 		{
 			Id = id;
 		}
-		public int Id { get; set; }
+		public int Id { get; }
+		public bool Moved { get; set; }
 		public override string ToString()
 		{
 			return $"{Id}-{base.ToString()}";
@@ -74,10 +76,12 @@ internal class Day09 : IDayRunner
 			int iChar = 0;
 			for (int i = 0; i < text.Length; i++)
 			{
-				var n1 = int.Parse(text[i].ToString());
-				if (n1 > 0)
-					Files.Add(new FInfo(iFile++, iChar, n1));
-				iChar += n1;
+				if (int.TryParse(text[i].ToString(), out var n1))
+				{
+					if (n1 > 0)
+						Files.Add(new FInfo(iFile++, iChar, n1));
+					iChar += n1;
+				}
 				if (i == text.Length - 1)
 					break;
 				i++;
@@ -100,6 +104,33 @@ internal class Day09 : IDayRunner
 				rv += file.CheckSum();
 			}
 			return rv;
+		}
+		internal bool Move2()
+		{
+			var lastFile = Files.OrderBy(f => f.Id).Last(f => f.Moved == false);
+			if (lastFile.Id == 0)
+				return false;
+			foreach(var free in Frees)
+			{
+				if (free.Start > lastFile.Start)
+					break;
+				if (free.Len >= lastFile.Len)
+				{
+					lastFile.Start = free.Start;
+					free.Start += lastFile.Len;
+					free.Len -= lastFile.Len;
+					if (free.Len == 0)
+						Frees.Remove(free);
+					break;
+				}
+			}
+			// cleanup
+			lastFile.Moved = true;
+
+			Files = Files.OrderBy(f => f.Start).ToList();
+			Frees = Frees.OrderBy(f => f.Start).ToList();
+
+			return true;
 		}
 
 		internal bool Move()
@@ -142,14 +173,21 @@ internal class Day09 : IDayRunner
 		var key = new StarCheckKey(StarEnum.Star2, IsReal);
 		StarCheck check;
 		if (!IsReal)
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 2858L);
 		else
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 6323761685944L);
 
-		var lines = Program.GetLines(check.Key);
+		var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
-
+		var disk = new Disk(text);
+		while (true)
+		{
+			if (!disk.Move2())
+				break;
+		}
+		rv = disk.Checksum();
+		// 8480777484518 too high
 		check.Compare(rv);
 		return rv;
 	}
