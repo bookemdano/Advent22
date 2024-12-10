@@ -1,11 +1,10 @@
 using AoCLibrary;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Advent24;
 
 internal class Day09 : IDayRunner
 {
-	public bool IsReal => true;
+	public bool IsReal => false;
 
 	// Day https://adventofcode.com/2024/day/9
 	// Input https://adventofcode.com/2024/day/9/input
@@ -82,6 +81,8 @@ internal class Day09 : IDayRunner
 						Files.Add(new FInfo(iFile++, iChar, n1));
 					iChar += n1;
 				}
+				else
+					ElfHelper.DayLog("bad char " + text[i]);
 				if (i == text.Length - 1)
 					break;
 				i++;
@@ -91,6 +92,8 @@ internal class Day09 : IDayRunner
 						Frees.Add(new Free(iChar, n2));
 					iChar += n2;
 				}
+				else
+					ElfHelper.DayLog("bad char " + text[i]);
 			}
 		}
 		public List<Free> Frees { get; set; } = [];
@@ -152,9 +155,7 @@ internal class Day09 : IDayRunner
 			}
 			firstFree.Start++;
 			firstFree.Len--;
-
 			lastFile.Len--;
-
 
 			// clean up empties
 			if (firstFree.Len == 0)

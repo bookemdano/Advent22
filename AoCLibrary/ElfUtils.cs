@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -36,6 +37,10 @@ public class Loc
 		return $"({Row},{Col})";
 	}
 
+	public override int GetHashCode()
+	{
+		return Row * 1000 + Col;
+	}
 	public Loc Diff(Loc other)
 	{
 		return new Loc(other.Row - Row, other.Col - Col);
@@ -50,7 +55,17 @@ public class Loc
 	{
 		return new Loc(Row + diff.Row, Col + diff.Col);
 	}
-
+	public Loc Move(DirEnum dir)
+	{
+		if (dir == DirEnum.N)
+			return new Loc(Row - 1, Col);
+		else if (dir == DirEnum.E)
+			return new Loc(Row, Col + 1);
+		else if (dir == DirEnum.S)
+			return new Loc(Row + 1, Col);
+		else //if (dir == DirEnum.W)
+			return new Loc(Row, Col - 1);
+	}
 	public bool Same(Loc other)
 	{
 		return (Row == other.Row && Col == other.Col);
@@ -95,6 +110,13 @@ public class GridMap
 		if (!IsValid(loc))
 			return null;
 		return _map[loc.Row][loc.Col];
+	}
+	public int? GetInt(Loc loc)
+	{
+		var c = Get(loc);
+		if (c == null)
+			return null;
+		return int.Parse(c.ToString());
 	}
 	public int Count(char target)
 	{
