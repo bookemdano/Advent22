@@ -24,13 +24,16 @@ public class LocDir : Loc
 	}
 
 }
+
+
+
 public class Loc
 {
 	public int Row { get; set; }
 	public int Col { get; set; }
 	public Loc(int row, int col)
 	{
-		Row = row; Col = col;;
+		Row = row; Col = col;
 	}
 	public override string ToString()
 	{
@@ -55,6 +58,15 @@ public class Loc
 	{
 		return new Loc(Row + diff.Row, Col + diff.Col);
 	}
+	public List<Loc> AllMoves()
+	{
+		var rv = new List<Loc>();
+		rv.Add(new Loc(Row - 1, Col));
+		rv.Add(new Loc(Row, Col + 1));
+		rv.Add(new Loc(Row + 1, Col));
+		rv.Add(new Loc(Row, Col - 1));
+		return rv;
+	}
 	public Loc Move(DirEnum dir)
 	{
 		if (dir == DirEnum.N)
@@ -70,6 +82,8 @@ public class Loc
 	{
 		return (Row == other.Row && Col == other.Col);
 	}
+
+
 }
 public enum MoveEnum
 {
@@ -87,6 +101,8 @@ public class GridMap
 			_map.Add(line.ToCharArray());
 		}
 	}
+	public int Rows => _map.Count();
+	public int Cols => _map[0].Count();
 	internal Loc? Find(char target)
 	{
 		int iRow = 0;

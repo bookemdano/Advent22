@@ -3,7 +3,7 @@ namespace Advent24;
 
 internal class Day11 : IDayRunner
 {
-	public bool IsReal => true;
+	public bool IsReal => false;
 
 	// Day https://adventofcode.com/2024/day/11
 	// Input https://adventofcode.com/2024/day/11/input
@@ -59,7 +59,7 @@ internal class Day11 : IDayRunner
 		var key = new StarCheckKey(StarEnum.Star2, IsReal);
 		StarCheck check;
 		if (!IsReal)
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 65601038650482L);
 		else
 			check = new StarCheck(key, 257246536026785L);
 
