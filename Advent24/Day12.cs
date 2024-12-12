@@ -91,16 +91,15 @@ internal class Day12 : IDayRunner
 		{
 			var rv = 0;
 			var sides = new List<Side>();
-			foreach (var loc in this)
+			foreach (var inside in this)
 			{
-				var moves = loc.AllMoves();
+				var moves = inside.AllMoves();
 
 				var outsides = moves.Where(m => !ContainsSame(m));
 				foreach(var outside in outsides)
-				{
-					sides.Add(Side.Average(loc, outside));
-				}
+					sides.Add(Side.Between(inside, outside));
 			}
+
 			var verts = sides.Where(s => s.SideDir == SideDirEnum.Vert);
 			foreach (var sideVerts in verts.GroupBy(v => v.Col))
 			{
@@ -108,14 +107,8 @@ internal class Day12 : IDayRunner
 				double? last = null;
 				foreach(var set in sets)
 				{
-					if (last == null)
-					{
+					if (last == null || last + 1 != set.Row)
 						rv++;
-					}
-					else if (last + 1 != set.Row)
-					{
-						rv++;
-					}
 					last = set.Row;
 				}
 			}
@@ -126,14 +119,8 @@ internal class Day12 : IDayRunner
 				double? last = null;
 				foreach (var set in sets)
 				{
-					if (last == null)
-					{
+					if (last == null || last + 1 != set.Col)
 						rv++;
-					}
-					else if (last + 1 != set.Col)
-					{
-						rv++;
-					}
 					last = set.Col;
 				}
 			}
@@ -155,44 +142,41 @@ AAAAAA
 		Vert,
 		Horz
 	}
-	public class Side
+	public class Side : FLoc
 	{
-		public double Row { get; }
-		public double Col { get; }
-		public SideDirEnum SideDir { get; }
+		public SideDirEnum SideDir => ((int)Row == Row)?SideDirEnum.Vert:SideDirEnum.Horz;
 
-		public Side(double row, double col, SideDirEnum sideDir)
+		public Side(double row, double col) : base(row, col)
 		{
-			Row = row; Col = col; SideDir = sideDir;
 		}
-		static public Side Average(Loc lh, Loc rh)
+		static public Side Between(Loc inside, Loc outside)
 		{
-			if (lh.Row == rh.Row)
+			if (inside.Row == outside.Row)
 			{
-				var min = Math.Min(lh.Col, rh.Col);
-				var max = Math.Max(lh.Col, rh.Col);
-				if (lh.Col < rh.Col)
-					return new Side(lh.Row, min + (max - min) / 4.0, SideDirEnum.Vert);
+				var min = Math.Min(inside.Col, outside.Col);
+				var max = Math.Max(inside.Col, outside.Col);
+				if (inside.Col < outside.Col)
+					return new Side(inside.Row, min + (max - min) / 4.0);
 				else
-					return new Side(lh.Row, min + (max - min) * 3 / 4.0, SideDirEnum.Vert);
+					return new Side(inside.Row, min + (max - min) * 3 / 4.0);
 			}
-			if (lh.Col == rh.Col)
+			if (inside.Col == outside.Col)
 			{
-				var min = Math.Min(lh.Row, rh.Row);
-				var max = Math.Max(lh.Row, rh.Row);
-				if (lh.Row < rh.Row)
-					return new Side(min + (max - min) / 4.0, lh.Col, SideDirEnum.Horz);
+				var min = Math.Min(inside.Row, outside.Row);
+				var max = Math.Max(inside.Row, outside.Row);
+				if (inside.Row < outside.Row)
+					return new Side(min + (max - min) / 4.0, inside.Col);
 				else
-					return new Side(min + (max - min) * 3 / 4.0, lh.Col, SideDirEnum.Horz);
+					return new Side(min + (max - min) * 3 / 4.0, inside.Col);
 			}
-			var deltaR = lh.Row - rh.Row;
-			var deltaC = lh.Col - rh.Col;
+			var deltaR = inside.Row - outside.Row;
+			var deltaC = inside.Col - outside.Col;
 
-			return new Side(lh.Row - deltaR / 2.0, rh.Col - deltaC / 2.0, SideDirEnum.Horz);
+			return new Side(inside.Row - deltaR / 2.0, outside.Col - deltaC / 2.0);
 		}
 		public override string ToString()
 		{
-			return $"({Row},{Col} {SideDir})";
+			return $"{base.ToString()} {SideDir}";
 		}
 	}
 	public object? Star2()

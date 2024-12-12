@@ -204,3 +204,17 @@ public class GridMap
 		return rv;
 	}
 }
+
+public class FLoc
+{
+	public double Row { get; }
+	public double Col { get; }
+	public FLoc(double row, double col)
+	{
+		Row = row; Col = col;
+	}
+	public override string ToString()
+	{
+		return $"({Row},{Col})";
+	}
+}

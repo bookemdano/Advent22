@@ -17,6 +17,7 @@ internal class Day|DD| : IDayRunner
 			check = new StarCheck(key, 0L);
 
 		var lines = Program.GetLines(check.Key);
+		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
 
@@ -33,6 +34,7 @@ internal class Day|DD| : IDayRunner
 			check = new StarCheck(key, 0L);
 
 		var lines = Program.GetLines(check.Key);
+		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
 
