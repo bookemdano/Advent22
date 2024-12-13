@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace AoCLibrary;
 public enum DirEnum
 {
@@ -22,6 +15,60 @@ public class LocDir : Loc
 	{
 		return $"{base.ToString()}{Dir}";
 	}
+
+}
+public class Point
+{
+	public long X { get; set; }
+	public long Y { get; set; }
+	public Point(long x, long y)
+	{
+		Y = y; X = x;
+	}
+	public override string ToString()
+	{
+		return $"({X},{Y})";
+	}
+
+	public Point Diff(Point other)
+	{
+		return new Point(other.X - X, other.Y - Y);
+	}
+
+	public Point Minus(Point diff)
+	{
+		return new Point(X - diff.X, Y - diff.Y);
+	}
+
+	public Point Plus(Point diff)
+	{
+		return new Point(X + diff.X, Y + diff.Y);
+	}
+	public List<Point> AllMoves()
+	{
+		var rv = new List<Point>();
+		rv.Add(new Point(X, Y - 1));
+		rv.Add(new Point(X + 1, Y));
+		rv.Add(new Point(X, Y + 1));
+		rv.Add(new Point(X - 1, Y));
+		return rv;
+	}
+	public Point Move(DirEnum dir)
+	{
+		if (dir == DirEnum.N)
+			return new Point(X, Y - 1);
+		else if (dir == DirEnum.E)
+			return new Point(X + 1, Y);
+		else if (dir == DirEnum.S)
+			return new Point(X, Y + 1);
+		else //if (dir == DirEnum.W)
+			return new Point(X - 1, Y);
+	}
+	public bool Same(Point other)
+	{
+		return (Y == other.Y && X == other.X);
+	}
+
 
 }
 
