@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
@@ -194,18 +195,42 @@ namespace AoCLibrary
             return line.Split(':', StringSplitOptions.TrimEntries)[1];
         }
 
-        public static string[] Split(char sep, string line)
-        {
-            return line.Split(sep, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        }
+		public static string[] Split(char sep, string line)
+		{
+			return line.Split(sep, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+		}
+		public static string[] Split(char[] seps, string line)
+		{
+			return line.Split(seps, StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+		}
 
 		public static long[] SplitLongs(char sep, string line)
 		{
 			return Split(sep, line).Select(s => long.Parse(s)).ToArray();
 		}
+		public static long[] SplitLongs(char[] seps, string line)
+		{
+			var parts = Split(seps, line);
+			var rv = new List<long>();
+			foreach(var part in parts)
+			{
+				if (long.TryParse(part, out var val))
+					rv.Add(val);
+			}
+			return rv.ToArray();
+		}
+		public static int[] SplitInts(char[] seps, string line)
+		{
+			return SplitLongs(seps, line).Select(s => (int)s).ToArray();
+		}
 		public static int[] SplitInts(char sep, string line)
 		{
 			return Split(sep, line).Select(s => int.Parse(s)).ToArray();
+		}
+
+		public static bool IsEven(long x)
+		{
+			return (x / 2 == x / 2.0);
 		}
 	}
 }

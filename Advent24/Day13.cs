@@ -23,19 +23,18 @@ internal class Day13 : IDayRunner
 		// magic
 		for(var i = 0; i < lines.Length; i++)
 		{
+			var machine = new Machine(lines[i++], lines[i++], lines[i++], 0);
+			var res = machine.Result();
+			if (res != null)
+				rv += (long) res;
+
+			/* old
 			var parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 			var a = new Point(int.Parse(parts[3]), int.Parse(parts[5]));
 			parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 			var b = new Point(int.Parse(parts[3]), int.Parse(parts[5]));
 			parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 			var prize = new Point(long.Parse(parts[2]), long.Parse(parts[4]));
-
-			var det = a.X * b.Y - b.X * a.Y;
-			if (det == 0)
-				continue;
-			var A = (prize.X * b.Y - b.X * prize.Y) / det;
-			var B = (a.X * prize.Y - prize.X * a.Y) / det;
-
 			var moves = new List<Move>();
 			moves.Add(new Move(a, 3));
 			moves.Add(new Move(b, 1));
@@ -72,6 +71,7 @@ internal class Day13 : IDayRunner
 			}
 			if (winners.Any())
 				rv += winners.Min();
+			*/
 		}
 
 		check.Compare(rv);
@@ -112,6 +112,43 @@ internal class Day13 : IDayRunner
 			return null;
 		}
 	}
+	public class Machine
+	{
+		private Point _a;
+		private Point _b;
+		private Point _prize;
+
+		public Machine(string lineA, string lineB, string lineP, long factor)
+		{
+			var parts = lineA.Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+			_a = new Point(long.Parse(parts[3]), long.Parse(parts[5]));
+			parts = lineB.Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+			_b = new Point(long.Parse(parts[3]), long.Parse(parts[5]));
+			parts = lineP.Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+			_prize = new Point(int.Parse(parts[2]) + factor, int.Parse(parts[4]) + factor);
+		}
+		public long? Result()
+		{
+			//a.X * A + b.X * B = prize.X;
+			//a.Y * A + b.Y * B = prize.Y;
+			//a.X * A = prize.X - b.X * B
+			//A = (prize.X - b.X * B) / a.X
+			//a.Y * ((prize.X - b.X * B) / a.X) + b.Y * B = prize.Y
+
+			var mid = _a.X * _b.Y - _b.X * _a.Y;
+			if (mid == 0)
+				return null;
+			var A = (_prize.X * _b.Y - _b.X * _prize.Y) / (double) mid;
+			var B = (_a.X * _prize.Y - _prize.X * _a.Y) / (double) mid;
+			if (A == (long)A || B == (long)B)
+				return (long)A * 3 + (long)B;
+			//var guess = new Point(_a.X * (long) A + _b.X * (long)B, _a.Y * (long)A + _b.Y * (long)B);
+			//if (guess.Same(_prize))
+			//	return (long)A * 3 + (long)B;
+			return null;
+
+		}
+	}
 	public object? Star2()
 	{
 		var key = new StarCheckKey(StarEnum.Star2, IsReal);
@@ -127,28 +164,10 @@ internal class Day13 : IDayRunner
 		// magic
 		for (var i = 0; i < lines.Length; i++)
 		{
-			var parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-			var a = new Point(long.Parse(parts[3]), long.Parse(parts[5]));
-			parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-			var b = new Point(long.Parse(parts[3]), long.Parse(parts[5]));
-			parts = lines[i++].Split(":,+= ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-			var prize = new Point(int.Parse(parts[2]) + 10000000000000L, int.Parse(parts[4]) + 10000000000000L);
-
-
-			//a.X * A + b.X * B = prize.X;
-			//a.Y * A + b.Y * B = prize.Y;
-			//a.X * A = prize.X - b.X * B
-			//A = (prize.X - b.X * B) / a.X
-			//a.Y * ((prize.X - b.X * B) / a.X) + b.Y * B = prize.Y
-
-			var det = a.X * b.Y - b.X * a.Y;
-			if (det == 0)
-				continue;
-			var A = (prize.X * b.Y - b.X * prize.Y) / det;
-			var B = (a.X * prize.Y - prize.X * a.Y) / det;
-			var guess = new Point(a.X * A + b.X * B, a.Y * A + b.Y * B);
-			if (guess.Same(prize))
-				rv += A*3 + B;
+			var machine = new Machine(lines[i++], lines[i++], lines[i++], (long) 1E13);
+			var res = machine.Result();
+			if (res != null)
+				rv += (long)res;
 		}
 		// 157687857400714 Too high
 		// 90798500745591

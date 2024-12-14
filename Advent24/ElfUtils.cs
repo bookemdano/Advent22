@@ -17,6 +17,25 @@ public class LocDir : Loc
 	}
 
 }
+public class Region
+{
+	public Point Ul { get; set; }
+	public Point Br { get; set; }
+
+	public Region(Point ul, Point br)
+	{
+		Ul = ul;
+		Br = br;
+	}
+	public override string ToString()
+	{
+		return $"{Ul} to {Br}";
+	}
+	public bool Contains(Point pt)
+	{
+		return (pt.X >= Ul.X && pt.Y >= Ul.Y && pt.X <= Br.X && pt.Y <= Br.Y);
+	}
+}
 public class Point
 {
 	public long X { get; set; }
@@ -69,7 +88,10 @@ public class Point
 		return (Y == other.Y && X == other.X);
 	}
 
-
+	internal Point Copy()
+	{
+		return new Point(X, Y);
+	}
 }
 
 
