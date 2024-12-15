@@ -16,6 +16,17 @@ public class LocDir : Loc
 		return $"{base.ToString()}{Dir}";
 	}
 
+	internal static DirEnum ParseDir(char c)
+	{
+		if (c == '^')
+			return DirEnum.N;
+		else if (c == '>')
+			return DirEnum.E;
+		else if (c == 'v')
+			return DirEnum.S;
+		else 
+			return DirEnum.W;
+	}
 }
 public class Region
 {
@@ -123,9 +134,13 @@ public class Loc
 		return new Loc(Row - diff.Row, Col - diff.Col);
 	}
 
+	public Loc Plus(int row, int col)
+	{
+		return new Loc(Row + row, Col + col);
+	}
 	public Loc Plus(Loc diff)
 	{
-		return new Loc(Row + diff.Row, Col + diff.Col);
+		return Plus(diff.Row, diff.Col);
 	}
 	public List<Loc> AllMoves()
 	{
@@ -163,8 +178,10 @@ public enum MoveEnum
 public class GridMap
 {
 	List<char[]> _map = [];
-	public GridMap(string[]? lines)
+	public GridMap(IEnumerable<string>? lines)
 	{
+		if (lines == null)
+			return;
 		foreach (var line in lines)
 		{
 			_map.Add(line.ToCharArray());
@@ -272,6 +289,7 @@ public class GridMap
 			rv += string.Join("", row);
 		return rv;
 	}
+
 }
 
 public class FLoc
