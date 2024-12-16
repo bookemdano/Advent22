@@ -10,7 +10,8 @@ internal class Program
 	{
 		Utils.AppName = "RUN";
 
-		var runner = GetDayRunner();
+		//var runner = GetDayRunner("14");
+		var runner = GetDayRunner(ElfHelper.DayString);
 		if (runner == null)
 			ElfHelper.DayLog("No runner found for Day" + ElfHelper.DayString);
 		else
@@ -60,7 +61,7 @@ internal class Program
 			ElfHelper.MonthLogPlus($"{res} t1: {ElfHelper.SmallString(t1)} t2: {ElfHelper.SmallString(t2)} total: {ElfHelper.SmallString(rv)}");
 		return rv;
 	}
-	static IDayRunner? GetDayRunner()
+	static IDayRunner? GetDayRunner(string dayString)
 	{
 		Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
 		var advent = assemblies[1];
@@ -69,7 +70,7 @@ internal class Program
 			ElfHelper.DayLog("No assembly[1] found!");
 			return null;
 		}
-		var className = $"Advent{ElfHelper.Year2}.Day{ElfHelper.DayString}";
+		var className = $"Advent{ElfHelper.Year2}.Day{dayString}";
 		var dayClass = advent.GetType(className);
 		if (dayClass == null)
 		{

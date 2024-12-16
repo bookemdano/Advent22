@@ -4,8 +4,8 @@ namespace Advent24;
 
 internal class Day15 : IDayRunner
 {
-	public bool IsReal => true;
-
+	public bool IsReal => false;
+	public bool ExtraLog => !IsReal;
 	// Day https://adventofcode.com/2024/day/15
 	// Input https://adventofcode.com/2024/day/15/input
 	public object? Star1()
@@ -36,13 +36,18 @@ internal class Day15 : IDayRunner
 		var moves = moveLine.Select(c => LocDir.ParseDir(c)).ToList();
 		var map = new Map15(mapLines);
 		var bot = map.Find('@');
+		if (ExtraLog)
+			Console.Clear();
 		foreach(var move in moves)
 		{
+			if (ExtraLog)
+				WriteToConsole(map.ToString());
+
 			//Console.WriteLine(map);
 			bot = map.Move(bot, move);
 			
 		}
-		Console.WriteLine(map);
+		//Console.WriteLine(map);
 
 		var boxes = map.FindAll('O');
 		foreach (var box in boxes)
@@ -51,6 +56,19 @@ internal class Day15 : IDayRunner
 		// 1492518
 		check.Compare(rv);
 		return rv;
+	}
+	void WriteToConsole(string text)
+	{
+		var lines = text.Split(Environment.NewLine);
+		if (lines.Count() >= Console.WindowHeight)
+			return;
+		var iLine = 0;
+		foreach(var line in lines)
+		{
+			Console.SetCursorPosition(0, iLine++);
+			Console.WriteLine(line);
+		}
+		Thread.Sleep(TimeSpan.FromMilliseconds(10));
 	}
 	public class Map15 : GridMap
 	{
@@ -175,10 +193,15 @@ internal class Day15 : IDayRunner
 		var map = new Map15(mapLines);
 		Console.WriteLine(map);
 		var bot = map.Find('@');
+		if (ExtraLog)
+			Console.Clear();
 
 		var iMove = 0;
 		foreach (var move in moves)
 		{
+			if (ExtraLog)
+				WriteToConsole(map.ToString());
+
 			bot = map.Move2(bot, move);
 			//Console.WriteLine($"{iMove++} {move}");
 			//Console.WriteLine(map);

@@ -7,13 +7,48 @@ public class LocDir : Loc
 {
 	public DirEnum Dir { get; }
 
+	public LocDir(Loc loc, DirEnum dir) : this(loc.Row, loc.Col, dir)
+	{
+	}
 	public LocDir(int row, int col, DirEnum dir) : base(row, col)
 	{
 		Dir = dir;
 	}
+	public override bool Equals(object? obj)
+	{
+		if (obj as LocDir == null)
+			return false;
+		return SameDir((obj as LocDir)!);
+	}
+	public override int GetHashCode()
+	{
+		return ((int)Dir)*1000000 + Row*1000 + Col;
+	}
 	public override string ToString()
 	{
 		return $"{base.ToString()}{Dir}";
+	}
+	public bool SameDir(LocDir other)
+	{
+		return (Row == other.Row && Col == other.Col && Dir == other.Dir);
+	}
+	public List<LocDir> AllDirMoves()
+	{
+		var rv = new List<LocDir>();
+		rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
+		rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
+		rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
+		rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
+		return rv;
+	}
+	public LocDir DirMove()
+	{
+		return DirMove(Dir);
+	}
+
+	public LocDir DirMove(DirEnum dir)
+	{
+		return new LocDir(Move(dir), dir);
 	}
 
 	internal static DirEnum ParseDir(char c)
@@ -26,6 +61,18 @@ public class LocDir : Loc
 			return DirEnum.S;
 		else 
 			return DirEnum.W;
+	}
+
+	internal static DirEnum Opposite(DirEnum dir)
+	{
+		if (dir == DirEnum.N)
+			return DirEnum.S;
+		else if (dir == DirEnum.S)
+			return DirEnum.N;
+		else if (dir == DirEnum.E)
+			return DirEnum.W;
+		else //if (dir == DirEnum.S)
+			return DirEnum.E;
 	}
 }
 public class Region
@@ -167,7 +214,12 @@ public class Loc
 		return (Row == other.Row && Col == other.Col);
 	}
 
-
+	public override bool Equals(object? obj)
+	{
+		if (obj as Loc == null)
+			return false;
+		return Same(obj as Loc);
+	}
 }
 public enum MoveEnum
 {
@@ -246,7 +298,7 @@ public class GridMap
 	public override string ToString()
 	{
 		var outs = new List<string>();
-		outs.Add("GridMap");
+		//outs.Add("GridMap");
 		foreach (var row in _map)
 		{
 			outs.Add(string.Join("", row));
