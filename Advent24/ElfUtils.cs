@@ -1,3 +1,5 @@
+using static Advent24.Day06;
+
 namespace AoCLibrary;
 public enum DirEnum
 {
@@ -150,6 +152,22 @@ public class Point
 	{
 		return new Point(X, Y);
 	}
+
+	internal static Point Parse(string line)
+	{
+		var parts = line.Split(',');
+		return new Point(long.Parse(parts[0]), long.Parse(parts[1]));
+	}
+	public override bool Equals(object? obj)
+	{
+		if (obj is Point)
+			return Same((obj as Point)!);
+		return false;
+	}
+	public override int GetHashCode()
+	{
+		return (int) X * 1000 + (int) Y;
+	}
 }
 
 
@@ -227,10 +245,15 @@ public enum MoveEnum
 	OffMap,
 	Loop
 }
-public class GridMap
+public class GridMapBase
 {
-	List<char[]> _map = [];
-	public GridMap(IEnumerable<string>? lines)
+	protected List<char[]> _map = [];
+	protected GridMapBase()
+	{
+
+	}
+
+	public GridMapBase(IEnumerable<string>? lines)
 	{
 		if (lines == null)
 			return;
@@ -238,6 +261,80 @@ public class GridMap
 		{
 			_map.Add(line.ToCharArray());
 		}
+	}
+	public int Count(char target)
+	{
+		var rv = 0;
+		foreach (var row in _map)
+		{
+			foreach (var c in row)
+			{
+				if (c == target)
+					rv++;
+			}
+		}
+		return rv;
+	}
+
+	public override string ToString()
+	{
+		var outs = new List<string>();
+		//outs.Add("GridMap");
+		foreach (var row in _map)
+		{
+			outs.Add(string.Join("", row));
+		}
+		return string.Join(Environment.NewLine, outs);
+	}
+	public string Text()
+	{
+		var rv = "";
+		foreach (var row in _map)
+			rv += string.Join("", row);
+		return rv;
+	}
+
+}
+
+
+public class GridMapXY : GridMapBase
+{
+	public GridMapXY(int x, int y)
+	{
+		for (int row = 0; row < y; row++)
+			_map.Add(new string('.', x).ToCharArray());
+	}
+	public void Set(Point pt, char c)
+	{
+		_map[(int) pt.Y][pt.X] = c;
+	}
+	public char? Get(Point pt)
+	{
+		if (!IsValid(pt))
+			return null;
+		return _map[(int) pt.Y][pt.X];
+	}
+	public bool IsValid(Point pt)
+	{
+		if (pt.Y < 0 || pt.X < 0)
+			return false;
+		if (pt.Y >= _map.Count() || pt.X >= _map[0].Count())
+			return false;
+		return true;
+	}
+
+	protected static void DrawOnText(string[] lines, Point pt, char c)
+	{
+		var row = lines[pt.Y].ToCharArray();
+		row[pt.X] = c;
+		lines[pt.Y] = new string(row);
+	}
+}
+public class GridMap : GridMapBase
+{
+	public GridMap(IEnumerable<string>? lines) : base(lines)
+	{
+		
 	}
 	public int Rows => _map.Count();
 	public int Cols => _map[0].Count();
@@ -272,19 +369,6 @@ public class GridMap
 			return null;
 		return int.Parse(c.ToString());
 	}
-	public int Count(char target)
-	{
-		var rv = 0;
-		foreach (var row in _map)
-		{
-			foreach (var c in row)
-			{
-				if (c == target)
-					rv++;
-			}
-		}
-		return rv;
-	}
 
 	public void Set(int row, int col, char c)
 	{
@@ -293,17 +377,6 @@ public class GridMap
 	public void Set(Loc loc, char c)
 	{
 		Set(loc.Row, loc.Col, c);
-	}
-
-	public override string ToString()
-	{
-		var outs = new List<string>();
-		//outs.Add("GridMap");
-		foreach (var row in _map)
-		{
-			outs.Add(string.Join("", row));
-		}
-		return string.Join(Environment.NewLine, outs);
 	}
 
 	public List<Loc> FindAll(char target)
@@ -334,13 +407,6 @@ public class GridMap
 		return true;
 	}
 
-	public string Text()
-	{
-		var rv = "";
-		foreach (var row in _map)
-			rv += string.Join("", row);
-		return rv;
-	}
 
 }
 

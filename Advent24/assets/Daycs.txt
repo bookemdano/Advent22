@@ -9,7 +9,7 @@ internal class Day|DD| : IDayRunner
 	// Input |INPUTURL|
 	public object? Star1()
 	{
-		var key = new StarCheckKey(StarEnum.Star1, IsReal);
+		var key = new StarCheckKey(StarEnum.Star1, IsReal, null);
 		StarCheck check;
 		if (!IsReal)
 			check = new StarCheck(key, 0L);
@@ -26,7 +26,7 @@ internal class Day|DD| : IDayRunner
 	}
 	public object? Star2()
 	{
-		var key = new StarCheckKey(StarEnum.Star2, IsReal);
+		var key = new StarCheckKey(StarEnum.Star2, IsReal, null);
 		StarCheck check;
 		if (!IsReal)
 			check = new StarCheck(key, 0L);

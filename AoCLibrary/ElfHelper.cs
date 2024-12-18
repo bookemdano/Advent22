@@ -268,7 +268,14 @@ public class StarCheckKey
 	}
 	public override string ToString()
 	{
-		return $"{Star} r:{IsReal} p:{Part}";
+		var rv = $"{Star}";
+		if (IsReal)
+			rv += $" REAL";
+		else
+			rv += $" FAKE";
+		if (Part != null)
+			rv += $" part:{Part}";
+		return rv;
 	}
 	public StarEnum Star { get; }
 	public bool IsReal { get; }
@@ -301,14 +308,17 @@ public class StarCheck
 	}
 	public void Compare(long answer)
 	{
-		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
-		Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
-		Utils.Assert(answer, Expected);
+		BaseCompare(answer, answer == Expected);
+	}
+	public void BaseCompare(object answer, bool success)
+	{
+		var str = success?"SUCCESS":"FAIL";
+		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer} {str}");
+		Utils.CaptainsLog($"Compare {this} ?= a:{answer} {str}");
+		Utils.Assert(success, $"{this} == a:{answer}");
 	}
 	public void Compare(string answer)
 	{
-		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
-		Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
-		Utils.Assert(answer == ExpectedString, $"{this} == a:{answer}");
+		BaseCompare(answer, answer == ExpectedString);
 	}
 }
