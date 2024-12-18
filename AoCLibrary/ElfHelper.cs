@@ -174,6 +174,12 @@ public class ElfHelper
 		Utils.MonthLog(o, sw);
 		DayLog(o, sw);
 	}
+	public static void DayLogPlus(object o)
+	{
+		DayLog(o, null);
+		var str = o?.ToString() ?? "";
+		Console.WriteLine(str);
+	}
 
 	public static void DayLog(object o, Stopwatch? sw = null)
 	{
@@ -276,17 +282,33 @@ public class StarCheck
 		Key = key;
 		Expected = expected;
 	}
+	public StarCheck(StarCheckKey key, string expected)
+	{
+		Key = key;
+		ExpectedString = expected;
+	}
 
 	public StarCheckKey Key { get; }
+	public string ExpectedString { get; }
 	public long Expected { get; }
+	bool UseString => !string.IsNullOrWhiteSpace(ExpectedString);
 	public override string ToString()
 	{
-		return $"{Key} e:{Expected}";
+		if (!UseString)
+			return $"{Key} e:{Expected}";
+		else
+			return $"{Key} e:{ExpectedString}";
 	}
 	public void Compare(long answer)
 	{
 		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
 		Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
 		Utils.Assert(answer, Expected);
+	}
+	public void Compare(string answer)
+	{
+		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer}");
+		Utils.CaptainsLog($"Compare {this} ?= a:{answer}");
+		Utils.Assert(answer == ExpectedString, $"{this} == a:{answer}");
 	}
 }

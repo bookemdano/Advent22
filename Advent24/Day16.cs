@@ -176,7 +176,7 @@ internal class Day16 : IDayRunner
 		if (!IsReal)
 			check = new StarCheck(key, 64L);
 		else
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 489L);
 
 		var lines = Program.GetLines(check.Key);
 		//var text = Program.GetText(check.Key);
