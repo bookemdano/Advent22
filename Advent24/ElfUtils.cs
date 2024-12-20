@@ -1,4 +1,5 @@
-using static Advent24.Day06;
+
+using System.Reflection;
 
 namespace AoCLibrary;
 public enum DirEnum
@@ -96,6 +97,16 @@ public class Region
 		return (pt.X >= Ul.X && pt.Y >= Ul.Y && pt.X <= Br.X && pt.Y <= Br.Y);
 	}
 }
+public class PointDir : Point
+{
+	public PointDir(long x, long y, DirEnum dir) : base(x, y)
+	{
+		Dir = dir;
+	}
+
+	public DirEnum Dir { get; }
+	
+}
 public class Point
 {
 	public long X { get; set; }
@@ -104,6 +115,13 @@ public class Point
 	{
 		Y = y; X = x;
 	}
+
+	public Point(Loc loc)
+	{
+		Y = loc.Row;
+		X = loc.Col;
+	}
+
 	public override string ToString()
 	{
 		return $"({X},{Y})";
@@ -130,6 +148,15 @@ public class Point
 		rv.Add(new Point(X + 1, Y));
 		rv.Add(new Point(X, Y + 1));
 		rv.Add(new Point(X - 1, Y));
+		return rv;
+	}
+	public List<PointDir> AllDirMoves()
+	{
+		var rv = new List<PointDir>();
+		rv.Add(new PointDir(X, Y - 1, DirEnum.N));
+		rv.Add(new PointDir(X + 1, Y, DirEnum.E));
+		rv.Add(new PointDir(X, Y + 1, DirEnum.S));
+		rv.Add(new PointDir(X - 1, Y, DirEnum.W));
 		return rv;
 	}
 	public Point Move(DirEnum dir)
@@ -294,11 +321,33 @@ public class GridMapBase
 		return rv;
 	}
 
+	protected Loc? FindRC(char target)
+	{
+		int iRow = 0;
+		foreach (var row in _map)
+		{
+			int iCol = 0;
+			foreach (var c in row)
+			{
+				if (c == target)
+					return new Loc(iRow, iCol);
+				iCol++;
+			}
+
+			iRow++;
+		}
+		return null;
+	}
+
 }
 
 
 public class GridMapXY : GridMapBase
 {
+	public GridMapXY(IEnumerable<string>? lines) : base(lines)
+	{
+
+	}
 	public GridMapXY(int x, int y)
 	{
 		for (int row = 0; row < y; row++)
@@ -329,6 +378,14 @@ public class GridMapXY : GridMapBase
 		row[pt.X] = c;
 		lines[pt.Y] = new string(row);
 	}
+	internal Point? Find(char target)
+	{
+		var rv = FindRC(target);
+		if (rv == null)
+			return null;
+		return new Point(rv);
+	}
+
 }
 public class GridMap : GridMapBase
 {
@@ -338,23 +395,6 @@ public class GridMap : GridMapBase
 	}
 	public int Rows => _map.Count();
 	public int Cols => _map[0].Count();
-	internal Loc? Find(char target)
-	{
-		int iRow = 0;
-		foreach (var row in _map)
-		{
-			int iCol = 0;
-			foreach (var c in row)
-			{
-				if (c == target)
-					return new Loc(iRow, iCol);
-				iCol++;
-			}
-
-			iRow++;
-		}
-		return null;
-	}
 
 	public char? Get(Loc loc)
 	{
@@ -377,6 +417,10 @@ public class GridMap : GridMapBase
 	public void Set(Loc loc, char c)
 	{
 		Set(loc.Row, loc.Col, c);
+	}
+	internal Loc? Find(char target)
+	{
+		return FindRC(target);
 	}
 
 	public List<Loc> FindAll(char target)
