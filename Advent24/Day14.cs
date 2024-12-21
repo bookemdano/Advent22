@@ -77,14 +77,18 @@ internal class Day14 : IDayRunner
 
 		internal void Move(int steps, Point size)
 		{
-			Positon.X += steps * Velocity.X;
-			Positon.X = Positon.X % size.X;
-			if (Positon.X < 0)
-				Positon.X += size.X;
-			Positon.Y += steps * Velocity.Y;
-			Positon.Y = Positon.Y % size.Y;
-			if (Positon.Y < 0)
-				Positon.Y += size.Y;
+			// changed after check
+			var x = Positon.X;
+			var y = Positon.Y;
+			x += steps * Velocity.X;
+			x = x % size.X;
+			if (x < 0)
+				x += size.X;
+			y += steps * Velocity.Y;
+			y = y % size.Y;
+			if (y < 0)
+				y += size.Y;
+			Positon = new Point(x, y);
 		}
 		public override string ToString()
 		{

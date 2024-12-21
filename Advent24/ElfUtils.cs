@@ -62,8 +62,20 @@ public class LocDir : Loc
 			return DirEnum.E;
 		else if (c == 'v')
 			return DirEnum.S;
-		else 
+		else
 			return DirEnum.W;
+	}
+
+	internal static char DirChar(DirEnum dir)
+	{
+		if (dir == DirEnum.N)
+			return '^';
+		if (dir == DirEnum.E)
+			return '>';
+		if (dir == DirEnum.S)
+			return 'v';
+		else
+			return '<';
 	}
 
 	internal static DirEnum Opposite(DirEnum dir)
@@ -76,6 +88,48 @@ public class LocDir : Loc
 			return DirEnum.W;
 		else //if (dir == DirEnum.S)
 			return DirEnum.E;
+	}
+}
+public class DirDist
+{
+	public DirDist(DirEnum dir, long dist)
+	{
+		Dir = dir;
+		Dist = dist;
+	}
+
+	static internal List<DirDist> FindDirs(Point from, Point target)
+	{
+		var rv = new List<DirDist>();
+		var current = from;
+		while (!current.Same(target))
+		{
+			var dirDist = FindDir(current, target);
+			current = current.Move(dirDist);
+			rv.Add(dirDist);
+		}
+		return rv;
+	}
+
+	static internal DirDist FindDir(Point from, Point target)
+	{
+		if (target.X > from.X)
+			return new DirDist(DirEnum.E, target.X - from.X);
+		else if (from.X > target.X)
+			return new DirDist(DirEnum.W, from.X - target.X);
+		else if (target.Y > from.Y)
+			return new DirDist(DirEnum.S, target.Y - from.Y);
+		else if (from.Y > target.Y)
+			return new DirDist(DirEnum.N, from.Y - target.Y);
+		else
+			return new DirDist(DirEnum.E, 0);
+	}
+
+	public DirEnum Dir { get; set; }
+	public long Dist { get; set; }
+	public override string ToString()
+	{
+		return $"{Dir}{Dist}";
 	}
 }
 public class Region
@@ -109,8 +163,8 @@ public class PointDir : Point
 }
 public class Point
 {
-	public long X { get; set; }
-	public long Y { get; set; }
+	public long X { get; }
+	public long Y { get; }
 	public Point(long x, long y)
 	{
 		Y = y; X = x;
@@ -170,6 +224,25 @@ public class Point
 		else //if (dir == DirEnum.W)
 			return new Point(X - 1, Y);
 	}
+	internal Point Move(List<DirDist> dirDists)
+	{
+		var pt = this; 
+		foreach(var dirDist in dirDists)
+			pt = pt.Move(dirDist);
+		return pt;
+	}
+
+	public Point Move(DirDist dirDist)
+	{
+		if (dirDist.Dir == DirEnum.N)
+			return new Point(X, Y - dirDist.Dist);
+		else if (dirDist.Dir == DirEnum.E)
+			return new Point(X + dirDist.Dist, Y);
+		else if (dirDist.Dir == DirEnum.S)
+			return new Point(X, Y + dirDist.Dist);
+		else //if (dir == DirEnum.W)
+			return new Point(X - dirDist.Dist, Y);
+	}
 	public bool Same(Point other)
 	{
 		return (Y == other.Y && X == other.X);
@@ -195,6 +268,7 @@ public class Point
 	{
 		return (int) X * 1000 + (int) Y;
 	}
+
 }
 
 
