@@ -1,8 +1,4 @@
 using AoCLibrary;
-using System.Linq;
-using System.Net.WebSockets;
-using static Advent24.Day13;
-using static Advent24.Day18;
 
 namespace Advent24;
 
@@ -17,20 +13,27 @@ internal class Day20 : IDayRunner
 		var key = new StarCheckKey(StarEnum.Star1, IsReal, null);
 		StarCheck check;
 		if (!IsReal)
-			check = new StarCheck(key, 5L);
+			check = new StarCheck(key, 44L);
 		else
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 1323L);
 
 		var lines = Program.GetLines(check.Key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
+		int offset = 100;
+		if (IsReal == false)
+			//offset = 64;//1
+			offset = 2;//44
+			//offset = 20;//5
+
 		var map = new Map20(lines);
 		var trail = new Trail20(map.Find('S')!);
-		var nonCheat = map.Solve(trail, maxScore: int.MaxValue).First();
+		var nonCheat = map.Solve(trail, maxScore: int.MaxValue, maxCheats: 0).First();
 
-		var cheats = map.Solve(trail, maxScore: nonCheat - 20);
+		var cheats = map.Solve(trail, maxScore: nonCheat - offset, maxCheats: 2);
 		rv = cheats.Count();
+
 		check.Compare(rv);
 		return rv;
 	}
@@ -39,8 +42,16 @@ internal class Day20 : IDayRunner
 		public Point Pos { get; set; }
 		public List<Point> History { get; } = [];
 		public int Score => History.Count();
-		public bool Cheated => Cheats.Any();
-		public List<Point> Cheats { get; } = [];
+		List<Point> _cheats = [];
+		public void AddCheat(Point cheat, Point last)
+		{
+			if (!_cheats.Any())
+				_cheats.Add(last);
+			_cheats.Add(cheat);
+		}
+		public int CheatCount => _cheats.Count;
+		public List<Point> GetCheats => _cheats;
+		public string CheatSet => $"{_cheats.FirstOrDefault()}{_cheats.LastOrDefault()}";
 		public Trail20(Point pos)
 		{
 			Pos = pos;
@@ -50,12 +61,12 @@ internal class Day20 : IDayRunner
 			var rv = new Trail20(pos);
 			rv.History.AddRange(History);
 			rv.History.Add(pos);
-			rv.Cheats.AddRange(Cheats);
+			rv._cheats.AddRange(_cheats);
 			return rv;
 		}
 		public override string ToString()
 		{
-			return $"{Pos} s:{Score} c:{Cheated}";
+			return $"{Pos} s:{Score} c:{CheatSet}({CheatCount})";
 		}
 	}
 	public class Map20 : GridMapXY
@@ -69,36 +80,50 @@ internal class Day20 : IDayRunner
 		{
 		}
 
-		public List<int> Solve(Trail20 head, int maxScore)
+		Trail20? _best;
+
+		public List<int> Solve(Trail20 head, int maxScore, int maxCheats)
 		{
 			var trails = new List<Trail20>();
 			var wins = new List<Trail20>();
 			var allowCheats = maxScore != int.MaxValue;
 			trails.Add(head);
+			var next = DateTime.Now;
 			while(trails.Any())
 			{
 				var newTrails = new List<Trail20>();
 				foreach(var trail in trails)
-					newTrails.AddRange(Move(trail, allowCheats));
+					newTrails.AddRange(Move(trail, allowCheats, maxCheats));
 
 				trails = new List<Trail20>();
 				foreach (var newTrail in newTrails)
 				{
+					if (allowCheats && newTrail.CheatCount > 0)
+					{
+						var index = _best.History.IndexOf(newTrail.Pos);
+						if (index >= 0)
+						{
+							newTrail.History.AddRange(_best.History[(index + 1)..]);
+							newTrail.Pos = _best.Pos;
+						}
+					}
 					if (newTrail.Score > maxScore)
 						continue;
-
 					if (Get(newTrail.Pos) == 'E')
 					{
-						Console.WriteLine(maxScore- newTrail.Score);
-						Draw(newTrail);
-						wins.Add(newTrail);
+						//Console.WriteLine($"{newTrail} {maxScore - newTrail.Score} left: {newTrails.Count()}");
+						//Draw(newTrail);
+						if (!wins.Any(t => t.CheatSet == newTrail.CheatSet))
+							wins.Add(newTrail);
 						//rv.Add(newTrail.Score);
 					}
 					else
 						trails.Add(newTrail);
 				}
 			}
-			var groups = wins.GroupBy(t => t.Cheats.FirstOrDefault()?.ToString());
+			if (allowCheats == false && wins.Count == 1)
+				_best = wins.First();
+			var groups = wins.GroupBy(t => t.CheatSet);
 			var rv = new List<int>();
 			foreach(var trailGroup in groups)
 			{
@@ -113,7 +138,7 @@ internal class Day20 : IDayRunner
 			var lines = text.Split(Environment.NewLine);
 			foreach (var pt in trail.History)
 				GridMapXY.DrawOnText(lines, pt, '0');
-			foreach (var pt in trail.Cheats)
+			foreach (var pt in trail.GetCheats)
 				GridMapXY.DrawOnText(lines, pt, 'X');
 
 			Console.WriteLine(trail);
@@ -121,10 +146,10 @@ internal class Day20 : IDayRunner
 				Console.WriteLine(line);
 		}
 		
-		public List<Trail20> Move(Trail20 trail, bool allowCheat)
+		public List<Trail20> Move(Trail20 trail, bool allowCheat, int maxCheats)
 		{
 			var rv = new List<Trail20>();
-			var moves = trail.Pos.AllDirMoves();
+			var moves = trail.Pos.AllMoves();
 			foreach(var move in moves)
 			{
 				if (trail.History.Contains(move))
@@ -134,15 +159,18 @@ internal class Day20 : IDayRunner
 				var blocked = Get(move) == '#';
 				if (!blocked)
 				{
-					rv.Add(trail.Add(move));
+					var newTrail = trail.Add(move);
+					if (newTrail.CheatCount > 0 && newTrail.CheatCount < maxCheats)
+						newTrail.AddCheat(move, trail.Pos);
+					rv.Add(newTrail);
 					continue;
 				}
-
-				if (allowCheat && !trail.Cheated)
+				else if (allowCheat && trail.CheatCount < maxCheats )
 				{
 					var cheat1 = trail.Add(move);
-					cheat1.Cheats.Add(move);
-
+					cheat1.AddCheat(move, trail.Pos);
+					rv.Add(cheat1);
+					/*
 					//var move2 = move.Move(move.Dir);
 					//var cheat2 = cheat1.Add(move2);
 					//cheat2.Cheats.Add(move2);
@@ -162,7 +190,7 @@ internal class Day20 : IDayRunner
 							rv.Add(cheatTrail);
 						}
 						//Draw(cheatTrail);
-					}
+					}*/
 				}
 			}
 			return rv;
@@ -174,7 +202,7 @@ internal class Day20 : IDayRunner
 		var key = new StarCheckKey(StarEnum.Star2, IsReal, null);
 		StarCheck check;
 		if (!IsReal)
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, 285L);
 		else
 			check = new StarCheck(key, 0L);
 
@@ -182,6 +210,17 @@ internal class Day20 : IDayRunner
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
+		int offset = 100;
+		if (IsReal == false)
+			offset = 50; //285
+			//offset = 76;//3
+
+		var map = new Map20(lines);
+		var trail = new Trail20(map.Find('S')!);
+		var nonCheat = map.Solve(trail, maxScore: int.MaxValue, maxCheats: 0).First();
+
+		var cheats = map.Solve(trail, maxScore: nonCheat - offset, maxCheats: 20);
+		rv = cheats.Count();
 
 		check.Compare(rv);
 		return rv;
