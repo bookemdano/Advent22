@@ -54,6 +54,20 @@ public class LocDir : Loc
 		return new LocDir(Move(dir), dir);
 	}
 
+	internal static DirEnum? TryParseDir(char? c)
+	{
+		if (c == '^')
+			return DirEnum.N;
+		else if (c == '>')
+			return DirEnum.E;
+		else if (c == 'v')
+			return DirEnum.S;
+		else if (c == '<')
+			return DirEnum.W;
+		else
+			return null;
+	}
+
 	internal static DirEnum ParseDir(char c)
 	{
 		if (c == '^')
@@ -62,7 +76,7 @@ public class LocDir : Loc
 			return DirEnum.E;
 		else if (c == 'v')
 			return DirEnum.S;
-		else
+		else //if (c == '<')
 			return DirEnum.W;
 	}
 
@@ -127,9 +141,19 @@ public class DirDist
 
 	public DirEnum Dir { get; set; }
 	public long Dist { get; set; }
+	public string Chars()
+	{
+		return new string(LocDir.DirChar(Dir), (int) Dist);
+	}
+
 	public override string ToString()
 	{
 		return $"{Dir}{Dist}";
+	}
+
+	internal bool Same(DirDist other)
+	{
+		return Dir == other.Dir && Dist == other.Dist;
 	}
 }
 public class Region
@@ -353,7 +377,7 @@ public class GridMapBase
 	{
 
 	}
-
+	public int Rows => _map.Count;
 	public GridMapBase(IEnumerable<string>? lines)
 	{
 		if (lines == null)

@@ -1,4 +1,6 @@
 using AoCLibrary;
+using static Advent24.Day13;
+using static Advent24.Day21;
 
 namespace Advent24;
 
@@ -21,59 +23,112 @@ internal class Day21 : IDayRunner
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
-		var keypad = new GridMapXY(new List<string>() { "789", "456", "123", " 0A" });
-		var dirpad = new GridMapXY(new List<string>() { " ^A", "<v>" });
+		var keymap = new Map21(new List<string>() { "789", "456", "123", " 0A" });
+		var dirmap = new Map21(new List<string>() { " ^A", "<v>" });
+
+		var test = "<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A";
+		var r1 = new Remote21("human", dirmap, null).Convert(test);
+		var r2 = new Remote21("r1",dirmap, null).Convert(r1);
+		var kb = new Remote21("keys", keymap, null).Convert(r2);
+
 		foreach (var line in lines)
 		{
-			/*var remotes = new List<Trail21>();
-			remotes.Add(new Trail21(new Point(2, 0)));	// robot2
-			remotes.Add(new Trail21(new Point(2, 0)));
-			remotes.Add(new Trail21(new Point(2, 0)));  // human
-			*/
-			var remote = new Trail21(new Point(2, 0));
-			var keys = new Trail21(new Point(2, 3));
+			var human = new Remote21("human", dirmap, null);
+			var robot1 = new Remote21("r1", dirmap, human);
+			var keypad = new Trail21(new Point(2, 3));
 			foreach (var c in line)
 			{
-				var targKey = keypad.Find(c)!;
-				if (keys.Head == targKey)
+				var targKey = keymap.Find(c)!;
+				if (keypad.Head == targKey)
 					break;
-				var dirDists = DirDist.FindDirs(keys.Head, targKey);
-				foreach(var dirDist in dirDists)
+				var dirDists = DirDist.FindDirs(keypad.Head, targKey);
+				robot1.MoveTo(dirDists);
+				/*foreach (var dirDist in dirDists)
 				{
-					var moves = MoveToThis(dirpad, remote.Head, LocDir.DirChar(dirDist.Dir));
-					remote.Move(moves, dirpad);
-
-					var aMoves = MoveToThis(dirpad, remote.Head, 'A');
-					remote.Move(aMoves, dirpad);
-					/*foreach(var dirDist1 in dirDist1s)
-					{
-						var dirTarget2Char = LocDir.DirChar(dirDist1.Dir);
-						var targ2Key = dirpad.Find(dirTarget1Char);
-						var remote2 = remotes[1];
-						var dirDist2s = DirDist.FindDirs(remote1.Head, targ1Key);
-						foreach (var dirDist2 in dirDist2s)
-						{
-							var dirTarget3Char = LocDir.DirChar(dirDist2.Dir);
-							var targ3Key = dirpad.Find(dirTarget2Char);
-							var remote3 = remotes[2];
-							var dirDist3s = DirDist.FindDirs(remote2.Head, targ1Key);
-							remote3.Head.Move(dirDist3s);
-						}
-						remote2.Head.Move(dirDist2s);
-					}
-					remote1.Head.Move(dirDist1s);
-					*/
-				}
-				keys.Move(dirDists, keypad);
+					human.MoveTo(LocDir.DirChar(dirDist.Dir), dirDist.Same(dirDists.Last()));
+				}*/
+				keypad.Move(dirDists, keymap);
+				keypad.Push(keymap);
 			}
-
 		}
 
 		check.Compare(rv);
 		return rv;
 	}
+	public class Map21 : GridMapXY
+	{
+		public Map21(IEnumerable<string>? lines) : base(lines)
+		{
+		}
+	}
+	public class Remote21
+	{
+		private Trail21 _trail;
+		private string _name;
+		private Map21 _map;
 
-	private static List<DirDist> MoveToThis(GridMapXY map, Point from, char targetC)
+		public Remote21? Outer { get; set; }
+		public Remote21(string name, Map21 map, Remote21? outer)
+		{
+			_name = name;
+			_map = map;
+			Outer = outer;
+			_trail = new Trail21(map.Find('A')!);
+		}
+
+		internal void MoveTo(List<DirDist> dists)
+		{
+			foreach(var dist in  dists)
+			{
+				var c = LocDir.DirChar(dist.Dir);
+				var moves = MovesToThis(_map, _trail.Head, c);
+				if (Outer != null)
+				{
+					var target = _trail.Head;
+					Outer.MoveTo(moves);
+				}
+				_trail.Move(moves, _map);
+				for(int i = 0; i < dist.Dist; i++)
+					_trail.Push(_map);
+			}
+			var aMoves = MovesToThis(_map, _trail.Head, 'A');
+			if (Outer != null)
+			{
+				var target = _trail.Head;
+				Outer.MoveTo(aMoves);
+			}
+			_trail.Move(aMoves, _map);
+			_trail.Push(_map);
+		}
+		public override string ToString()
+		{
+			return _name + " " + _trail.ToString();
+		}
+
+		internal string Convert(string test)
+		{
+			var rv = string.Empty;
+			var pt = _trail.Head;
+			foreach(var c in test)
+			{
+				if (c == 'A')
+					rv += _map.Get(pt);
+				else
+					pt = pt.Move(LocDir.ParseDir(c));
+			}
+			return rv;
+		}
+	}
+	private static void MoveLast(GridMapXY dirpad, DirDist aMove1, Trail21 remote2)
+	{
+		var moves2 = MovesToThis(dirpad, remote2.Head, LocDir.DirChar(aMove1.Dir));
+		remote2.Move(moves2, dirpad);
+
+		var aMoves2 = MovesToThis(dirpad, remote2.Head, 'A');
+		remote2.Move(aMoves2, dirpad);
+	}
+
+	private static List<DirDist> MovesToThis(GridMapXY map, Point from, char targetC)
 	{
 		var target = map.Find(targetC)!;
 		return DirDist21.FindDirs21(from, target, map.Find(' ')!);
@@ -89,17 +144,39 @@ internal class Day21 : IDayRunner
 		public Point Head { get; set; }
 		public long Length => Moves.Count;
 		public List<DirDist> Moves { get; set; } = [];
-		public string _chars = string.Empty;
-		internal void Move(List<DirDist> moves, GridMapXY map)
+		string _chars = string.Empty;
+		string _pushes = string.Empty;
+		internal void Move(List<DirDist> moves, GridMapXY? map)
 		{
 			Moves.AddRange(moves);
-			foreach(var move in moves)
+			foreach (var move in moves)
+			{
 				Head = Head.Move(move);
-			_chars += map.Get(Head)??'?';
+				_chars += move.Chars();
+			}
+			/*var c = map.Get(Head);
+			var dir = LocDir.TryParseDir(c);
+			if (dir == null)
+				_chars += c ?? '?';
+			else
+				_chars += dir.ToString();
+			*/
+			//_pushes += map.Get(Head) ?? '?';
 		}
 		public override string ToString()
 		{
-			return _chars;
+			return $"{_chars}";
+		}
+
+		internal void Push(Map21 map)
+		{
+			var c = map.Get(Head);
+			var dir = LocDir.TryParseDir(c);
+			if (dir == null)
+				_chars += c ?? '?';
+			else
+				_chars += dir.ToString();
+			_pushes += map.Get(Head) ?? '?';
 		}
 	}
 	public class DirDist21
@@ -115,6 +192,8 @@ internal class Day21 : IDayRunner
 				Utils.Assert(!current.Same(danger), "Safe from danger.");
 				rv.Add(dirDist);
 			}
+			if (rv.Count() == 0)
+				ElfHelper.DayLog("Empty");
 			return rv;
 		}
 
