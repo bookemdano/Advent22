@@ -5,7 +5,7 @@ using System.Reflection;
 namespace Advent24;
 internal class Program
 {
-	static bool _crazyTimers = true;
+	static bool _crazyTimers = false;
 	static async Task Main()
 	{
 		Utils.AppName = "RUN";
