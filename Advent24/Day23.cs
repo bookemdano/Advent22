@@ -52,27 +52,20 @@ internal class Day23 : IDayRunner
 	}
 	public class Trail23
 	{
-		public List<Comp23> Comps { get; set; } = [];
-		public Trail23()
+		public string CompNameString { get; set; }
+		public string Head { get; set; }
+		public Trail23(string compName, string? compNameString = null) 
 		{
+			if (compNameString == null)
+				CompNameString = compName;
+			else
+				CompNameString = compNameString + "," + compName;
+			Head = compName;
+		}
 
-		}
-		public Trail23(Comp23 comp) 
-		{
-			Comps.Add(comp);
-		}
-
-		public Comp23 Head => Comps.Last();
-		public Trail23 Step(Comp23 comp)
-		{
-			var rv = new Trail23();
-			rv.Comps.AddRange(Comps);			
-			rv.Comps.Add(comp);
-			return rv;
-		}
 		public override string ToString()
 		{
-			return $"{string.Join(',', Comps.Select(s=>s.Name))}";
+			return CompNameString;
 		}
 	}
 	public class Comp23
@@ -84,10 +77,10 @@ internal class Day23 : IDayRunner
 		public string Name { get; }
 		public List<Comp23> Connections { get; } = [];
 
-		public string BiggestGroup()
+		public string BiggestGroup(List<Comp23> allComps)
 		{
 			var trails = new List<Trail23>();
-			trails.Add(new Trail23(this));
+			trails.Add(new Trail23(Name));
 			var rv = string.Empty;
 			var maxCount = 0;
 			while(trails.Any())
@@ -95,14 +88,15 @@ internal class Day23 : IDayRunner
 				var newTrails = new List<Trail23>();
 				foreach(var trail in trails)
 				{
-					foreach (var conn in trail.Head.Connections)
+					var trailComp = allComps.FirstOrDefault(c => c.Name == trail.Head);
+					foreach (var conn in trailComp.Connections)
 					{
-						if (trail.Comps.Any(t => t.Name == conn.Name))// already evaluates
+						if (trail.CompNameString.Contains(conn.Name))// already evaluated
 							continue;
 						var failed = false;
-						foreach (var comp in trail.Comps)
+						foreach (var compName in trail.CompNameString.Split(','))
 						{
-							if (!comp.ConnectedTo(conn.Name))
+							if (!conn.ConnectedTo(compName))
 							{
 								failed = true;
 								break;
@@ -110,12 +104,12 @@ internal class Day23 : IDayRunner
 						}
 						if (!failed)
 						{
-							var newTrail = trail.Step(conn);
+							var newTrail = new Trail23(conn.Name, trail.CompNameString);
 							newTrails.Add(newTrail);
-							if (newTrail.Comps.Count > maxCount)
+							if (newTrail.CompNameString.Length > maxCount)
 							{
-								maxCount = newTrail.Comps.Count;
-								rv = newTrail.ToString();
+								maxCount = newTrail.CompNameString.Length;
+								rv = newTrail.CompNameString;
 							}
 						}
 					}
@@ -182,7 +176,7 @@ internal class Day23 : IDayRunner
 		if (!IsReal)
 			check = new StarCheck(key, "co,de,ka,ta");
 		else
-			check = new StarCheck(key, 0L);
+			check = new StarCheck(key, "bw,dr,du,ha,mm,ov,pj,qh,tz,uv,vq,wq,xw");
 
 		var lines = Program.GetLines(check.Key);
 		//var text = Program.GetText(check.Key);
@@ -211,9 +205,12 @@ internal class Day23 : IDayRunner
 		
 		foreach(var comp in comps)
 		{
-			var group = comp.BiggestGroup();
+			var group = comp.BiggestGroup(comps);
 			if (group.Length > rv.Length)
+			{
+				Console.WriteLine("Best so far:" + group);
 				rv = Order(group);
+			}
 		}
 
 		check.Compare(rv);
