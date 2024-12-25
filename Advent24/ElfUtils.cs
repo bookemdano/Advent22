@@ -436,6 +436,13 @@ public class GridMapBase
 		}
 		return null;
 	}
+    internal string GetCol(int col)
+    {
+		var rv = string.Empty;
+		foreach (var row in _map)
+			rv += row[col];
+		return rv;
+    }
 
 }
 
