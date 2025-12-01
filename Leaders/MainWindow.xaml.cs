@@ -135,13 +135,16 @@ namespace Leaders
 			var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
 			int i = 0;
 			var vms = new List<MemberViewModel>();
-			var prevScore = showables.First().LocalScore;
-			foreach (var showable in showables)
+			if (showables.Any())
 			{
-				++i;
-				vms.Add(new MemberViewModel(showable, i, prevScore, elfResult.Members.Count()));
-			}
-			grd.ItemsSource = vms;
+                var prevScore = showables.First().LocalScore;
+                foreach (var showable in showables)
+                {
+                    ++i;
+                    vms.Add(new MemberViewModel(showable, i, prevScore, elfResult.Members.Count()));
+                }
+            }
+            grd.ItemsSource = vms;
 
 			_next = elfResult.Timestamp.Add(ElfHelper.MinApiRefresh);
 			staNext.Text = "Next update " + _next;

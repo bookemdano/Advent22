@@ -20,7 +20,7 @@ public class ElfHelper
 	}
 
 	public static readonly int Year = DateTime.Today.AddDays(-31).Year;
-	public static readonly int TotalDays = 25;
+	public static readonly int TotalDays = 12;
         public static bool IsActive
         {
             get
@@ -43,6 +43,8 @@ public class ElfHelper
                 var rv = (int) RawDay;
                 if (rv > TotalDays)
                     return TotalDays;
+				if (rv <= 0)
+					return 1;
                 return rv;
             }
         }
