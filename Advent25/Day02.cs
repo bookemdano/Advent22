@@ -1,19 +1,15 @@
 using AoCLibrary;
-using System.Collections.Generic;
-using System.Globalization;
 namespace Advent25;
 
 internal class Day02 : IDayRunner
 {
-	public bool IsReal => true;
-
 	// Day https://adventofcode.com/2025/day/2
 	// Input https://adventofcode.com/2025/day/2/input
-	public object? Star1()
+	public RunnerResult Star1(bool isReal)
 	{
-		var key = new StarCheckKey(StarEnum.Star1, IsReal, null);
+		var key = new StarCheckKey(StarEnum.Star1, isReal, null);
 		StarCheck check;
-		if (!IsReal)
+		if (!isReal)
 			check = new StarCheck(key, 1227775554L);
 		else
 			check = new StarCheck(key, 30608905813L);
@@ -40,14 +36,16 @@ internal class Day02 : IDayRunner
 					rv += i;
             }
         }
-		check.Compare(rv);
-		return rv;
-	}
-	public object? Star2()
+        var res = new RunnerResult();
+        res.StarValue = rv;
+        res.StarSuccess = check.Compare(rv);
+        return res;
+    }
+    public RunnerResult Star2(bool isReal)
 	{
-		var key = new StarCheckKey(StarEnum.Star2, IsReal, null);
+		var key = new StarCheckKey(StarEnum.Star2, isReal, null);
 		StarCheck check;
-		if (!IsReal)
+		if (!isReal)
 			check = new StarCheck(key, 4174379265L);
 		else
 			check = new StarCheck(key, 0L);
@@ -90,8 +88,10 @@ internal class Day02 : IDayRunner
             }
         }
 
-        check.Compare(rv);
-		return rv;
-	}
+        var res = new RunnerResult();
+        res.StarValue = rv;
+        res.StarSuccess = check.Compare(rv);
+        return res;
+    }
 }
 

@@ -1,12 +1,12 @@
 using AoCLibrary;
 namespace Advent25;
 
-internal class Day|DD| : IDayRunner
+internal class Day04 : IDayRunner
 {
 	public bool IsReal => false;
 
-	// Day |URL|
-	// Input |INPUTURL|
+	// Day https://adventofcode.com/2025/day/4
+	// Input https://adventofcode.com/2025/day/4/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);

@@ -308,19 +308,20 @@ public class StarCheck
 		else
 			return $"{Key} e:{ExpectedString}";
 	}
-	public void Compare(long answer)
+	public bool Compare(long answer)
 	{
-		BaseCompare(answer, answer == Expected);
+		return BaseCompare(answer, answer == Expected);
 	}
-	public void BaseCompare(object answer, bool success)
+	public bool BaseCompare(object answer, bool success)
 	{
 		var str = success?"SUCCESS":"FAIL";
 		ElfHelper.MonthLogPlus($"Compare {this} ?= a:{answer} {str}");
 		Utils.CaptainsLog($"Compare {this} ?= a:{answer} {str}");
 		Utils.Assert(success, $"{this} == a:{answer}");
+		return success;
 	}
-	public void Compare(string answer)
+	public bool Compare(string answer)
 	{
-		BaseCompare(answer, answer == ExpectedString);
+		return BaseCompare(answer, answer == ExpectedString);
 	}
 }

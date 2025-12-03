@@ -3,22 +3,20 @@ namespace Advent25;
 
 internal class Day01 : IDayRunner
 {
-	public bool IsReal => true;
-
 	// Day https://adventofcode.com/2025/day/1
 	// Input https://adventofcode.com/2025/day/1/input
-	public object? Star1()
+	public RunnerResult Star1(bool isReal)
 	{
-		var key = new StarCheckKey(StarEnum.Star1, IsReal, null);
+		var key = new StarCheckKey(StarEnum.Star1, isReal, null);
 		StarCheck check;
-		if (!IsReal)
+		if (!isReal)
 			check = new StarCheck(key, 3L);
 		else
 			check = new StarCheck(key, 1034L);
 
 		var lines = Program.GetLines(check.Key);
-		//var text = Program.GetText(check.Key);
-		var rv = 0L;
+        //var text = Program.GetText(check.Key);
+        var rv = 0L;
 		// magic
 		var d = 50;
 		int max = 100;
@@ -42,14 +40,16 @@ internal class Day01 : IDayRunner
 				rv++;
 		}
 
-		check.Compare(rv);
-		return rv;
+		var res = new RunnerResult();
+		res.StarValue = rv;
+		res.StarSuccess = check.Compare(rv);
+        return res;
 	}
-	public object? Star2()
+	public RunnerResult Star2(bool isReal)
 	{
-		var key = new StarCheckKey(StarEnum.Star2, IsReal, null);
+		var key = new StarCheckKey(StarEnum.Star2, isReal, null);
 		StarCheck check;
-		if (!IsReal)
+		if (!isReal)
 			check = new StarCheck(key, 6L);
 		else
 			check = new StarCheck(key, 0L);
@@ -59,7 +59,6 @@ internal class Day01 : IDayRunner
 		var rv = 0L;
 		// magic
 		var d = 50;
-		int max = 100;
 		foreach (var line in lines)
 		{
 			var origD = d;
@@ -75,9 +74,11 @@ internal class Day01 : IDayRunner
         // too low 6059
         // too high 6173
         // wrong 6151
-        check.Compare(rv);
-		return rv;
-	}
+        var res = new RunnerResult();
+        res.StarValue = rv;
+        res.StarSuccess = check.Compare(rv);
+        return res;
+    }
     int Rotate(int from, int clicks, out int zeros)
 	{
 		var step = 1;

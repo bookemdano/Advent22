@@ -1,18 +1,21 @@
+using AoCLibrary;
+
 namespace Advent25;
 
 public class RunnerResult
 {
-	public object? Star1 { get; set; }
-	public object? Star2 { get; set; }
-	public override string ToString()
-	{
-		return "Star1=> " + Star1 + " Star2=> " + Star2;
-	}
+    public object? StarValue { get; set; }
+    public bool? StarSuccess { get; set; }
+    public TimeSpan Ts { get; set; }
+    public override string ToString()
+    {
+        return $"StarValue=>{StarValue} StarSuccess=> {StarSuccess} TimeSpan=> {ElfHelper.SmallString(Ts)}";
+    }
 }
+
 interface IDayRunner
 {
-	bool IsReal { get; }
-	object? Star1();
-	object? Star2();
+    RunnerResult Star1(bool isReal);
+    RunnerResult Star2(bool isReal);
 
 }

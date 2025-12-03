@@ -6,7 +6,6 @@ namespace Advent25;
 
 internal class Program
 {
-    static bool _crazyTimers = false;
     static async Task Main()
     {
         Utils.AppName = "RUN";
@@ -17,51 +16,49 @@ internal class Program
             ElfHelper.DayLog("No runner found for Day" + ElfHelper.DayString);
         else
         {
-            if (_crazyTimers)
-            {
-                var best = TimeSpan.MaxValue;
-                for (int i = 0; i < 10; i++)
-                {
-                    var res = await RunAsync(runner);
-                    if (res < best)
-                        best = res;
-                }
-                Utils.MonthLog($"Best run {ElfHelper.SmallString(best)}");
-            }
-            else
-                await RunAsync(runner);
+            await RunAsync(runner);
         }
     }
-    static async Task<TimeSpan> RunAsync(IDayRunner runner)
+    static async Task RunAsync(IDayRunner runner)
     {
         ElfHelper.ResetDayLog();
-        ElfHelper.MonthLogPlus($"Run() {runner.GetType().Name} r:{runner.IsReal}");
-        if (runner.IsReal && !IsFileThere(InputFile(runner.IsReal, StarEnum.NA)))
+
+        ElfHelper.MonthLogPlus($"Run() {runner.GetType().Name}");
+
+        var res1 = await RunIt(runner, false, StarEnum.Star1);
+
+        var res2 = new RunnerResult();
+        if (res1.StarSuccess == true)
+            res2 = await RunIt(runner, false, StarEnum.Star2);
+
+        if (res1.StarSuccess == true)
+            await RunIt(runner, true, StarEnum.Star1);
+        if (res2.StarSuccess == true)
+            await RunIt(runner, true, StarEnum.Star2);
+    }
+
+    private static async Task<RunnerResult> RunIt(IDayRunner runner, bool isReal, StarEnum star)
+    {
+        // get input file if we don't have it yet.
+        if (isReal && !IsFileThere(InputFile(isReal, StarEnum.NA)))
         {
             var str = await ElfHelper.WriteInputFileAsync(ElfHelper.Day);
-            var filename = InputFile(runner.IsReal, StarEnum.NA);
+            var filename = InputFile(isReal, StarEnum.NA);
             File.WriteAllText(filename, str);
         }
 
-        var res = new RunnerResult();
+        RunnerResult res;
 
         var sw = Stopwatch.StartNew();
-        res.Star1 = runner.Star1();
-        var t1 = sw.Elapsed;
-        if (!_crazyTimers)
-            ElfHelper.DayLog($"r1:{res.Star1} t1: {ElfHelper.SmallString(t1)}");
-        res.Star2 = runner.Star2();
-        var rv = sw.Elapsed;
-        var t2 = rv - t1;
-        if (!_crazyTimers)
-        {
-            ElfHelper.DayLog($"r2:{res.Star2} t2: {ElfHelper.SmallString(t2)}");
-            ElfHelper.DayLog($"total: {ElfHelper.SmallString(rv)}");
-        }
+        if (star == StarEnum.Star1)
+            res = runner.Star1(isReal);
         else
-            ElfHelper.MonthLogPlus($"{res} t1: {ElfHelper.SmallString(t1)} t2: {ElfHelper.SmallString(t2)} total: {ElfHelper.SmallString(rv)}");
-        return rv;
+            res = runner.Star2(isReal);
+        res.Ts = sw.Elapsed;
+        ElfHelper.DayLog($"r1:{res}");
+        return res;
     }
+
     static IDayRunner? GetDayRunner(string dayString)
     {
         Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();

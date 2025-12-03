@@ -4,16 +4,14 @@ namespace Advent25;
 
 internal class Day03 : IDayRunner
 {
-	public bool IsReal => true;
-
-	// Day https://adventofcode.com/2025/day/3
-	// Input https://adventofcode.com/2025/day/3/input
-	public object? Star1()
-	{
-		var key = new StarCheckKey(StarEnum.Star1, IsReal, null);
-		StarCheck check;
-		if (!IsReal)
-			check = new StarCheck(key, 357L);
+    // Day https://adventofcode.com/2025/day/3
+    // Input https://adventofcode.com/2025/day/3/input
+    public RunnerResult Star1(bool isReal)
+    {
+        var key = new StarCheckKey(StarEnum.Star1, isReal, null);
+        StarCheck check;
+        if (!isReal)
+            check = new StarCheck(key, 357L);
 		else
 			check = new StarCheck(key, 17332L);
 
@@ -50,15 +48,17 @@ internal class Day03 : IDayRunner
 			rv += biggest*10 + b2;
         }
 
-		check.Compare(rv);
-		return rv;
-	}
-	public object? Star2()
-	{
-		var key = new StarCheckKey(StarEnum.Star2, IsReal, null);
-		StarCheck check;
-		if (!IsReal)
-			check = new StarCheck(key, 3121910778619L);
+        var res = new RunnerResult();
+        res.StarValue = rv;
+        res.StarSuccess = check.Compare(rv);
+        return res;
+    }
+    public RunnerResult Star2(bool isReal)
+    {
+        var key = new StarCheckKey(StarEnum.Star2, isReal, null);
+        StarCheck check;
+        if (!isReal)
+            check = new StarCheck(key, 3121910778619L);
 		else
 			check = new StarCheck(key, 172516781546707L);
 
@@ -82,9 +82,11 @@ internal class Day03 : IDayRunner
 			rv += val;
         }
 
-        check.Compare(rv);
-		return rv;
-	}
+        var res = new RunnerResult();
+        res.StarValue = rv;
+        res.StarSuccess = check.Compare(rv);
+        return res;
+    }
 
     private int FindNext(string line, int iChar, int digitsLeft)
     {
