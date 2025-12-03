@@ -1,5 +1,5 @@
 using AoCLibrary;
-namespace Advent24;
+namespace Advent25;
 
 internal class Day|DD| : IDayRunner
 {
