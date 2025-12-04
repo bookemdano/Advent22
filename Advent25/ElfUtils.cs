@@ -4,7 +4,8 @@ using System.Reflection;
 namespace AoCLibrary;
 public enum DirEnum
 {
-	N, E, S, W
+	N, E, S, W,
+	NE,NW,SE,SW
 }
 public class LocDir : Loc
 {
@@ -35,16 +36,29 @@ public class LocDir : Loc
 	{
 		return (Row == other.Row && Col == other.Col && Dir == other.Dir);
 	}
-	public List<LocDir> AllDirMoves()
-	{
-		var rv = new List<LocDir>();
-		rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
-		rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
-		rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
-		rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
-		return rv;
-	}
-	public LocDir DirMove()
+    public List<LocDir> AllDirMoves()
+    {
+        var rv = new List<LocDir>();
+        rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
+        rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
+        rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
+        rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
+        return rv;
+    }
+    public List<LocDir> All8DirMoves()
+    {
+        var rv = new List<LocDir>();
+        rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
+        rv.Add(new LocDir(Row - 1, Col + 1, DirEnum.NE));
+        rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
+        rv.Add(new LocDir(Row + 1, Col + 1, DirEnum.SE));
+        rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
+        rv.Add(new LocDir(Row + 1, Col - 1, DirEnum.SW));
+        rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
+        rv.Add(new LocDir(Row - 1, Col - 1, DirEnum.NW));
+        return rv;
+    }
+    public LocDir DirMove()
 	{
 		return DirMove(Dir);
 	}
@@ -332,16 +346,29 @@ public class Loc
 	{
 		return Plus(diff.Row, diff.Col);
 	}
-	public List<Loc> AllMoves()
-	{
-		var rv = new List<Loc>();
-		rv.Add(new Loc(Row - 1, Col));
-		rv.Add(new Loc(Row, Col + 1));
-		rv.Add(new Loc(Row + 1, Col));
-		rv.Add(new Loc(Row, Col - 1));
-		return rv;
-	}
-	public Loc Move(DirEnum dir)
+    public List<Loc> AllMoves()
+    {
+        var rv = new List<Loc>();
+        rv.Add(new Loc(Row - 1, Col));
+        rv.Add(new Loc(Row, Col + 1));
+        rv.Add(new Loc(Row + 1, Col));
+        rv.Add(new Loc(Row, Col - 1));
+        return rv;
+    }
+    public List<Loc> All8Moves()
+    {
+        var rv = new List<Loc>();
+        rv.Add(new Loc(Row - 1, Col));
+        rv.Add(new Loc(Row - 1, Col + 1));
+        rv.Add(new Loc(Row, Col + 1));
+        rv.Add(new Loc(Row + 1, Col + 1));
+        rv.Add(new Loc(Row + 1, Col));
+        rv.Add(new Loc(Row + 1, Col - 1));
+        rv.Add(new Loc(Row, Col - 1));
+        rv.Add(new Loc(Row - 1, Col - 1));
+        return rv;
+    }
+    public Loc Move(DirEnum dir)
 	{
 		if (dir == DirEnum.N)
 			return new Loc(Row - 1, Col);
@@ -556,7 +583,17 @@ public class GridMap : GridMapBase
 		return true;
 	}
 
-
+    internal string FindSurroundingChars(Loc loc)
+    {
+		var moves = loc.All8Moves();
+		var rv = "";
+        foreach (var move in moves)
+		{
+			if (IsValid(move))
+				rv += Get(move);
+		}
+		return rv;
+    }
 }
 
 public class FLoc

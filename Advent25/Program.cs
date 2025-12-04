@@ -25,15 +25,13 @@ internal class Program
 
         ElfHelper.MonthLogPlus($"Run() {runner.GetType().Name}");
 
-        var res1 = await RunIt(runner, false, StarEnum.Star1);
-
-        var res2 = new RunnerResult();
-        if (res1.StarSuccess == true)
-            res2 = await RunIt(runner, false, StarEnum.Star2);
-
-        if (res1.StarSuccess == true)
-            await RunIt(runner, true, StarEnum.Star1);
-        if (res2.StarSuccess == true)
+        var res = await RunIt(runner, false, StarEnum.Star1);
+        if (res.StarSuccess == true)
+            res = await RunIt(runner, true, StarEnum.Star1);
+        
+        if (res.StarSuccess == true)
+            res = await RunIt(runner, false, StarEnum.Star2);
+        if (res.StarSuccess == true)
             await RunIt(runner, true, StarEnum.Star2);
     }
 
