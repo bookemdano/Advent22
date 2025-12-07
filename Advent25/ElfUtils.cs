@@ -1,5 +1,6 @@
 
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AoCLibrary;
 public enum DirEnum
@@ -470,6 +471,10 @@ public class GridMapBase
 			rv += row[col];
 		return rv;
     }
+    internal char[] GetRow(int iRow)
+    {
+        return _map[iRow];
+    }
 
 }
 
@@ -521,13 +526,25 @@ public class GridMapXY : GridMapBase
 }
 public class GridMap : GridMapBase
 {
-	public GridMap(IEnumerable<string>? lines) : base(lines)
+    public GridMap(IEnumerable<string>? lines) : base(lines)
+    {
+
+    }
+    public GridMap()
 	{
-		
+
 	}
-	public int Rows => _map.Count();
+    public GridMap(GridMap other)
+    {
+		_map = other._map.Select(r => r.ToArray()).ToList();
+    }
+    public int Rows => _map.Count();
 	public int Cols => _map[0].Count();
 
+	public char? Get(int iRow, int iCol)
+	{
+		return Get(new Loc(iRow, iCol));
+	}
 	public char? Get(Loc loc)
 	{
 		if (!IsValid(loc))
@@ -578,7 +595,7 @@ public class GridMap : GridMapBase
 	{
 		if (loc.Row < 0 || loc.Col < 0)
 			return false;
-		if (loc.Row >= _map.Count() || loc.Col >= _map[0].Count())
+		if (loc.Row >= _map.Count() || loc.Col >= _map[loc.Row].Count())
 			return false;
 		return true;
 	}
@@ -594,6 +611,7 @@ public class GridMap : GridMapBase
 		}
 		return rv;
     }
+
 }
 
 public class FLoc
