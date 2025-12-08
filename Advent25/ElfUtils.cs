@@ -627,3 +627,61 @@ public class FLoc
 		return $"({Row},{Col})";
 	}
 }
+public class Point3D : IEquatable<Point3D>
+{
+    public Point3D(long x, long y, long z)
+    {
+        X = x;
+        Y = y;
+        Z = z;
+    }
+
+    static public Point3D FromXYZ(string str)
+    {
+        var parts = Utils.SplitLongs(',', str);
+        return new Point3D(parts[0], parts[1], parts[2]);
+    }
+
+    public long X { get; set; }
+    public long Y { get; set; }
+    public long Z { get; set; }
+    public bool Equals(Point3D? other)
+    {
+        return other?.X == X && other?.Y == Y && other?.Z == Z;
+    }
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
+        //return (int)((X * 1E6) + (Y * 1E3) + Z);
+    }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Point3D other)
+            return false;
+
+        return Equals(other);
+    }
+    public override string ToString()
+    {
+        return $"({X}, {Y}, {Z})";
+    }
+
+    internal double Distance(Point3D other)
+	{         
+		var dx = other.X - X;
+		var dy = other.Y - Y;
+		var dz = other.Z - Z;
+		return Math.Sqrt(dx * dx + dy * dy + dz * dz);
+    }
+    internal decimal Slope2D(Point3D pt2)
+    {
+        if ((pt2.X - X) == 0)
+            return decimal.MaxValue;
+        return (decimal)(pt2.Y - Y) / (pt2.X - X);
+    }
+
+    internal bool IsOnLine2D(decimal slope, decimal intercept)
+    {
+        return (Y == slope * X + intercept);
+    }
+}
