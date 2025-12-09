@@ -40,6 +40,7 @@ public class ElfHelper
         {
             get
             {
+				//return 7;	// override date
                 var rv = (int) RawDay;
                 if (rv > TotalDays)
                     return TotalDays;
@@ -298,7 +299,7 @@ public class StarCheck
 	}
 
 	public StarCheckKey Key { get; }
-	public string ExpectedString { get; }
+	public string ExpectedString { get; } = string.Empty;
 	public long Expected { get; }
 	bool UseString => !string.IsNullOrWhiteSpace(ExpectedString);
 	public override string ToString()

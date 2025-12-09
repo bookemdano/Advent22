@@ -12,13 +12,13 @@ internal class Day04 : IDayRunner
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 13L);
+            res.Check = new StarCheck(key, 13L);
 		else
-			check = new StarCheck(key, 1433L);
+            res.Check = new StarCheck(key, 1433L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
@@ -35,21 +35,19 @@ internal class Day04 : IDayRunner
             }
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 43L);
+			res.Check = new StarCheck(key, 43L);
 		else
-			check = new StarCheck(key, 8616);
+            res.Check = new StarCheck(key, 8616);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
@@ -79,9 +77,7 @@ internal class Day04 : IDayRunner
                 locs.Remove(remove);
             }
         }
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
 	}
 }

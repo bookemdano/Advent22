@@ -1,24 +1,22 @@
 using AoCLibrary;
-using System.Collections.Generic;
 
 namespace Advent25;
 
 internal class Day08 : IDayRunner
 {
-	public bool IsReal => false;
-
 	// Day https://adventofcode.com/2025/day/8
 	// Input https://adventofcode.com/2025/day/8/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-        StarCheck check;
-        if (!isReal)
-			check = new StarCheck(key, 40L);
-		else
-			check = new StarCheck(key, 112230L);
+        var res = new RunnerResult();
 
-		var lines = Program.GetLines(check.Key);
+        if (!isReal)
+            res.Check = new StarCheck(key, 40L);
+		else
+            res.Check = new StarCheck(key, 112230L);
+
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
@@ -42,14 +40,12 @@ internal class Day08 : IDayRunner
 
         //CombineCircuits(circuits);
         rv = circuits.TopThreeSum();
-        
-        var res = new RunnerResult();
+
         //1440 too low
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
-    class Pair3D
+    struct Pair3D
     {
         public Pair3D(Point3D p1, Point3D p2)
         {
@@ -57,7 +53,7 @@ internal class Day08 : IDayRunner
             P2 = p2;
             Distance = p1.Distance(p2);
         }
-        override public string ToString()
+        public override readonly string ToString()
         {
             return $"{P1} <-> {P2} = {Distance}";
         }
@@ -67,18 +63,11 @@ internal class Day08 : IDayRunner
     }
     class CircuitList
     {
-        List<Circuit> _circuits = [];
+        readonly List<Circuit> _circuits = [];
 
         public int Count()
         {
             return _circuits.Count;
-        }
-        public CircuitList(CircuitList other)
-        {
-            foreach(var c in other._circuits)
-            {
-                _circuits.Add(new Circuit(c));
-            }
         }
 
         public CircuitList()
@@ -97,8 +86,8 @@ internal class Day08 : IDayRunner
             var cir1 = _circuits.SingleOrDefault(c => c.Contains(pair.P1));
             var cir2 = _circuits.SingleOrDefault(c => c.Contains(pair.P2));
             Utils.Assert(cir1 != null && cir2 != null, "circuits");
-            cir1.Combine(cir2);
-            _circuits.Remove(cir2);
+            cir1!.Combine(cir2!);
+            _circuits.Remove(cir2!);
         }
 
         internal long TopThreeSum()
@@ -106,64 +95,20 @@ internal class Day08 : IDayRunner
             var tops = _circuits.OrderByDescending(c => c.Points.Count).Take(3).ToList();
             return tops[0].Points.Count * tops[1].Points.Count * tops[2].Points.Count;
         }
-
-        internal bool AnyContain(Pair3D pair)
-        {
-            return _circuits.Any(c => c.Contains(pair.P1) && c.Contains(pair.P2));
-        }
-
-        internal void CombineCircuits()
-        {
-            var changed = true;
-            while (changed)
-            {
-                changed = false;
-                for (int i = 0; i < _circuits.Count; i++)
-                {
-                    for (int j = i + 1; j < _circuits.Count; j++)
-                    {
-                        var cir1 = _circuits[i];
-                        var cir2 = _circuits[j];
-                        if (cir1.Intersect(cir2).Any())
-                        {
-                            cir1.Combine(cir2);
-                            _circuits.RemoveAt(j);
-                            changed = true;
-                            break;
-                        }
-                    }
-                    if (changed)
-                        break;
-                }
-            }
-        }
     }
 
     class Circuit
     {
-        public List<Point3D> Points = new List<Point3D>();
+        public List<Point3D> Points = [];
 
         public Circuit(Point3D point3D)
         {
             Points.Add(point3D);
         }
 
-        public Circuit(Circuit other)
-        {
-            Points.AddRange(other.Points.ToList());
-        }
-
-        internal void Add(Point3D pt)
-        {
-            Points.Add(pt);
-        }
         internal bool Contains(Point3D pt)
         {
             return Points.Contains(pt);
-        }
-        internal IEnumerable<Point3D> Intersect(Circuit other)
-        {
-            return Points.Intersect(other.Points);
         }
 
         internal void Combine(Circuit other)
@@ -172,20 +117,20 @@ internal class Day08 : IDayRunner
         }
         public override string ToString()
         {
-            return $"{Points.Count()}";
+            return $"{Points.Count}";
         }
     }
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-            check = new StarCheck(key, 25272L);
+            res.Check = new StarCheck(key, 25272L);
         else
-            check = new StarCheck(key, 2573952864L);
+            res.Check = new StarCheck(key, 2573952864L);
 
-        var lines = Program.GetLines(check.Key);
-        //var text = Program.GetText(check.Key);
+        var lines = Program.GetLines(key);
+        //var text = Program.GetText(key);
         var rv = 0L;
         // magic
         var pts = lines.Select(l => Point3D.FromXYZ(l)).ToList();
@@ -209,9 +154,7 @@ internal class Day08 : IDayRunner
             }
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
 }

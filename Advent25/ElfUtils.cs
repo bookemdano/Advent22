@@ -8,18 +8,15 @@ public enum DirEnum
 	N, E, S, W,
 	NE,NW,SE,SW
 }
-public class LocDir : Loc
+public class LocDir(int row, int col, DirEnum dir) : Loc(row, col)
 {
-	public DirEnum Dir { get; }
+    public DirEnum Dir { get; } = dir;
 
-	public LocDir(Loc loc, DirEnum dir) : this(loc.Row, loc.Col, dir)
+    public LocDir(Loc loc, DirEnum dir) : this(loc.Row, loc.Col, dir)
 	{
 	}
-	public LocDir(int row, int col, DirEnum dir) : base(row, col)
-	{
-		Dir = dir;
-	}
-	public override bool Equals(object? obj)
+
+    public override bool Equals(object? obj)
 	{
 		if (obj as LocDir == null)
 			return false;
@@ -39,24 +36,28 @@ public class LocDir : Loc
 	}
     public List<LocDir> AllDirMoves()
     {
-        var rv = new List<LocDir>();
-        rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
-        rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
-        rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
-        rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
+        var rv = new List<LocDir>
+        {
+            new(Row - 1, Col, DirEnum.N),
+            new(Row, Col + 1, DirEnum.E),
+            new(Row + 1, Col, DirEnum.S),
+            new(Row, Col - 1, DirEnum.W)
+        };
         return rv;
     }
     public List<LocDir> All8DirMoves()
     {
-        var rv = new List<LocDir>();
-        rv.Add(new LocDir(Row - 1, Col, DirEnum.N));
-        rv.Add(new LocDir(Row - 1, Col + 1, DirEnum.NE));
-        rv.Add(new LocDir(Row, Col + 1, DirEnum.E));
-        rv.Add(new LocDir(Row + 1, Col + 1, DirEnum.SE));
-        rv.Add(new LocDir(Row + 1, Col, DirEnum.S));
-        rv.Add(new LocDir(Row + 1, Col - 1, DirEnum.SW));
-        rv.Add(new LocDir(Row, Col - 1, DirEnum.W));
-        rv.Add(new LocDir(Row - 1, Col - 1, DirEnum.NW));
+        var rv = new List<LocDir>
+        {
+            new(Row - 1, Col, DirEnum.N),
+            new(Row - 1, Col + 1, DirEnum.NE),
+            new(Row, Col + 1, DirEnum.E),
+            new(Row + 1, Col + 1, DirEnum.SE),
+            new(Row + 1, Col, DirEnum.S),
+            new(Row + 1, Col - 1, DirEnum.SW),
+            new(Row, Col - 1, DirEnum.W),
+            new(Row - 1, Col - 1, DirEnum.NW)
+        };
         return rv;
     }
     public LocDir DirMove()
@@ -171,17 +172,12 @@ public class DirDist
 		return Dir == other.Dir && Dist == other.Dist;
 	}
 }
-public class Region
+public class Region(Point ul, Point br)
 {
-	public Point Ul { get; set; }
-	public Point Br { get; set; }
+    public Point Ul { get; set; } = ul;
+    public Point Br { get; set; } = br;
 
-	public Region(Point ul, Point br)
-	{
-		Ul = ul;
-		Br = br;
-	}
-	public override string ToString()
+    public override string ToString()
 	{
 		return $"{Ul} to {Br}";
 	}
@@ -236,20 +232,24 @@ public class Point
 	}
 	public List<Point> AllMoves()
 	{
-		var rv = new List<Point>();
-		rv.Add(new Point(X, Y - 1));
-		rv.Add(new Point(X + 1, Y));
-		rv.Add(new Point(X, Y + 1));
-		rv.Add(new Point(X - 1, Y));
+        var rv = new List<Point>
+        {
+            new(X, Y - 1),
+            new(X + 1, Y),
+            new(X, Y + 1),
+            new(X - 1, Y)
+        };
 		return rv;
 	}
 	public List<PointDir> AllDirMoves()
 	{
-		var rv = new List<PointDir>();
-		rv.Add(new PointDir(X, Y - 1, DirEnum.N));
-		rv.Add(new PointDir(X + 1, Y, DirEnum.E));
-		rv.Add(new PointDir(X, Y + 1, DirEnum.S));
-		rv.Add(new PointDir(X - 1, Y, DirEnum.W));
+		var rv = new List<PointDir>
+        {
+            new(X, Y - 1, DirEnum.N),
+            new(X + 1, Y, DirEnum.E),
+            new(X, Y + 1, DirEnum.S),
+            new(X - 1, Y, DirEnum.W)
+        };
 		return rv;
 	}
 	public Point Move(DirEnum dir)
@@ -312,15 +312,12 @@ public class Point
 
 
 
-public class Loc
+public class Loc(int row, int col)
 {
-	public int Row { get; set; }
-	public int Col { get; set; }
-	public Loc(int row, int col)
-	{
-		Row = row; Col = col;
-	}
-	public override string ToString()
+    public int Row { get; set; } = row; 
+	public int Col { get; set; } = col;
+
+    public override string ToString()
 	{
 		return $"({Row},{Col})";
 	}
@@ -349,47 +346,60 @@ public class Loc
 	}
     public List<Loc> AllMoves()
     {
-        var rv = new List<Loc>();
-        rv.Add(new Loc(Row - 1, Col));
-        rv.Add(new Loc(Row, Col + 1));
-        rv.Add(new Loc(Row + 1, Col));
-        rv.Add(new Loc(Row, Col - 1));
+        var rv = new List<Loc>
+        {
+            new(Row - 1, Col),
+            new(Row, Col + 1),
+            new(Row + 1, Col),
+            new(Row, Col - 1)
+        };
         return rv;
     }
     public List<Loc> All8Moves()
     {
-        var rv = new List<Loc>();
-        rv.Add(new Loc(Row - 1, Col));
-        rv.Add(new Loc(Row - 1, Col + 1));
-        rv.Add(new Loc(Row, Col + 1));
-        rv.Add(new Loc(Row + 1, Col + 1));
-        rv.Add(new Loc(Row + 1, Col));
-        rv.Add(new Loc(Row + 1, Col - 1));
-        rv.Add(new Loc(Row, Col - 1));
-        rv.Add(new Loc(Row - 1, Col - 1));
+        var rv = new List<Loc>
+        {
+            new(Row - 1, Col),
+            new(Row - 1, Col + 1),
+            new(Row, Col + 1),
+            new(Row + 1, Col + 1),
+            new(Row + 1, Col),
+            new(Row + 1, Col - 1),
+            new(Row, Col - 1),
+            new(Row - 1, Col - 1)
+        };
         return rv;
     }
     public Loc Move(DirEnum dir)
 	{
-		if (dir == DirEnum.N)
-			return new Loc(Row - 1, Col);
-		else if (dir == DirEnum.E)
-			return new Loc(Row, Col + 1);
-		else if (dir == DirEnum.S)
-			return new Loc(Row + 1, Col);
-		else //if (dir == DirEnum.W)
-			return new Loc(Row, Col - 1);
-	}
-	public bool Same(Loc other)
+        if (dir == DirEnum.N)
+            return new Loc(Row - 1, Col);
+        else if (dir == DirEnum.NE)
+            return new Loc(Row - 1, Col + 1);
+        else if (dir == DirEnum.E)
+            return new Loc(Row, Col + 1);
+        else if (dir == DirEnum.SE)
+            return new Loc(Row + 1, Col + 1);
+        else if (dir == DirEnum.S)
+            return new Loc(Row + 1, Col);
+        else if (dir == DirEnum.SW)
+            return new Loc(Row + 1, Col - 1);
+        else if (dir == DirEnum.W)
+            return new Loc(Row, Col - 1);
+        else //if (dir == DirEnum.NW)
+            return new Loc(Row - 1, Col - 1);
+    }
+    public bool Same(Loc other)
 	{
 		return (Row == other.Row && Col == other.Col);
 	}
 
 	public override bool Equals(object? obj)
 	{
-		if (obj as Loc == null)
+		if (obj is Loc loc)
+			return Same(loc);
+		else
 			return false;
-		return Same(obj as Loc);
 	}
 }
 public enum MoveEnum
@@ -504,7 +514,7 @@ public class GridMapXY : GridMapBase
 	{
 		if (pt.Y < 0 || pt.X < 0)
 			return false;
-		if (pt.Y >= _map.Count() || pt.X >= _map[0].Count())
+		if (pt.Y >= _map.Count || pt.X >= _map[0].Length)
 			return false;
 		return true;
 	}
@@ -538,8 +548,8 @@ public class GridMap : GridMapBase
     {
 		_map = other._map.Select(r => r.ToArray()).ToList();
     }
-    public int Rows => _map.Count();
-	public int Cols => _map[0].Count();
+    public int Rows => _map.Count;
+	public int Cols => _map[0].Length;
 
 	public char? Get(int iRow, int iCol)
 	{
@@ -556,7 +566,7 @@ public class GridMap : GridMapBase
 		var c = Get(loc);
 		if (c == null)
 			return null;
-		return int.Parse(c.ToString());
+		return int.Parse(c.ToString()!);
 	}
 
 	public void Set(int row, int col, char c)
@@ -595,7 +605,7 @@ public class GridMap : GridMapBase
 	{
 		if (loc.Row < 0 || loc.Col < 0)
 			return false;
-		if (loc.Row >= _map.Count() || loc.Col >= _map[loc.Row].Count())
+		if (loc.Row >= _map.Count || loc.Col >= _map[loc.Row].Length)
 			return false;
 		return true;
 	}
@@ -614,37 +624,26 @@ public class GridMap : GridMapBase
 
 }
 
-public class FLoc
+public class FLoc(double row, double col)
 {
-	public double Row { get; }
-	public double Col { get; }
-	public FLoc(double row, double col)
-	{
-		Row = row; Col = col;
-	}
-	public override string ToString()
+    public double Row { get; } = row; public double Col { get; } = col;
+
+    public override string ToString()
 	{
 		return $"({Row},{Col})";
 	}
 }
-public class Point3D : IEquatable<Point3D>
+public class Point3D(long x, long y, long z) : IEquatable<Point3D>
 {
-    public Point3D(long x, long y, long z)
-    {
-        X = x;
-        Y = y;
-        Z = z;
-    }
-
     static public Point3D FromXYZ(string str)
     {
         var parts = Utils.SplitLongs(',', str);
         return new Point3D(parts[0], parts[1], parts[2]);
     }
 
-    public long X { get; set; }
-    public long Y { get; set; }
-    public long Z { get; set; }
+    public long X { get; set; } = x;
+    public long Y { get; set; } = y;
+    public long Z { get; set; } = z;
     public bool Equals(Point3D? other)
     {
         return other?.X == X && other?.Y == Y && other?.Z == Z;

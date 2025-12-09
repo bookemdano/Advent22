@@ -8,14 +8,14 @@ internal class Day02 : IDayRunner
 	public RunnerResult Star1(bool isReal)
 	{
 		var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-		StarCheck check;
-		if (!isReal)
-			check = new StarCheck(key, 1227775554L);
+        var res = new RunnerResult();
+        if (!isReal)
+            res.Check = new StarCheck(key, 1227775554L);
 		else
-			check = new StarCheck(key, 30608905813L);
+            res.Check = new StarCheck(key, 30608905813L);
 
 		//var lines = Program.GetLines(check.Key);
-		var text = Program.GetText(check.Key);
+		var text = Program.GetText(key);
 		var sets = text.Split(',');
 		var rv = 0L;
 		// magic
@@ -36,21 +36,20 @@ internal class Day02 : IDayRunner
 					rv += i;
             }
         }
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+
+        res.CheckGuess(rv);
         return res;
     }
     public RunnerResult Star2(bool isReal)
 	{
 		var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-		StarCheck check;
-		if (!isReal)
-			check = new StarCheck(key, 4174379265L);
+        var res = new RunnerResult();
+        if (!isReal)
+            res.Check = new StarCheck(key, 4174379265L);
 		else
-			check = new StarCheck(key, 0L);
+            res.Check = new StarCheck(key, 0L);
 
-        var text = Program.GetText(check.Key);
+        var text = Program.GetText(key);
         var sets = text.Split(',');
         var rv = 0L;
         // magic
@@ -88,9 +87,7 @@ internal class Day02 : IDayRunner
             }
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
 }

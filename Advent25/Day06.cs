@@ -4,20 +4,18 @@ namespace Advent25;
 
 internal class Day06 : IDayRunner
 {
-	public bool IsReal => false;
-
 	// Day https://adventofcode.com/2025/day/6
 	// Input https://adventofcode.com/2025/day/6/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 4277556L);
+			res.Check = new StarCheck(key, 4277556L);
 		else
-			check = new StarCheck(key, 6100348226985L);
+			res.Check = new StarCheck(key, 6100348226985L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
@@ -46,15 +44,13 @@ internal class Day06 : IDayRunner
             rv += group.Operate();
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
     class Group1
     {
         public List<long> Values { get; set; } = [];
-        public string Op { get; set; }
+        public string Op { get; set; } = "";
 
         internal long Operate()
         {
@@ -78,13 +74,13 @@ internal class Day06 : IDayRunner
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 3263827L);
+			res.Check = new StarCheck(key, 3263827L);
 		else
-			check = new StarCheck(key, 12377473011151L);
+			res.Check = new StarCheck(key, 12377473011151L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
@@ -97,12 +93,11 @@ internal class Day06 : IDayRunner
             {
                 var group = new Group2(i, lastLine[i]);
                 groups.Add(group);
-                if (lastGroup != null)
-                    lastGroup.ColEnd = i - 1;
+                lastGroup?.ColEnd = i - 1;
                 lastGroup = group;
             }
         }
-        lastGroup.ColEnd = lines.Max(l => l.Length);
+        lastGroup?.ColEnd = lines.Max(l => l.Length);
 
         for(int i = 0; i < lines.Length - 1; i++)
         {
@@ -118,9 +113,7 @@ internal class Day06 : IDayRunner
         {
             rv += group.Operate();
         }
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
 	}
     class Group2
@@ -129,15 +122,15 @@ internal class Day06 : IDayRunner
         {
             return $"{string.Join(',', _strings)} {_op}";
         }
-        List<string> _strings = [];
-        int _colStart;
+        readonly List<string> _strings = [];
+        readonly int _colStart;
         public int ColEnd { get; set; } = -1;
         public int Length()
         {
             return ColEnd - _colStart;
         }
 
-        char _op;
+        readonly char _op;
         public Group2(int colStart, char op)
         {
             _colStart = colStart;

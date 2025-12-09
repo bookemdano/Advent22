@@ -32,7 +32,7 @@ namespace AoCLibrary
 		}
 		public static void CaptainsLog(object o)
 		{
-			var str = $"{DateTime.Now} {AppName} {o}";
+			//var str = $"{DateTime.Now} {AppName} {o}";
 			File.AppendAllText(Path.Combine(Dir, $"elf{DateTime.Today:yyyy}.log"), $"{DateTime.Now} {AppName} {o}" + Environment.NewLine);
 			//Console.WriteLine(str);
 		}
@@ -52,7 +52,7 @@ namespace AoCLibrary
                 }
                 else
 					rv = "0" + rv;
-                n = n / len;
+                n /= len;
             }
 			return rv;
         }
@@ -66,7 +66,7 @@ namespace AoCLibrary
             {
                 var mod = n % len;
                 rv = poss[mod] + rv;
-                n = n / len;
+                n /= len;
             }
             return rv;
         }
@@ -206,7 +206,7 @@ namespace AoCLibrary
 
 		public static long[] SplitLongs(char sep, string line)
 		{
-			return Split(sep, line).Select(s => long.Parse(s)).ToArray();
+			return Split(sep, line).Select(long.Parse).ToArray();
 		}
 		public static long[] SplitLongs(char[] seps, string line)
 		{
@@ -225,7 +225,7 @@ namespace AoCLibrary
 		}
 		public static int[] SplitInts(char sep, string line)
 		{
-			return Split(sep, line).Select(s => int.Parse(s)).ToArray();
+			return Split(sep, line).Select(int.Parse).ToArray();
 		}
 
 		public static bool IsEven(long x)

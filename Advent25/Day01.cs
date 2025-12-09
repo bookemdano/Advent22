@@ -8,13 +8,13 @@ internal class Day01 : IDayRunner
 	public RunnerResult Star1(bool isReal)
 	{
 		var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-		StarCheck check;
-		if (!isReal)
-			check = new StarCheck(key, 3L);
+        var res = new RunnerResult();
+        if (!isReal)
+			res.Check = new StarCheck(key, 3L);
 		else
-			check = new StarCheck(key, 1034L);
+            res.Check = new StarCheck(key, 1034L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
         //var text = Program.GetText(check.Key);
         var rv = 0L;
 		// magic
@@ -40,21 +40,19 @@ internal class Day01 : IDayRunner
 				rv++;
 		}
 
-		var res = new RunnerResult();
-		res.StarValue = rv;
-		res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
 	}
 	public RunnerResult Star2(bool isReal)
 	{
 		var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-		StarCheck check;
-		if (!isReal)
-			check = new StarCheck(key, 6L);
+        var res = new RunnerResult();
+        if (!isReal)
+			res.Check = new StarCheck(key, 6L);
 		else
-			check = new StarCheck(key, 0L);
+			res.Check = new StarCheck(key, 0L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
 		// magic
@@ -74,9 +72,7 @@ internal class Day01 : IDayRunner
         // too low 6059
         // too high 6173
         // wrong 6151
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
     int Rotate(int from, int clicks, out int zeros)

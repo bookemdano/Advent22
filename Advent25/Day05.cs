@@ -5,20 +5,18 @@ namespace Advent25;
 
 internal class Day05 : IDayRunner
 {
-	public bool IsReal => false;
-
 	// Day https://adventofcode.com/2025/day/5
 	// Input https://adventofcode.com/2025/day/5/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 3L);
+			res.Check = new StarCheck(key, 3L);
 		else
-			check = new StarCheck(key, 635L);
+            res.Check = new StarCheck(key, 635L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
@@ -52,22 +50,20 @@ internal class Day05 : IDayRunner
             }
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
     }
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 14L);
+			res.Check = new StarCheck(key, 14L);
 		else
-			check = new StarCheck(key, 369761800782619L);
+            res.Check = new StarCheck(key, 369761800782619L);
 
-		var lines = Program.GetLines(check.Key);
-		//var text = Program.GetText(check.Key);
+		var lines = Program.GetLines(key);
+		//var text = Program.GetText(key);
 		var rv = 0L;
         // magic
         var ranges = new List<Range>();
@@ -115,11 +111,9 @@ internal class Day05 : IDayRunner
         foreach(var range in ranges)
             rv += range.End - range.Start + 1;
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        // TOo low 338852627934377
+        // Too low 338852627934377
         //         369761800782619
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
 	}
     public enum AREnum
@@ -138,8 +132,8 @@ internal class Day05 : IDayRunner
         }
         public AREnum Add(Range other)
         {
-            var rv = false;
-            var orig = new Range(Start, End);
+            //var rv = false;
+            //var orig = new Range(Start, End);
             if (InRange(other.Start) && InRange(other.End))
             {
                 // other is inside current

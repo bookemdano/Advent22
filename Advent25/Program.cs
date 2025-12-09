@@ -10,7 +10,6 @@ internal class Program
     {
         Utils.AppName = "RUN";
 
-        //var runner = GetDayRunner("14");
         var runner = GetDayRunner(ElfHelper.DayString);
         if (runner == null)
             ElfHelper.DayLog("No runner found for Day" + ElfHelper.DayString);

@@ -1,8 +1,4 @@
 using AoCLibrary;
-using System;
-using System.Diagnostics.SymbolStore;
-using System.Reflection.Metadata.Ecma335;
-using System.Threading;
 namespace Advent25;
 
 internal class Day07 : IDayRunner
@@ -14,60 +10,63 @@ internal class Day07 : IDayRunner
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 21L);
+			res.Check = new StarCheck(key, 21L);
 		else
-			check = new StarCheck(key, 1516L);
+            res.Check = new StarCheck(key, 1516L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
-        var grid = new GridMap(lines);
-        for (var iRow = 1; iRow < grid.Rows; iRow++)
-        {
-            for (var iCol = 0; iCol < grid.Cols; iCol++)
+        var grid = new GridMap(lines.Where(l => !l.All(c => c == '.')));
+        var locs = new List<Loc>();
+        locs.Add(grid.Find('S')!);
+        while(locs.Any())
+        { 
+            var newLocs = new List<Loc>();
+            foreach (var loc in locs)
             {
-                var loc = new Loc(iRow, iCol);
-                var c = grid.Get(iRow, iCol);
-                var cUp = grid.Get(iRow - 1, iCol);
-
-                if (c == '^' && cUp == '|')
+                var locBelow = loc.Move(DirEnum.S);
+                var cBelow = grid.Get(locBelow);
+                if (cBelow == '.')
+                    newLocs.Add(locBelow);
+                else if (cBelow == '^')
                 {
-                    var lLoc = new Loc(iRow, iCol - 1);
-                    if (grid.Get(lLoc) == '.')
-                        grid.Set(lLoc, '|');
-                    var rLoc = new Loc(iRow, iCol + 1);
-                    if (grid.Get(rLoc) == '.')
-                        grid.Set(rLoc, '|');
-                    rv++;
+                    bool found = false;
+                    if (!newLocs.Contains(loc.Move(DirEnum.SE)))
+                    {
+                        found = true;
+                        newLocs.Add(loc.Move(DirEnum.SE));
+                    }
+                    if (!newLocs.Contains(loc.Move(DirEnum.SW)))
+                    {
+                        found = true;
+                        newLocs.Add(loc.Move(DirEnum.SW));
+                    }
+                    if (found)
+                        rv++;
                 }
-                if (c != '.')
-                    continue;
-                if (cUp == 'S' || cUp == '|')
-                    grid.Set(loc, '|');
             }
-            //ElfHelper.DayLog(grid.ToString());
+            locs = newLocs;
         }
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
+        res.CheckGuess(rv);
         //1484 too low
-        res.StarSuccess = check.Compare(rv);
         return res;
     }
 
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        StarCheck check;
+        var res = new RunnerResult();
         if (!isReal)
-			check = new StarCheck(key, 40L);
+            res.Check = new StarCheck(key, 40L);
 		else
-			check = new StarCheck(key, 0L);
+            res.Check = new StarCheck(key, 1393669447690L);
 
-		var lines = Program.GetLines(check.Key);
+		var lines = Program.GetLines(key);
 		//var text = Program.GetText(check.Key);
 		var rv = 0L;
         // magic
@@ -97,9 +96,7 @@ internal class Day07 : IDayRunner
         if (dict.ContainsKey(firstSplit))
             rv = dict[firstSplit];
 
-        var res = new RunnerResult();
-        res.StarValue = rv;
-        res.StarSuccess = check.Compare(rv);
+        res.CheckGuess(rv);
         return res;
 	}
 
