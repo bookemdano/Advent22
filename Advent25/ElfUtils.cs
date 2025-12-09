@@ -198,7 +198,9 @@ public class PointDir : Point
 }
 public class Point
 {
-	public long X { get; }
+    internal static readonly Point Zero = new Point(0,0);
+
+    public long X { get; }
 	public long Y { get; }
 	public Point(long x, long y)
 	{
@@ -308,6 +310,20 @@ public class Point
 		return (int) X * 1000 + (int) Y;
 	}
 
+    internal static List<Point> ReadAll(string[] lines)
+    {
+        var rv = new List<Point>();
+        foreach (var line in lines)
+        {
+			rv.Add(Parse(line));
+        }
+		return rv;
+    }
+
+    internal double Distance(Point other)
+    {
+		return Math.Sqrt((other.X - X) * (other.X - X) + (other.Y - Y) * (other.Y - Y));
+    }
 }
 
 
@@ -401,6 +417,7 @@ public class Loc(int row, int col)
 		else
 			return false;
 	}
+
 }
 public enum MoveEnum
 {

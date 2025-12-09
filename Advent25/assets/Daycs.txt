@@ -29,7 +29,7 @@ internal class Day|DD| : IDayRunner
         if (!isReal)
 			res.Check = new StarCheck(key, 0L);
 		else
-			res.Ccheck = new StarCheck(key, 0L);
+			res.Check = new StarCheck(key, 0L);
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
