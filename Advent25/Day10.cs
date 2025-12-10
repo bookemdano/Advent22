@@ -1,4 +1,5 @@
 using AoCLibrary;
+using System.ComponentModel.DataAnnotations;
 namespace Advent25;
 
 internal class Day10 : IDayRunner
@@ -26,40 +27,40 @@ internal class Day10 : IDayRunner
     }
     class Light10
     {
-        int _goal;
+        public int Goal { get; }
         public int _val; // for expediency
         public Light10(bool goal)
         {
-            _goal = goal ? 1 : 0;
+            Goal = goal ? 1 : 0;
         }
         public Light10(int goal, int val)
         {
-            _goal = goal;
+            Goal = goal;
             _val = val;
         }
         public Light10(Light10 other)
         {
-            _goal = other._goal;
+            Goal = other.Goal;
             _val = other._val;
         }
         override public string ToString()
         {
-            return $"{_val}[{_goal}]";
+            return $"{_val}[{Goal}]";
         }
         public bool IsMatch()
         {
-            return _val == _goal;
+            return _val == Goal;
         }
 
         internal bool IsJOver()
         {
-            return _val > _goal;
+            return _val > Goal;
         }
 
         internal bool Increment()
         {
             _val++;
-            return (_val <= _goal);
+            return (_val <= Goal);
         }
 
         internal void Toggle()
@@ -69,32 +70,37 @@ internal class Day10 : IDayRunner
             else
                 _val = 0;
         }
+
+        internal long Delta()
+        {
+            return Math.Abs(_val - Goal);
+        }
     }
    
     class Light10s
     {
-        Light10[] _lights;
+        public Light10[] Lights { get; }
         StarEnum _star;
         public Light10s(StarEnum star, string str)
         {
             _star = star;
             if (star == StarEnum.Star1)
-                _lights = str.Select(c => new Light10(c == '#')).ToArray();
+                Lights = str.Select(c => new Light10(c == '#')).ToArray();
             else //if (star == StarEnum.Star2)
             {
                 var parts = str.Split(',');
-                _lights = parts.Select(p => new Light10(int.Parse(p), 0)).ToArray();
+                Lights = parts.Select(p => new Light10(int.Parse(p), 0)).ToArray();
 
             }
         }
         public Light10s(Light10s other)
         {
             _star = other._star;
-            _lights = other._lights.Select(l => new Light10(l)).ToArray();
+            Lights = other.Lights.Select(l => new Light10(l)).ToArray();
         }
         public bool IsMatch()
         {
-            foreach (var light in _lights)
+            foreach (var light in Lights)
             {
                 if (!light.IsMatch())
                     return false;
@@ -103,7 +109,7 @@ internal class Day10 : IDayRunner
         }
         public bool IsJOver()
         {
-            foreach (var light in _lights)
+            foreach (var light in Lights)
             {
                 if (light.IsJOver())
                     return true;
@@ -112,17 +118,17 @@ internal class Day10 : IDayRunner
         }
         public override string ToString()
         {
-            return string.Join("", _lights);
+            return string.Join("", Lights);
         }
         internal bool Act(Button10 button)
         {
             foreach (var light in button.LightIds)
             {
                 if (StarEnum.Star1 == _star)
-                    _lights[light].Toggle();
+                    Lights[light].Toggle();
                 else
                 {
-                    if (!_lights[light].Increment())
+                    if (!Lights[light].Increment())
                         return false;
                 }
             }
@@ -132,7 +138,7 @@ internal class Day10 : IDayRunner
         {
             foreach (var light in button.LightIds)
             {
-                _lights[light].Toggle();
+                Lights[light].Toggle();
             }
         }
         internal bool IncrementAll(Button10 button)
@@ -145,7 +151,11 @@ internal class Day10 : IDayRunner
 
         internal string CompareString()
         {
-            return string.Join(',', _lights.Select(l => l._val));
+            return string.Join(',', Lights.Select(l => l._val));
+        }
+        internal long Delta()
+        {
+            return Lights.Sum(l => l.Delta());
         }
     }
     class Button10
@@ -184,6 +194,7 @@ internal class Day10 : IDayRunner
             var rv = Lights.Act(button);
             CompareString = Lights.CompareString();
             Count++;
+            Delta = Lights.Delta();
             return rv;
         }
      
@@ -192,6 +203,7 @@ internal class Day10 : IDayRunner
             return $"l:{Lights} c:{Count}";
         }
         public string CompareString { get; private set; }
+        public long Delta { get; private set; }
     }
     class Machine10
     {
@@ -230,52 +242,43 @@ internal class Day10 : IDayRunner
                 buttonSets = newSets;
             }
         }
-        public int JMatch()
+        public long JMatch()
         {
             if (_lights.IsMatch())
-                return 0;
+                return 0L;
             ElfHelper.DayLogPlus($"New Machine- {_lights}");
 
-            var buttonSets = new List<ButtonSet10>();
-            _buttons = _buttons.OrderByDescending(b => b.LightIds.Length).ToList();
-            foreach (var button in _buttons)
-            {
-                var newSet = new ButtonSet10(button, _lights);
-                if (newSet.Lights.IsMatch())
-                    return newSet.Count;
-                buttonSets.Add(newSet);
-            }
-            var next = DateTime.Now;
-            var compareStrings = new HashSet<string>();
-            var i = 0L;
-            while (true)
-            {
-                var newSets = new List<ButtonSet10>();
-                foreach (var set in buttonSets)
-                {
-                    foreach (var button in _buttons)
-                    {
-                        var newSet = new ButtonSet10(set, button);
-                        if (newSet.Lights.IsJOver())
-                            continue;
-                        if (newSet.Lights.IsMatch())
-                            return newSet.Count;
+            using var ctx = new Microsoft.Z3.Context();
+            using var opt = ctx.MkOptimize();
+            var presses = Enumerable.Range(0, _buttons.Count())
+                .Select(i => ctx.MkIntConst($"b{i}"))
+                .ToArray();
+            foreach(var press in presses)
+                opt.Add(ctx.MkGe(press, ctx.MkInt(0)));
 
-                        if (!compareStrings.Contains(newSet.CompareString))
-                        {
-                            newSets.Add(newSet);
-                            compareStrings.Add(newSet.CompareString);
-                        }
-                    }
-                }
-                if (DateTime.Now > next)
+            for (var i = 0; i < _lights.Lights.Count(); i++)
+            {
+                var affecting = presses.Where((_, j) => _buttons[j].LightIds.Contains(i)).ToArray();
+                if (affecting.Length > 0)
                 {
-                    ElfHelper.DayLogPlus($"{i} Sets {buttonSets.Count} => {newSets.Count}");
-                    next = DateTime.Now.AddSeconds(5);
+                    Microsoft.Z3.Expr sum;
+                    if (affecting.Length == 1)
+                        sum = affecting[0];
+                    else
+                        sum = ctx.MkAdd(affecting);
+
+                    opt.Add(ctx.MkEq(sum, ctx.MkInt(_lights.Lights[i].Goal)));
                 }
-                i++;
-                buttonSets = newSets;
             }
+
+            if (presses.Length == 1)
+                opt.MkMinimize(presses[0]);
+            else
+                opt.MkMinimize(ctx.MkAdd(presses));
+            opt.Check();
+
+            var model = opt.Model;
+            return presses.Sum(p => ((Microsoft.Z3.IntNum)model.Evaluate(p, true)).Int64);
         }
 
         Light10s _lights;

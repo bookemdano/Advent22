@@ -68,6 +68,7 @@
     <Content Include="Assets\Day01Fake.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <PackageReference Include="Microsoft.Z3" Version="4.12.2" />
     <ProjectReference Include="..\AoCLibrary\AoCLibrary.csproj" />
     <Resource Include="assets\Daycs.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
