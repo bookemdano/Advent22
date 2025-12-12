@@ -1,6 +1,6 @@
 using AoCLibrary;
 namespace Advent25;
-
+// #done
 internal class Day01 : IDayRunner
 {
 	// Day https://adventofcode.com/2025/day/1

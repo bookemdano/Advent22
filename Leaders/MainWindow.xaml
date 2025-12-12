@@ -8,12 +8,16 @@
 		Loaded="Window_Loaded"
         Title="MainWindow" Height="450" Width="800">
 	<StackPanel>
-		<StackPanel Orientation="Horizontal">
-			<Button Click="Now_Click" Margin="3" Padding="3">Now</Button>
-			<Button x:Name="btnAddNext" Click="AddNext_Click" Margin="3" Padding="3">Add Next</Button>
-			<Button Click="Puzzle_Click" Margin="3" Padding="3">Puzzle</Button>
-			<Button Click="Leaderboard_Click" Margin="3" Padding="3">Leaderboard</Button>
-			<Button Click="Slack_Click" Margin="3" Padding="3">Slack</Button>
+        <Menu>
+
+            <MenuItem Header="Year" Name="mnuYear"/>
+            <MenuItem Header="Now" Click="Now_Click"/>
+            <MenuItem Header="Add Next" x:Name="mnuAddNext" Click="AddNext_Click"/>
+            <MenuItem Header="Puzzle" Click="Puzzle_Click"/>
+            <MenuItem Header="Leaderboard" Click="Leaderboard_Click"/>
+            <MenuItem Header="Slack"/>
+        </Menu>
+        <StackPanel Orientation="Horizontal">
 		</StackPanel>
 		<DataGrid x:Name="grd"/>
 		<StackPanel Orientation="Horizontal"  Background="Black">

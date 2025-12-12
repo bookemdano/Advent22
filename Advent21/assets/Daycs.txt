@@ -1,0 +1,44 @@
+using AoCLibrary;
+namespace Advent21;
+// #working
+internal class Day|DD| : IRunner
+{
+	// Day |URL|
+	// Input |INPUTURL|
+    public RunnerResult Star1(bool isReal)
+    {
+        var key = new StarCheckKey(StarEnum.Star1, isReal, null);
+        var res = new RunnerResult();
+        if (!isReal)
+			res.Check = new StarCheck(key, 0L);
+		else
+			res.Check = new StarCheck(key, 0L);
+
+		var lines = Program.GetLines(key);
+		//var text = Program.GetText(key);
+		var rv = 0L;
+		// magic
+
+        res.CheckGuess(rv);
+        return res;
+    }
+    public RunnerResult Star2(bool isReal)
+    {
+        var key = new StarCheckKey(StarEnum.Star2, isReal, null);
+        var res = new RunnerResult();
+        if (!isReal)
+			res.Check = new StarCheck(key, 0L);
+		else
+			res.Check = new StarCheck(key, 0L);
+
+		var lines = Program.GetLines(key);
+		//var text = Program.GetText(key);
+
+		var rv = 0L;
+		// magic
+
+        res.CheckGuess(rv);
+        return res;
+	}
+}
+

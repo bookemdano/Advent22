@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 
@@ -20,7 +19,22 @@ namespace AoCLibrary
             Directory.CreateDirectory(Dir);
 		}
 
-		static public string AppName { get; set; } = string.Empty;
+        static public void WriteConfig(string key, int val)
+        {
+            File.WriteAllText(Path.Combine(Dir, $"{key}.cfg"), val.ToString());
+        }
+        static public int ReadConfig(string key, int def)
+        {
+            var file = Path.Combine(Dir, $"{key}.cfg");
+            if (!File.Exists(file))
+                return def;
+            var str = File.ReadAllText(file);
+            if (int.TryParse(str, out int val))
+                return val;
+            return def;
+        }
+
+        static public string AppName { get; set; } = string.Empty;
 		public static void MonthLog(object o, Stopwatch? sw = null)
 		{
 			var str = $"{AppName} {o}";

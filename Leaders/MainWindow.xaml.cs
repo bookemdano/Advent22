@@ -1,9 +1,8 @@
 using AoCLibrary;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection.Metadata;
-using System.Threading.Channels;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace Leaders
@@ -21,9 +20,37 @@ namespace Leaders
 			timer.Tick += Timer_Tick;
 			timer.Interval = TimeSpan.FromMinutes(1);
 			timer.Start();
-		}
+			var projects = ElfHelper.GetProjectStrings();
+			var currentYear = Utils.ReadConfig("year", ElfHelper.Year);
+			var currentYear2 = (currentYear - 2000).ToString();
+            foreach (var project in projects)
+			{
+				var mi = new MenuItem();
+				mi.Header = project.ToString();
+                mi.Click += Year_Click;
+				mi.Tag = 2000 + int.Parse(project.Substring(6));
+				if (project.Contains(currentYear2))
+					mi.IsChecked = true;
+                mnuYear.Items.Add(mi);
+			}
+			if (currentYear != ElfHelper.Year)
+				ElfHelper.OverrideYear(currentYear);
+        }
+        private async void Year_Click(object sender, RoutedEventArgs e)
+        {
+			if (sender is not MenuItem mi)
+				return;
+			foreach (MenuItem other in mnuYear.Items)
+				other.IsChecked = false;
+			mi.IsChecked = true;
+            ElfHelper.OverrideYear((int)mi.Tag);
+			_last = null;
+			await TickAsync(true);
+            UpdateNextButton();
+			Utils.WriteConfig("year", ElfHelper.Year);
+        }
 
-		private async void Timer_Tick(object? sender, EventArgs e)
+        private async void Timer_Tick(object? sender, EventArgs e)
 		{
 			await TickAsync(false);
 		}
@@ -36,30 +63,27 @@ namespace Leaders
 
 		async Task TickAsync(bool force)
 		{
-			var daysInto = ElfHelper.RawDay;
+            ElfHelper.UpdateCurrentDay();
 
-			if (daysInto < 0)
-				Title = $"Coming in {(0 - daysInto).ToString("0")}";
-			else
+            Title = $"Day {ElfHelper.Year} {ElfHelper.DayString}";
+
+            if (ElfHelper.IsActive && ElfHelper.CurrentDayOrNull != null)
 			{
-                Title = $"Day {ElfHelper.DayString} {(100 * daysInto / 25):0.0}%";
-
-            }
-
-            if (LastSentDay != ElfHelper.Day)
-			{
-				if (ElfHelper.IsActive)
-					Send(ElfHelper.DailyUrl);
-				LastSentDay = ElfHelper.Day;
-
-				if (ElfHelper.Day == ElfHelper.NextEmptyDay())
+				// current day is going to be calendar date, regardless of what is done
+				var lastSent = Utils.ReadConfig("lastsentdate", -1);
+				if (lastSent != ElfHelper.CurrentDayOrNull)
 				{
-					await ElfHelper.WriteStubFilesAsync(ElfHelper.Day, true);
-					Log("Created next day" + ElfHelper.Day);
-					UpdateNextButton();
+					Send(ElfHelper.DailyUrl);
+					Utils.WriteConfig("lastsentdate", ElfHelper.CurrentDayOrLast);
+
+					if (ElfHelper.CurrentDayOrLast == ElfHelper.NextEmptyDay())
+					{
+						await ElfHelper.WriteStubFilesAsync(ElfHelper.CurrentDayOrLast, true);
+						Log("Created next day" + ElfHelper.CurrentDayOrLast);
+						UpdateNextButton();
+					}
 				}
-			}
-			
+			}		
 			try
 			{
 				await ReadAsync(force);
@@ -72,35 +96,13 @@ namespace Leaders
 
 		private void UpdateNextButton()
 		{
-			btnAddNext.IsEnabled = false;
+			mnuAddNext.IsEnabled = false;
 			var day = ElfHelper.NextEmptyDay();
 			if (day > 0)
 			{
-				btnAddNext.IsEnabled = true;
-				btnAddNext.Content = $"Add Day{day:00}";
-				btnAddNext.Tag = day;
-			}
-		}
-		int _lastDaySent = -1;
-		int LastSentDay
-		{
-			get
-			{
-				if (_lastDaySent == -1)
-				{
-					_lastDaySent = 0;
-					if (File.Exists(Path.Combine(Utils.Dir, "LastDaySent.cfg")))
-					{
-						var str = File.ReadAllText(Path.Combine(Utils.Dir, "LastDaySent.cfg"));
-						int.TryParse(str, out _lastDaySent);
-					}
-				}
-				return _lastDaySent;
-			}
-			set
-			{
-				_lastDaySent = value;
-				File.WriteAllText(Path.Combine(Utils.Dir, "LastDaySent.cfg"), _lastDaySent.ToString());
+				mnuAddNext.IsEnabled = true;
+				mnuAddNext.Header = $"Add Day{day:00}";
+				mnuAddNext.Tag = day;
 			}
 		}
 		void Send(string str)
@@ -119,7 +121,7 @@ namespace Leaders
 			Debug.Assert(elfResult != null);
 			Log("Updating UI with data from: " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(_last);
-			if (changes.Any())
+			if (ElfHelper.Year == DateTime.Today.Year && changes.Any())
 			{
 				foreach (var change in changes)
 				{
@@ -127,11 +129,10 @@ namespace Leaders
 					PlaySound();
 				}
 				Send(string.Join(Environment.NewLine, changes));
-			}
+                staLeft.Text = "Left today: " + elfResult.PointsLeftToday();
+            }
 
-			staLeft.Text = "Left today: " + elfResult.PointsLeftToday();
-
-			var ordered = elfResult.AllMembers(true).OrderByDescending(m => m.LocalScore);
+            var ordered = elfResult.AllMembers(true).OrderByDescending(m => m.LocalScore);
 			var showables = ordered.Where(m => m.LocalScore > 0).ToArray();
 			int i = 0;
 			var vms = new List<MemberViewModel>();
@@ -170,7 +171,7 @@ namespace Leaders
 		{
 			if (MessageBox.Show("Are you sure?", "Sure?", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
 			{
-				var day = (int)btnAddNext.Tag;
+				var day = (int)mnuAddNext.Tag;
 				await ElfHelper.WriteStubFilesAsync(day, true);
 				Log("Created next day" + day);
 				UpdateNextButton();

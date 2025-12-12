@@ -2,14 +2,15 @@
 using System.Diagnostics;
 using System.Reflection;
 
-namespace Advent25;
+namespace Advent21;
 
 internal class Program
 {
     static async Task Main()
     {
         Utils.AppName = "RUN";
-
+        ElfHelper.OverrideYear(2021);
+        ElfHelper.UpdateCurrentDay();
         var runner = GetDayRunner(ElfHelper.DayString);
         if (runner == null)
             ElfHelper.DayLog("No runner found for Day" + ElfHelper.DayString);
@@ -18,7 +19,7 @@ internal class Program
             await RunAsync(runner);
         }
     }
-    static async Task RunAsync(IDayRunner runner)
+    static async Task RunAsync(IRunner runner)
     {
         ElfHelper.ResetDayLog();
 
@@ -34,7 +35,7 @@ internal class Program
             await RunIt(runner, true, StarEnum.Star2);
     }
 
-    private static async Task<RunnerResult> RunIt(IDayRunner runner, bool isReal, StarEnum star)
+    private static async Task<RunnerResult> RunIt(IRunner runner, bool isReal, StarEnum star)
     {
         // get input file if we don't have it yet.
         if (isReal && !IsFileThere(InputFile(isReal, StarEnum.NA)))
@@ -56,7 +57,7 @@ internal class Program
         return res;
     }
 
-    static IDayRunner? GetDayRunner(string dayString)
+    static IRunner? GetDayRunner(string dayString)
     {
         Assembly[] assemblies = AppDomain.CurrentDomain.GetAssemblies();
         var advent = assemblies[1];
@@ -74,7 +75,7 @@ internal class Program
             return null;
         }
         var o = Activator.CreateInstance(dayClass);
-        if (o is IDayRunner rv)
+        if (o is IRunner rv)
             return rv;
         return null;
     }
