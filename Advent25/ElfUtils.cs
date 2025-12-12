@@ -1,4 +1,5 @@
 
+using System;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 
@@ -432,8 +433,9 @@ public class GridMapBase
 	{
 
 	}
-	public int Rows => _map.Count;
-	public GridMapBase(IEnumerable<string>? lines)
+    public int Rows => _map.Count;
+    public int Cols => _map[0].Length;
+    public GridMapBase(IEnumerable<string>? lines)
 	{
 		if (lines == null)
 			return;
@@ -473,7 +475,16 @@ public class GridMapBase
 			rv += string.Join("", row);
 		return rv;
 	}
-
+    public override bool Equals(object? obj)
+    {
+		if (obj is GridMapBase other)
+			return other.Text() == Text();
+		return false;
+    }
+    public override int GetHashCode()
+    {
+		return Text().GetHashCode();
+    }
 	protected Loc? FindRC(char target)
 	{
 		int iRow = 0;
@@ -512,22 +523,34 @@ public class GridMapXY : GridMapBase
 	{
 
 	}
-	public GridMapXY(int x, int y)
-	{
-		for (int row = 0; row < y; row++)
-			_map.Add(new string('.', x).ToCharArray());
-	}
-	public void Set(Point pt, char c)
-	{
-		_map[(int) pt.Y][pt.X] = c;
-	}
-	public char? Get(Point pt)
+    public GridMapXY(int x, int y)
+    {
+        for (int row = 0; row < y; row++)
+            _map.Add(new string('.', x).ToCharArray());
+    }
+    public GridMapXY(GridMapXY other)
+    {
+        _map = other._map.Select(row => row.ToArray()).ToList();
+    }
+    public void Set(int x, int y, char c)
+    {
+        _map[y][x] = c;
+    }
+    public void Set(Point pt, char c) 
+    {
+		Set((int) pt.X, (int)pt.Y, c);
+    }
+    public char? Get(Point pt)
 	{
 		if (!IsValid(pt))
 			return null;
-		return _map[(int) pt.Y][pt.X];
+		return DirectGet((int)pt.X, (int)pt.Y);
 	}
-	public bool IsValid(Point pt)
+    public char DirectGet(int x, int y)
+    {
+        return _map[y][x];
+    }
+    public bool IsValid(Point pt)
 	{
 		if (pt.Y < 0 || pt.X < 0)
 			return false;
@@ -549,7 +572,49 @@ public class GridMapXY : GridMapBase
 			return null;
 		return new Point(rv);
 	}
+	// only works for square
+    internal GridMapXY Rotate()
+    {
+        var rv = new GridMapXY(Cols, Rows);
+		for (int r = 0; r < Rows; r++)
+			for (int c = 0; c < Cols; c++)
+				rv.Set(r, c, DirectGet(c, r));
+        //ElfHelper.DayLogPlus(this);
+        //ElfHelper.DayLogPlus(rv);
+        return rv;
+    }
+	internal void Union(GridMapXY other, int targetX, int targetY)
+	{
+        for (int x = 0; x < other.Cols; x++)
+        {
+            for (int y = 0; y < other.Rows; y++)
+            {
+				Set(x + targetX, y + targetY, other.DirectGet(x, y));
+            }
+        }
+    }
 
+    internal GridMapXY FlipVert()
+    {
+        var rv = new GridMapXY(Cols, Rows);
+        for (int r = 0; r < Rows; r++)
+            for (int c = 0; c < Cols; c++)
+                rv.Set(r, Cols - c - 1, DirectGet(r, c));
+        //ElfHelper.DayLogPlus(this);
+        //ElfHelper.DayLogPlus(rv);
+        return rv;
+    }
+
+    internal GridMapXY FlipHorz()
+    {
+        var rv = new GridMapXY(Cols, Rows);
+        for (int r = 0; r < Rows; r++)
+            for (int c = 0; c < Cols; c++)
+                rv.Set(Rows - r - 1, c, DirectGet(r, c));
+        //ElfHelper.DayLogPlus(this);
+        //ElfHelper.DayLogPlus(rv);
+        return rv;
+    }
 }
 public class GridMap : GridMapBase
 {
@@ -558,15 +623,15 @@ public class GridMap : GridMapBase
 
     }
     public GridMap()
-	{
+    {
 
-	}
+    }
+
     public GridMap(GridMap other)
     {
 		_map = other._map.Select(r => r.ToArray()).ToList();
     }
-    public int Rows => _map.Count;
-	public int Cols => _map[0].Length;
+
 
 	public char? Get(int iRow, int iCol)
 	{
