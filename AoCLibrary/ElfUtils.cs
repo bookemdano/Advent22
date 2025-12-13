@@ -500,16 +500,26 @@ public class GridMapBase
 		}
 		return null;
 	}
-    internal string GetCol(int col)
+    public string GetCol(int col)
     {
 		var rv = string.Empty;
 		foreach (var row in _map)
 			rv += row[col];
 		return rv;
     }
-    internal char[] GetRow(int iRow)
+    public char[] GetRow(int iRow)
     {
         return _map[iRow];
+    }
+
+    public IEnumerable<string> GetRows()
+    {
+        var rv = new List<string>();
+        for (int r = 0; r < Rows; r++)
+        {
+            rv.Add(new string(GetRow(r)));
+        }
+        return rv;
     }
 
 }
