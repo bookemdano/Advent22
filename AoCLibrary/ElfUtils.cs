@@ -326,6 +326,10 @@ public class Point
 
 public class Loc(int row, int col)
 {
+	public Loc(Loc pos) : this(pos.Row, pos.Col)
+    {
+    }
+
     public int Row { get; set; } = row; 
 	public int Col { get; set; } = col;
 
@@ -382,24 +386,24 @@ public class Loc(int row, int col)
         };
         return rv;
     }
-    public Loc Move(DirEnum dir)
+    public Loc Move(DirEnum dir, int amount = 1)
 	{
         if (dir == DirEnum.N)
-            return new Loc(Row - 1, Col);
+            return new Loc(Row - amount, Col);
         else if (dir == DirEnum.NE)
-            return new Loc(Row - 1, Col + 1);
+            return new Loc(Row - amount, Col + amount);
         else if (dir == DirEnum.E)
-            return new Loc(Row, Col + 1);
+            return new Loc(Row, Col + amount);
         else if (dir == DirEnum.SE)
-            return new Loc(Row + 1, Col + 1);
+            return new Loc(Row + amount, Col + amount);
         else if (dir == DirEnum.S)
-            return new Loc(Row + 1, Col);
+            return new Loc(Row + amount, Col);
         else if (dir == DirEnum.SW)
-            return new Loc(Row + 1, Col - 1);
+            return new Loc(Row + amount, Col - amount);
         else if (dir == DirEnum.W)
-            return new Loc(Row, Col - 1);
+            return new Loc(Row, Col - amount);
         else //if (dir == DirEnum.NW)
-            return new Loc(Row - 1, Col - 1);
+            return new Loc(Row - amount, Col - amount);
     }
     public bool Same(Loc other)
 	{
@@ -413,7 +417,6 @@ public class Loc(int row, int col)
 		else
 			return false;
 	}
-
 }
 public enum MoveEnum
 {
