@@ -203,6 +203,13 @@ public class Point
 		Y = y; X = x;
 	}
 
+    public Point(string str)
+    {
+        var parts = str.Split(",");
+        X = int.Parse(parts[0]);
+        Y = int.Parse(parts[1]);
+    }
+    
 	public Point(Loc loc)
 	{
 		Y = loc.Row;
@@ -324,14 +331,25 @@ public class Point
 
 
 
-public class Loc(int row, int col)
+public class Loc
 {
-	public Loc(Loc pos) : this(pos.Row, pos.Col)
+    public Loc(string str)
+    {
+        var parts = str.Split(",");
+		Row = int.Parse(parts[0]);
+		Col = int.Parse(parts[1]);
+    }
+    public Loc(int row, int col)
+    {
+        Row = row; 
+		Col = col;
+    }
+    public Loc(Loc pos) : this(pos.Row, pos.Col)
     {
     }
 
-    public int Row { get; set; } = row; 
-	public int Col { get; set; } = col;
+    public int Row { get; set; } 
+	public int Col { get; set; }
 
     public override string ToString()
 	{
