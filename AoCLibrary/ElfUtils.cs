@@ -1,3 +1,5 @@
+using System.Threading;
+
 namespace AoCLibrary;
 public enum DirEnum
 {
@@ -674,7 +676,7 @@ public class GridMap : GridMapBase
 		var c = Get(loc);
 		if (c == null)
 			return null;
-		return int.Parse(c.ToString()!);
+		return c - '0';
 	}
 
 	public void Set(int row, int col, char c)
@@ -730,6 +732,16 @@ public class GridMap : GridMapBase
 		return rv;
     }
 
+    public void SetInt(Loc loc, int val)
+    {
+        Set(loc, (char)(val + (int) '0'));
+    }
+    public void IncInt(Loc loc)
+    {
+		var v = GetInt(loc);
+		if (v != null)
+			SetInt(loc, (int) v + 1);
+    }
 }
 
 public class FLoc(double row, double col)
