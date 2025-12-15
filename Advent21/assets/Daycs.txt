@@ -16,7 +16,7 @@ internal class Day|DD| : IRunner
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
-		var rv = -1L;
+		var rv = 0L;
 		// magic
 
         res.CheckGuess(rv);
