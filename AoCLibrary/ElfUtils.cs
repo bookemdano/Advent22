@@ -657,6 +657,10 @@ public class GridMap : GridMapBase
     {
 
     }
+    public GridMap(int rows, int cols) : base(cols, rows)
+    {
+    }
+
     public GridMap()
     {
 
