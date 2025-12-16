@@ -462,7 +462,12 @@ public class GridMapBase
 			_map.Add(line.ToCharArray());
 		}
 	}
-	public int Count(char target)
+    public GridMapBase(int x, int y)
+    {
+        for (int row = 0; row < y; row++)
+            _map.Add(new string('.', x).ToCharArray());
+    }
+    public int Count(char target)
 	{
 		var rv = 0;
 		foreach (var row in _map)
@@ -551,15 +556,16 @@ public class GridMapXY : GridMapBase
 	{
 
 	}
-    public GridMapXY(int x, int y)
-    {
-        for (int row = 0; row < y; row++)
-            _map.Add(new string('.', x).ToCharArray());
-    }
+
     public GridMapXY(GridMapXY other)
     {
         _map = other._map.Select(row => row.ToArray()).ToList();
     }
+
+    public GridMapXY(int x, int y) : base(x, y)
+    {
+    }
+
     public void Set(int x, int y, char c)
     {
         _map[y][x] = c;
@@ -573,7 +579,8 @@ public class GridMapXY : GridMapBase
 		if (!IsValid(pt))
 			return null;
 		return DirectGet((int)pt.X, (int)pt.Y);
-	}
+    }
+ 
     public char DirectGet(int x, int y)
     {
         return _map[y][x];
@@ -660,8 +667,7 @@ public class GridMap : GridMapBase
 		_map = other._map.Select(r => r.ToArray()).ToList();
     }
 
-
-	public char? Get(int iRow, int iCol)
+    public char? Get(int iRow, int iCol)
 	{
 		return Get(new Loc(iRow, iCol));
 	}
