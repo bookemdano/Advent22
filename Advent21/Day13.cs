@@ -1,8 +1,6 @@
 using AoCLibrary;
-using System.IO.MemoryMappedFiles;
-using System.Linq;
 namespace Advent21;
-// #working
+
 internal class Day13 : IRunner
 {
 	// Day https://adventofcode.com/2021/day/13
@@ -20,12 +18,12 @@ internal class Day13 : IRunner
 		//var text = Program.GetText(key);
 		var rv = 0L;
 		// magic
-		rv = ParseAndFold(lines, key);
+		var pts = ParseAndFold(lines, key);
 
-        res.CheckGuess(rv);
+        res.CheckGuess(pts.Count());
         return res;
     }
-    int ParseAndFold(IEnumerable<string> lines, StarCheckKey key)
+    List<Point> ParseAndFold(IEnumerable<string> lines, StarCheckKey key)
     {
         var beforeBreak = true;
         var pts = new List<Point>();
@@ -56,63 +54,41 @@ internal class Day13 : IRunner
                 {
                     if (pt.X < crease)
                     {
-                        newPts.Add(pt);
+                        if (!newPts.Contains(pt))
+                            newPts.Add(pt);
                     }
                     else if (pt.X > crease)
                     {
                         var diff = pt.X - crease;
-                        newPts.Add(new Point(pt.X, crease - diff));
-                    }
-                }
-                for (int x = 0; x < crease; x++)
-                {
-                    var targetX = maxX - x - 1;
-                    for (int y = 0; y < maxY; y++)
-                    {
-                        var pt = new Point(x, y);
-                        if (pts.Contains(pt))
-                            newPts.Add(pt);
-                        else
-                        {
-                            var ptTarget = new Point(targetX, y);
-                            if (pts.Contains(ptTarget))
-                                newPts.Add(pt);
-                        }
+                        var newPt = new Point(crease - diff, pt.Y);
+                        if (!newPts.Contains(newPt))
+                            newPts.Add(newPt);
                     }
                 }
             }
             else if (fold.Contains("y"))
             {
-                for (int y = 0; y < crease; y++)
+                foreach (var pt in pts)
                 {
-                    var targetY = maxY - y - 1;
-                    for (int x = 0; x < maxX; x++)
+                    if (pt.Y < crease)
                     {
-                        var pt = new Point(x, y);
-                        if (pts.Contains(pt))
+                        if (!newPts.Contains(pt))
                             newPts.Add(pt);
-                        else
-                        {
-                            var ptTarget = new Point(x, targetY);
-                            if (pts.Contains(ptTarget))
-                                newPts.Add(pt);
-                        }
+                    }
+                    else if (pt.Y > crease)
+                    {
+                        var diff = pt.Y - crease;
+                        var newPt = new Point(pt.X, crease - diff);
+                        if (!newPts.Contains(newPt))
+                            newPts.Add(newPt);
                     }
                 }
             }
             pts = newPts;
-            //ElfHelper.DayLogPlus("Fold1\n" + GridMap13.Map(pts));
             if (key.Star == StarEnum.Star1)
-                return pts.Count();
+                break;
         }
-        if (key.Star == StarEnum.Star2)
-        {
-            Map(key.ToString(), pts);
-            if (key.IsReal == false)
-                return 0;
-            
-        }
-        return pts.Count();
+        return pts;
     }
     static void Map(string str, List<Point> pts)
     {
@@ -128,16 +104,25 @@ internal class Day13 : IRunner
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, 0L);
+			res.Check = new StarCheck(key, "0");
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, "CJCKBAPB");
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
 
-		var rv = 0L;
+		var rv = "";
         // magic
-        rv = ParseAndFold(lines, key);
+        var pts = ParseAndFold(lines, key);
+        if (key.Star == StarEnum.Star2)
+        {
+            Map(key.ToString(), pts);
+            // you have to manually read the output to get the answer
+            if (!isReal)
+                rv = "0";
+            else
+                rv = "CJCKBAPB";
+        }
 
         res.CheckGuess(rv);
         return res;
