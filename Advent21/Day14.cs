@@ -1,9 +1,8 @@
 using AoCLibrary;
-using System;
 using System.Text;
 
 namespace Advent21;
-// #working
+
 internal class Day14 : IRunner
 {
 	// Day https://adventofcode.com/2021/day/14
@@ -21,8 +20,6 @@ internal class Day14 : IRunner
 		//var text = Program.GetText(key);
 		var rv = 0L;
         // magic
-        rv = Recur14.Recurse(lines, 10);
-
         var template = lines[0];
         var rules = new Dictionary<string, char>();
         foreach (var line in lines.Skip(2))
@@ -30,14 +27,13 @@ internal class Day14 : IRunner
             var pair = line.Substring(0, 2);
             rules.Add(pair, line[6]);
         }
-        for(int i = 0; i < 10; i++)
+        for (int i = 0; i < 10; i++)
             template = Rule14.RunRulesPaired(template, rules);
 
         var dict = Histogram(template);
         rv = dict.Max(x => x.Value) - dict.Min(x => x.Value);
 
         rv = Recur14.Recurse(lines, 10);
-
         res.CheckGuess(rv);
         return res;
     }
@@ -104,22 +100,14 @@ internal class Day14 : IRunner
             // sum(map(f, tpl, tpl[1:]), Counter(tpl))
             for (int i = 0; i < template.Length - 1; i++)
             {
-                var add = F(template[i], template[i + 1], depth);
+                var add = Check(template[i], template[i + 1], depth);
                 AddCounts(counts, add);
             }
 
-            long max = counts.Values.Max();
-            long min = counts.Values.Min();
-
-            return max - min;
+            return counts.Values.Max() - counts.Values.Min();
         }
-        // Equivalent of:
-        // @cache
-        // def f(a, b, depth):
-        //   if depth == 0: return Counter('')
-        //   x = rules[a+b]
-        //   return Counter(x) + f(a,x,depth-1) + f(x,b,depth-1)
-        static Dictionary<char, long> F(char a, char b, int depth)
+
+        static Dictionary<char, long> Check(char a, char b, int depth)
         {
             var key = new RecurKey14(a, b, depth);
             if (memo.TryGetValue(key, out var cached))
@@ -132,14 +120,13 @@ internal class Day14 : IRunner
                 return empty;
             }
 
-            var pair = new string(new[] { a, b });
-            char x = rules[pair];
+            var replacement = rules["" + a + b];
 
             var result = new Dictionary<char, long>();
-            result[x] = 1; // Counter(x)
+            result[replacement] = 1; // Counter(x)
 
-            AddCounts(result, F(a, x, depth - 1));
-            AddCounts(result, F(x, b, depth - 1));
+            AddCounts(result, Check(a, replacement, depth - 1));
+            AddCounts(result, Check(replacement, b, depth - 1));
 
             memo[key] = result;
             return result;
