@@ -108,7 +108,8 @@ namespace Leaders
 		void Send(string str)
 		{
 			Log("Sending " + str);
-			Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + str);
+            if (ElfHelper.Year != DateTime.Today.Year)
+				Sms.SendMessage("4109608923", "ELF Alert!" + Environment.NewLine + str);
 		}
 		async Task ReadAsync(bool force)
 		{
@@ -121,7 +122,7 @@ namespace Leaders
 			Debug.Assert(elfResult != null);
 			Log("Updating UI with data from: " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(_last);
-			if (ElfHelper.Year == DateTime.Today.Year && changes.Any())
+			if (changes.Any())
 			{
 				foreach (var change in changes)
 				{
