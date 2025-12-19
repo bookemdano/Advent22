@@ -22,9 +22,13 @@ internal class Day18 : IRunner
 		// magic
 		foreach (var line in lines)
 		{
-            var subLine = line.Substring(1, line.Length - 2);
-            var bin = new Bin18(line, 0);
-            bin.Explode();
+            var bin = new Bin18(line, 0, 0);
+            var exs = bin.Find4s();
+            
+            foreach(var ex in exs)
+            {
+                bin.Left(ex.Left)
+            }
 		}
 
         res.CheckGuess(rv);
@@ -73,78 +77,94 @@ internal class Day18 : IRunner
     }
     class Bin18
     {
-        public void Add(int v)
+        public void Add(int val, int i)
         {
             if (!LeftDone)
-                _lh = v;
+                LeftBin = new Bin18(val, i, _level);
             else
-                _rh = v;
+                RightBin = new Bin18(val, i, _level);
+        }
+        public Bin18(int value, int i, int level)
+        {
+            Val = value;
+            _level = level;
+            _index = i;
         }
         public void Add(Bin18 bin)
         {
             if (!LeftDone)
-                _lhBin = bin;
+                LeftBin = bin;
             else
-                _rhBin = bin;
+                RightBin = bin;
         }
-        bool LeftDone => (_lhBin != null || _lh >= 0);
-        bool RightDone => (_rhBin != null || _rh >= 0);
+        bool LeftDone => (LeftBin != null);
+        bool RightDone => (RightBin != null);
         public override string ToString()
         {
             var str = string.Empty;
-            if (_lhBin!= null)
-               str += _lhBin;
-            else
-                str += _lh;
-            str += ",";
-            if (_rhBin != null)
-                str += _rhBin;
-            else
-                str += _rh;
-            return $"[{str}]({_level})";
+            if (Val >= 0)
+                return $"{Val}({_level})<{_index}>";
+            return $"[{LeftBin},{RightBin}]";
         }
-        int _lh = -1;
-        int _rh = -1;
-        Bin18? _lhBin;
-        Bin18? _rhBin;
+        public int Val { get; set; } = -1;
+        public Bin18? LeftBin { get; set; }
+        public Bin18? RightBin { get; set; }
         bool IsDone()
         {
             return (LeftDone && RightDone);
 
         }
+        bool HasVal => Val >= 0;
+        public List<Bin18> Find4s()
+        {
+
+            var rv = new List<Bin18>();
+            if (_level >= 4)
+            {
+                rv.Add(this);
+            }
+            else if (!HasVal)
+            {
+                rv.AddRange(LeftBin.Find4s());
+                rv.AddRange(RightBin.Find4s());
+            }
+            return rv;
+        }
 
         internal void Explode()
         {
+
             if (_level >= 4)
             {
 
             }    
-            if (_lhBin != null)
-                _lhBin.Explode();
-            if (_rhBin != null)
-                _rhBin.Explode();
+            if (LeftBin != null)
+                LeftBin.Explode();
+            if (RightBin != null)
+                RightBin.Explode();
         }
 
-        int _used;
+        int _ichar;
         private int _level;
+        private int _index;
 
-        public Bin18(string line, int level)
+        public Bin18(string line, int start, int level)
         {
             _level = level;
-            Utils.Assert(line[0] == '[', "Opens right " + this);
-            for (_used = 1; _used < line.Length; _used++)
+            Utils.Assert(line[start] == '[', "Opens right " + this);
+            for (_ichar = start + 1; _ichar < line.Length; _ichar++)
             {
-                var c = line[_used];
+                var c = line[_ichar];
                 if (int.TryParse(c.ToString(), out int digit))
                 {
                     Utils.Assert(!IsDone(), "Not Done " + this);
-                    Add(digit);
+                    Add(digit, _ichar);
                 }
                 else if (c == '[')
                 {
-                    var bin = new Bin18(line.Substring(_used), level + 1);
+                    var bin = new Bin18(line, _ichar, level + 1);
                     Add(bin);
-                    _used += bin._used;
+                    _ichar = bin._ichar;
                 }
                 else if (c == ']')
                 {
