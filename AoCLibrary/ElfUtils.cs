@@ -790,12 +790,20 @@ public class Point3D(long x, long y, long z) : IEquatable<Point3D>
 
         return Equals(other);
     }
+	static public Point3D Parse(string line)
+	{
+		var parts = line.Split(',');
+		if (parts.Length == 2)
+            return new Point3D(long.Parse(parts[0]), long.Parse(parts[1]), 0);
+
+        return new Point3D(long.Parse(parts[0]), long.Parse(parts[1]), long.Parse(parts[2]));
+	}
     public override string ToString()
     {
         return $"({X}, {Y}, {Z})";
     }
 
-    internal double Distance(Point3D other)
+    public double Distance(Point3D other)
 	{         
 		var dx = other.X - X;
 		var dy = other.Y - Y;
@@ -812,5 +820,23 @@ public class Point3D(long x, long y, long z) : IEquatable<Point3D>
     internal bool IsOnLine2D(decimal slope, decimal intercept)
     {
         return (Y == slope * X + intercept);
+    }
+
+    public Point3D Offset(Point3D other)
+    {
+        var dx = other.X - X;
+        var dy = other.Y - Y;
+        var dz = other.Z - Z;
+        return new Point3D(dx, dy, dz);
+    }
+
+    public Point3D Add(Point3D offset)
+    {
+		return new Point3D(X + offset.X, Y + offset.Y, Z + offset.Z);
+    }
+
+    public Point3D Subtract(Point3D offset)
+    {
+        return new Point3D(X - offset.X, Y - offset.Y, Z - offset.Z);
     }
 }
