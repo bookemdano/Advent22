@@ -1,10 +1,7 @@
 using AoCLibrary;
-using System.Runtime.CompilerServices;
-using System.Threading.Channels;
 
 namespace Advent21;
 
-// #working
 internal class Day18 : IRunner
 {
 	// Day https://adventofcode.com/2021/day/18
@@ -14,18 +11,18 @@ internal class Day18 : IRunner
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, 129L);
+			res.Check = new StarCheck(key, 4140L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 3892L);
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
 		var rv = 0L;
 
-        var binX = new Bin18("[[[[[9,8],1],2],3],4]", 0, 0);
+        var binX = new Bin18("[[[[[9,8],1],2],3],4]", 0);
         ExplodeAll(binX);
         Utils.Assert(binX.ToShortString(), "[[[[0,9],2],3],4]");
-        binX = new Bin18("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]", 0, 0);
+        binX = new Bin18("[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]", 0);
         ExplodeAll(binX);
         Utils.Assert(binX.ToShortString(), "[[3,[2,[8,0]]],[9,[5,[7,0]]]]");
 
@@ -33,11 +30,12 @@ internal class Day18 : IRunner
             var lineA = "[[[[4,3],4],4],[7,[[8,4],9]]]";
             var lineB = "[1,1]";
             var newLine = $"[{lineA},{lineB}]";
-            var bin1 = new Bin18(newLine, 0, 0);
+            var bin1 = new Bin18(newLine, 0);
             Utils.Assert(bin1.ToShortString(), "[[[[[4,3],4],4],[7,[[8,4],9]]],[1,1]]");
             var changes = ExplodeAll(bin1);
             Utils.Assert(bin1.ToShortString(), "[[[[0,7],4],[15,[0,13]]],[1,1]]");
-            bin1.Split();
+            bin1.SplitOne();
+            bin1.SplitOne();
             Utils.Assert(bin1.ToShortString(), "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]");
             changes = ExplodeAll(bin1);
             Utils.Assert(bin1.ToShortString(), "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]");
@@ -55,23 +53,35 @@ internal class Day18 : IRunner
                 continue;
             }
             var newLine = $"[{last},{lines[iLine]}]";
-            bin = new Bin18(newLine, 0, 0);
-            int changes = 1;
-            while (ExplodeAll(bin) > 0) ;
-            while (bin.Split() > 0) ;
+            bin = new Bin18(newLine, 0);
+            var changes = 1;
+            while(changes > 0)
+            {
+                changes = ExplodeAllEvery(bin);
+                changes = bin.SplitOne();
+            }
             last = bin.ToShortString();
         }
         if (bin != null)
             rv = bin.Magnitude();
-
+        
         res.CheckGuess(rv);
         return res;
     }
-
+    static int ExplodeAllEvery(Bin18 bin)
+    {
+        var rv = 0;
+        var exploded = 1;
+        while (exploded > 0)
+        {
+            exploded = ExplodeAll(bin);
+            rv += exploded; 
+        }
+        return rv;
+    }
     private static int ExplodeAll(Bin18 bin)
     {
-        bin.SetLimits(0); // resets levels
-        var exs = bin.Find4s();
+        var exs = bin.Find4s(0);
 
         foreach (var ex in exs)
         {
@@ -92,11 +102,11 @@ internal class Day18 : IRunner
         public void Add(int val, int i)
         {
             if (!LeftDone)
-                LeftBin = new Bin18(val, i, _level);
+                LeftBin = new Bin18(val, i);
             else
-                RightBin = new Bin18(val, i, _level);
+                RightBin = new Bin18(val, i);
         }
-        public long Magnitude()
+        public int Magnitude()
         {
             if (HasVal)
                 return Val;
@@ -104,10 +114,9 @@ internal class Day18 : IRunner
                 return (LeftBin.Magnitude()) * 3 + (2*RightBin.Magnitude());
             return -1;
         }
-        public Bin18(int value, int i, int level)
+        public Bin18(int value, int i)
         {
             Val = value;
-            _level = level;
             _index = i;
         }
         public void Add(Bin18 bin)
@@ -127,7 +136,7 @@ internal class Day18 : IRunner
             if (Val >= 0)
             {
                 //return $"{Val}";
-                return $"{Val}({_level})<{_index}>";
+                return $"{Val}<{_index}>";
             }
             return $"[{LeftBin},{RightBin}]";
         }
@@ -140,17 +149,18 @@ internal class Day18 : IRunner
 
         }
         bool HasVal => Val >= 0;
-        public List<Bin18> Find4s()
+        public List<Bin18> Find4s(int level)
         {
             var rv = new List<Bin18>();
-            if (_level == 4)
+            if (level == 4)
             {
-                rv.Add(this);
+                if (!HasVal)
+                    rv.Add(this);
             }
             else if (!HasVal)
             {
-                rv.AddRange(LeftBin.Find4s());
-                rv.AddRange(RightBin.Find4s());
+                rv.AddRange(LeftBin!.Find4s(level + 1));
+                rv.AddRange(RightBin!.Find4s(level + 1));
             }
             return rv;
         }
@@ -171,20 +181,6 @@ internal class Day18 : IRunner
             if (i == allBins.Count() - 1)
                 return null;
             return allBins[i + 1];
-        }
-        internal void SetLimits(int level)
-        {
-            if (_level != level)
-            {   if (HasVal)
-                    _level = level - 1;
-                else
-                    _level = level;
-            }
-            
-            if (LeftBin != null)
-                LeftBin.SetLimits(level + 1);
-            if (RightBin != null)
-                RightBin.SetLimits(level + 1);
         }
 
         internal List<Bin18> AllBins()
@@ -216,17 +212,15 @@ internal class Day18 : IRunner
             LeftBin = null;
             RightBin = null;
             Val = 0;
-            _level--;
         }
 
-        internal int Split()
+        internal int SplitOne()
         {
             if (Val > 9)
             {
-                var lh = (int) (Val / 2);
-                _level++;
-                LeftBin = new Bin18(lh, 0, _level);
-                RightBin = new Bin18(Val - lh, 0, _level);
+                var lh = (int)(Val / 2);
+                LeftBin = new Bin18(lh, 0);
+                RightBin = new Bin18(Val - lh, 0);
                 Val = -1;
                 return 1;
             }
@@ -234,9 +228,17 @@ internal class Day18 : IRunner
             {
                 int rv = 0;
                 if (LeftBin != null)
-                    rv += LeftBin.Split();
+                {
+                    rv += LeftBin.SplitOne();
+                    if (rv > 0)
+                        return rv;
+                }
                 if (RightBin != null)
-                    rv += RightBin.Split();
+                {
+                    rv += RightBin.SplitOne();
+                    if (rv > 0)
+                        return rv;
+                }
                 return rv;
             }
         }
@@ -252,12 +254,10 @@ internal class Day18 : IRunner
         }
 
         int _ichar;
-        private int _level;
         private int _index;
 
-        public Bin18(string line, int start, int level)
+        public Bin18(string line, int start)
         {
-            _level = level;
             Utils.Assert(line[start] == '[', "Opens right " + this);
             for (_ichar = start + 1; _ichar < line.Length; _ichar++)
             {
@@ -269,7 +269,7 @@ internal class Day18 : IRunner
                 }
                 else if (c == '[')
                 {
-                    var bin = new Bin18(line, _ichar, level + 1);
+                    var bin = new Bin18(line, _ichar);
                     Add(bin);
                     _ichar = bin._ichar;
                 }
@@ -293,16 +293,40 @@ internal class Day18 : IRunner
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 3993L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 4909L);
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
 
 		var rv = 0L;
-		// magic
-
+        // magic
+        var last = lines[0];
+        var dict = new Dictionary<string, int>();
+        // magic
+        for (var iLine = 0; iLine < lines.Count(); iLine++)
+        {
+            for (var jLine = 0; jLine < lines.Count(); jLine++)
+            {
+                if (iLine == jLine)
+                    continue;
+                var line1 = lines[iLine];
+                var line2 = lines[jLine];
+                var newLine = $"[{line1},{line2}]";
+                var bin = new Bin18(newLine, 0);
+                
+                var changes = 1;
+                while (changes > 0)
+                {
+                    changes = ExplodeAllEvery(bin);
+                    changes = bin.SplitOne();
+                }
+                var mag = bin.Magnitude();
+                dict.Add(newLine, mag);
+            }
+        }
+        rv = dict.Max(k => k.Value);
         res.CheckGuess(rv);
         return res;
 	}
