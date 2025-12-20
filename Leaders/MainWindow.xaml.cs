@@ -120,7 +120,7 @@ namespace Leaders
 
 			var elfResult = await ElfHelper.ReadAsync(force);
 			Debug.Assert(elfResult != null);
-			Log("Updating UI with data from: " + elfResult.Timestamp);
+			//Log("Updating UI with data from: " + elfResult.Timestamp);
 			var changes = elfResult.HasChanges(_last);
 			if (changes.Any())
 			{
