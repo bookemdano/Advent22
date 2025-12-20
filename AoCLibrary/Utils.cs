@@ -86,7 +86,11 @@ namespace AoCLibrary
         }
         static public void Assert(long l1, long l2)
         {
-			Assert(l1 == l2, $"{l1} != {l2}");
+            Assert(l1 == l2, $"{l1} != {l2}");
+        }
+        static public void Assert(string str1, string str2)
+        {
+            Assert(str1 == str2, $"{str1} != {str2}");
         }
         static public void Assert(bool b, string str)
         {
