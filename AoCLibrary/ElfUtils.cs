@@ -1,10 +1,15 @@
 using System.Threading;
 
 namespace AoCLibrary;
+
 public enum DirEnum
 {
-	N, E, S, W,
-	NE,NW,SE,SW
+    N, E, S, W,
+    NE, NW, SE, SW
+}
+public enum AxisEnum
+{
+    X, Y, Z
 }
 public class LocDir(int row, int col, DirEnum dir) : Loc(row, col)
 {
@@ -765,9 +770,12 @@ public class FLoc(double row, double col)
 }
 public class Point3D(long x, long y, long z) : IEquatable<Point3D>
 {
-    static public Point3D FromXYZ(string str)
+    static public Point3D Parse(string str)
     {
         var parts = Utils.SplitLongs(',', str);
+        if (parts.Length == 2)
+            return new Point3D(parts[0], parts[1], 0);
+
         return new Point3D(parts[0], parts[1], parts[2]);
     }
 
@@ -790,14 +798,6 @@ public class Point3D(long x, long y, long z) : IEquatable<Point3D>
 
         return Equals(other);
     }
-	static public Point3D Parse(string line)
-	{
-		var parts = line.Split(',');
-		if (parts.Length == 2)
-            return new Point3D(long.Parse(parts[0]), long.Parse(parts[1]), 0);
-
-        return new Point3D(long.Parse(parts[0]), long.Parse(parts[1]), long.Parse(parts[2]));
-	}
     public override string ToString()
     {
         return $"({X}, {Y}, {Z})";
@@ -838,5 +838,30 @@ public class Point3D(long x, long y, long z) : IEquatable<Point3D>
     public Point3D Subtract(Point3D offset)
     {
         return new Point3D(X - offset.X, Y - offset.Y, Z - offset.Z);
+    }
+
+    public Point3D Flip(AxisEnum axis)
+    {
+        if (axis == AxisEnum.X)
+            return new Point3D(0 - X, Y, Z);
+        else if (axis == AxisEnum.Y)
+            return new Point3D(X, 0 - Y, Z);
+        else //if (axis == AxisEnum.X)
+            return new Point3D(X, Y, 0 - Z);
+    }
+
+	List<long> GetInts()
+	{
+		return new List<long>() { X, Y, Z };
+	}
+    public bool FuzzyMatch(Point3D other)
+    {
+		var ints = GetInts().Select(i => Math.Abs(i));
+		var others = other.GetInts().Select(i => Math.Abs(i)).ToList();
+		foreach (var i in ints)
+			if (!others.Remove(i))
+				return false;
+
+		return (others.Any() == false);
     }
 }

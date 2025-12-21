@@ -24,28 +24,29 @@ internal class Day19 : IRunner
 		// magic
 		var beacons = new List<Point3D>();
 		var scanners = new List<Region19>();
+        int iBeacon = 0;
         foreach (var line in lines)
 		{
 			if (line.StartsWith("--") || string.IsNullOrWhiteSpace(line))
 			{
 				if (beacons.Count() > 0)
-					scanners.Add(new Region19(beacons));
+					scanners.Add(new Region19(beacons, iBeacon++));
 				beacons = new List<Point3D>();			
 			}
 			else
 				beacons.Add(Point3D.Parse(line));
 		}
         if (beacons.Count() > 0)
-            scanners.Add(new Region19(beacons));
+            scanners.Add(new Region19(beacons, iBeacon++));
 
         var main = new MasterRegion19();
         main.Add(scanners[0]);
         for(int i = 1;  i < scanners.Count(); i++)
         {
-            main = main.Add(scanners[i]);
+            main.Merge(scanners[i]);
         }
-
-
+        var allBeacons = main.AllBeacons();
+        rv = allBeacons.Count();
         res.CheckGuess(rv);
         return res;
     }
@@ -93,9 +94,6 @@ internal class Day19 : IRunner
     class MasterRegion19
     {
         List<Region19> _regions = [];
-        List<Point3D> _beacons = [];
-        List<Point3D> _scannerPts = [];
-        List<Square19> _squares = [];
         public MasterRegion19()
         {
             
@@ -108,61 +106,49 @@ internal class Day19 : IRunner
         {
             var rv = new List<Point3D>();
             foreach (var region in _regions)
-                rv.AddRange(region.Beacons);
+            {
+                foreach(var beacon in region.Beacons)
+                {
+                    if (!rv.Contains(beacon))
+                        rv.Add(beacon);
+                }
+            }
             return rv;
         }
-        internal Region19? Merge(Region19 other)
+
+        internal void Merge(Region19 other)
         {
             var allBeacons = AllBeacons();
+            var rotations = other.Rotations();
+
             for (var i = 0; i < allBeacons.Count(); i++)
             {
                 for (var j = 0; j < other.Beacons.Count(); j++)
                 {
                     var offset = other.Beacons[j].Offset(allBeacons[i]);
-                    var offsetted = other.Offset(offset);
-                    if (Matches(offsetted))
-                        return Add(offsetted);
+                    var offsetted = new Region19(other, offset);
+                    var count = offsetted.CountMatch(allBeacons);
+                    if (count >= 12)
+                    {
+                        Add(offsetted);
+                        return;
+                    }
+                    if (count > 1)
+                        continue;
                 }
             }
-            return null;
         }
-        public MasterRegion19(List<Point3D> beacons)
-        {
-            // normalize
-            var square = new Square19(beacons);
-
-            var zeroPt = new Point3D(0, 0, 0);
-            square.Include(zeroPt);
-            var newBeacons = new List<Point3D>();
-            foreach (var beacon in beacons)
-                newBeacons.Add(beacon.Subtract(square.Min));
-
-            _beacons = newBeacons.OrderBy(b => b.Distance(new Point3D(0, 0, 0))).ToList();
-            var scannerPt = zeroPt.Subtract(square.Min);
-            _scannerPts.Add(scannerPt);
-            var nSquare = new Square19(beacons);
-            nSquare.Include(scannerPt);
-            _maps.Add(nSquare);
-        }
-        /*
-        public MasterRegion19(Region19 other)
-        {
-            _beacons = other._beacons.ToList();
-            _scannerPts = other._scannerPts.ToList();
-        }
-        */
     }
-    class Region19s
-    {
-        List<Region19> _regions = [];
-    }
+
     class Region19
     {
         public List<Point3D> Beacons { get; } = [];
         public Point3D Scanner { get; }
         public Square19 Square { get; }
-        public Region19(List<Point3D> beacons)
+        string _name;
+        public Region19(List<Point3D> beacons, int iBeacon)
         {
+            _name = "R:" + iBeacon;
             // normalize
             var square = new Square19(beacons);
             var zeroPt = new Point3D(0, 0, 0);
@@ -176,67 +162,60 @@ internal class Day19 : IRunner
             Square = new Square19(beacons);
             Square.Include(Scanner);
         }
-
-
-
-
-        internal Region19? Merge(Region19 other)
+        public override string ToString()
         {
-            for (var i = 0; i < Beacons.Count(); i++)
-            {
-                for (var j = 0; j < other.Beacons.Count(); j++)
-                {
-                    var offset = other.Beacons[j].Offset(Beacons[i]);
-                    var offsetted = other.Offset(offset);
-                    if (Matches(offsetted))
-                        return Add(offsetted);
-                }
-            }
-            return null;
-
+            return _name + " s:" + Scanner;
         }
-        bool WithinMapped(Point3D pt)
+        internal int CountMatch(List<Point3D> allBeacons)
         {
-            foreach(var map in _maps)
-            {
-                if (map.Contains(pt))
-                    return true;
-            }
-            return false;
-        }
-        private bool Matches(Region19 other)
-        {
-            foreach (var beacon in other.Beacons)
-            {
-                if (WithinMapped(beacon) && !Beacons.Contains(beacon))
-                    return false;
-            }
-            return true;
-        }
-
-        private Region19? Add(Region19 other)
-        {
-            foreach (var beacon in other.Beacons)
-            {
-                Beacons.Add(beacon);
-            }
-            throw new NotImplementedException();
-        }
-
-        private Region19 Offset(Point3D offset)
-        {
-            var beacons = new List<Point3D>();
+            var rv = 0;
             foreach (var beacon in Beacons)
-                beacons.Add(beacon.Add(offset));
-            var rv  = new Region19(beacons);
+                rv += allBeacons.Count(b => b.FuzzyMatch(beacon));
+            return rv;
+        }
+        internal List<Region19> Rotations()
+        {
+            var rv = new List<Region19>();
+            rv.Add(this);
+            var beacons = Beacons.Select(b => b.Flip(AxisEnum.X)).ToList();
+            var flipX = Beacons.Select(b => b.Flip(AxisEnum.X));
+            var flipXY = flipX.Select(b => b.Flip(AxisEnum.Y));
+            var flipXZ = flipX.Select(b => b.Flip(AxisEnum.Z));
+            var flipXYZ = flipXY.Select(b => b.Flip(AxisEnum.Z));
+            var flipY = Beacons.Select(b => b.Flip(AxisEnum.Y));
+            var flipYZ = flipY.Select(b => b.Flip(AxisEnum.Z));
+            var flipZ = Beacons.Select(b => b.Flip(AxisEnum.Z));
             
-            var scanners = new List<Point3D>();
-            foreach (var scanner in _scannerPts)
-                scanners.Add(scanner.Add(offset));
-            rv._scannerPts.AddRange(scanners);
+            rv.Add(new Region19(flipX.ToList(), Scanner.Flip(AxisEnum.X), _name + " FlipX"));
+            rv.Add(new Region19(flipY.ToList(), Scanner.Flip(AxisEnum.Y), _name + " FlipY"));
+            rv.Add(new Region19(flipZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipZ"));
+            rv.Add(new Region19(flipXY.ToList(), Scanner.Flip(AxisEnum.X), _name + " FlipXY"));
+            rv.Add(new Region19(flipXZ.ToList(), Scanner.Flip(AxisEnum.Y), _name + " FlipXZ"));
+            rv.Add(new Region19(flipYZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipYZ"));
+            rv.Add(new Region19(flipXYZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipXYZ"));
 
             return rv;
         }
+
+        private Region19(List<Point3D> beacons, Point3D scanner, string name)
+        {
+            Beacons = beacons;
+            Scanner = scanner;
+            _name = name;
+        }
+
+        public Region19(Region19 other, Point3D offset)
+        {
+            // normalize
+            foreach (var beacon in other.Beacons)
+                Beacons.Add(beacon.Add(offset));
+            Scanner = other.Scanner.Add(offset);
+            _name = other._name + " o:" + offset;
+            
+            Square = new Square19(Beacons);
+            Square.Include(Scanner);
+        }
+
     }
 
     public RunnerResult Star2(bool isReal)
