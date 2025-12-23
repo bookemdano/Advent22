@@ -138,7 +138,10 @@ public class ElfHelper
         var strDay = $"{day:00}";
         var codeDir = CodeDir();
         var assetDir = Path.Combine(codeDir, "assets");
-        var cs = File.ReadAllText(Path.Combine(assetDir, "DayCS.txt"));
+        var template = Path.Combine(assetDir, "DayCS.txt");
+        if (!File.Exists(template))
+            template = "DayCS.txt";
+        var cs = File.ReadAllText(template);
         var dayUrl = DayUrl(day);
         cs = cs.Replace("|URL|", dayUrl);
         cs = cs.Replace("|INPUTURL|", $"{dayUrl}/input");

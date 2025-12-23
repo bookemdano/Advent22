@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <None Remove="bring.wav" />
+    <None Remove="Daycs.txt" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +31,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AoCLibrary\AoCLibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Daycs.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
