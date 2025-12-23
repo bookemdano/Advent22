@@ -400,14 +400,30 @@ public class Loc
     {
         var rv = new List<Loc>
         {
+            new(Row - 1, Col - 1),
             new(Row - 1, Col),
             new(Row - 1, Col + 1),
-            new(Row, Col + 1),
-            new(Row + 1, Col + 1),
-            new(Row + 1, Col),
-            new(Row + 1, Col - 1),
             new(Row, Col - 1),
-            new(Row - 1, Col - 1)
+            new(Row, Col + 1),
+            new(Row + 1, Col - 1),
+            new(Row + 1, Col),
+            new(Row + 1, Col + 1),
+        };
+        return rv;
+    }
+    public List<Loc> All9Moves()	// include here
+    {
+        var rv = new List<Loc>
+        {
+            new(Row - 1, Col - 1),
+            new(Row - 1, Col),
+            new(Row - 1, Col + 1),
+            new(Row, Col - 1),
+            new(Row, Col),
+            new(Row, Col + 1),
+            new(Row + 1, Col - 1),
+            new(Row + 1, Col),
+            new(Row + 1, Col + 1),
         };
         return rv;
     }
