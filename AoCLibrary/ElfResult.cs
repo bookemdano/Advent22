@@ -17,8 +17,13 @@ namespace AoCLibrary
 			var rv = Members.Values.ToArray();
 			if (rv == null)
 				return [];
+			foreach(var m in Members)
+			{
+				if (m.Value.LocalScore == 0 && m.Value.Stars > 0)
+					m.Value.LocalScore = m.Value.Stars;
+			}
 			if (hideZeros)
-				rv = rv.Where(m => m?.LocalScore > 0).ToArray();
+				rv = rv.Where(m => m?.LocalScore > 0 || m?.Stars > 0).ToArray();
 			return rv;
         }
 		// return null for no changes
