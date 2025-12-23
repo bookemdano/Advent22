@@ -458,6 +458,11 @@ public class Loc
 		else
 			return false;
 	}
+
+    public Loc Move(int rows, int cols)
+    {
+		return new Loc(Row + rows, Col + cols);
+    }
 }
 public enum MoveEnum
 {
