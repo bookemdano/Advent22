@@ -19,16 +19,25 @@ namespace AoCLibrary
             Directory.CreateDirectory(Dir);
 		}
 
+        static public void WriteConfig(string key, string val)
+        {
+            File.WriteAllText(Path.Combine(Dir, $"{key}.cfg"), val);
+        }
         static public void WriteConfig(string key, int val)
         {
-            File.WriteAllText(Path.Combine(Dir, $"{key}.cfg"), val.ToString());
+			WriteConfig(key, val.ToString());
         }
-        static public int ReadConfig(string key, int def)
-        {
+        static public string ReadConfig(string key, string def)
+		{
             var file = Path.Combine(Dir, $"{key}.cfg");
             if (!File.Exists(file))
                 return def;
-            var str = File.ReadAllText(file);
+            return File.ReadAllText(file);
+
+        }
+        static public int ReadConfig(string key, int def)
+        {
+			var str = ReadConfig(key, def.ToString());
             if (int.TryParse(str, out int val))
                 return val;
             return def;

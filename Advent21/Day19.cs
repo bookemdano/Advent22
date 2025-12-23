@@ -1,14 +1,11 @@
 using AoCLibrary;
-using System.Reflection.Metadata.Ecma335;
-using System.Security.Cryptography.X509Certificates;
-using System.Text.RegularExpressions;
 
 namespace Advent21;
-// #working
+
 internal class Day19 : IRunner
 {
-	// Day https://adventofcode.com/2021/day/19
-	// Input https://adventofcode.com/2021/day/19/input
+    // Day https://adventofcode.com/2021/day/19
+    // Input https://adventofcode.com/2021/day/19/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
@@ -16,80 +13,32 @@ internal class Day19 : IRunner
         if (!isReal)
 			res.Check = new StarCheck(key, 79L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 313L);
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
 		var rv = 0L;
-		// magic
-		var beacons = new List<Point3D>();
-		var scanners = new List<Region19>();
-        int iBeacon = 0;
-        foreach (var line in lines)
-		{
-			if (line.StartsWith("--") || string.IsNullOrWhiteSpace(line))
-			{
-				if (beacons.Count() > 0)
-					scanners.Add(new Region19(beacons, iBeacon++));
-				beacons = new List<Point3D>();			
-			}
-			else
-				beacons.Add(Point3D.Parse(line));
-		}
-        if (beacons.Count() > 0)
-            scanners.Add(new Region19(beacons, iBeacon++));
+        // magic
+        var pt = new Point3D(5, 6, -4);
+        var rots = Rotation3D.AllRotations();
+        foreach(var rot in rots)
+        {
+            ElfHelper.DayLogPlus(rot.Apply(pt));
+        }
+
+
+        var regions = Region19.ReadAll(lines);
 
         var main = new MasterRegion19();
-        main.Add(scanners[0]);
-        for(int i = 1;  i < scanners.Count(); i++)
-        {
-            main.Merge(scanners[i]);
-        }
+        main.Add(regions[0]);
+        regions.RemoveAt(0);
+
+        main.MergeAll(regions, key.IsReal);
         var allBeacons = main.AllBeacons();
         rv = allBeacons.Count();
+
         res.CheckGuess(rv);
         return res;
-    }
-    class Square19
-    {
-        public Point3D Min;
-        public Point3D Max;
-        public Square19(List<Point3D> points)
-        {
-            Min = new Point3D(points.Min(b => b.X), points.Min(b => b.Y), points.Min(b => b.Z));
-            Max = new Point3D(points.Max(b => b.X), points.Max(b => b.Y), points.Max(b => b.Z));
-        }
-        public override string ToString()
-        {
-            return $"{Min} to {Max}";
-        }
-
-        public bool Contains(Point3D pt)
-        {
-            if (pt.X < Min.X || pt.X > Max.X)
-                return false;
-            if (pt.Y < Min.Y || pt.Y > Max.Y)
-                return false;
-            if (pt.Z < Min.Z || pt.Z > Max.Z)
-                return false;
-            return true;
-        }
-        internal void Include(Point3D pt)
-        {
-            if (Min.X > pt.X)
-                Min.X = pt.X;
-            if (Min.Y > pt.Y)
-                Min.Y = pt.Y;
-            if (Min.Z > pt.Z)
-                Min.Z = pt.Z;
-
-            if (Max.X < pt.X)
-                Max.X = pt.X;
-            if (Max.Y < pt.Y)
-                Max.Y = pt.Y;
-            if (Max.Z < pt.Z)
-                Max.Z = pt.Z;
-        }
     }
     class MasterRegion19
     {
@@ -102,6 +51,11 @@ internal class Day19 : IRunner
         {
             _regions.Add(region);
         }
+        internal List<Point3D> AllScanners()
+        {
+            return _regions.Select(r => r.Scanner).ToList();
+        }
+
         public List<Point3D> AllBeacons() 
         {
             var rv = new List<Point3D>();
@@ -116,26 +70,64 @@ internal class Day19 : IRunner
             return rv;
         }
 
-        internal void Merge(Region19 other)
+        bool Merge(Region19 other, bool isReal)
         {
             var allBeacons = AllBeacons();
-            var rotations = other.Rotations();
+            Point3D? savedOffset = null;
+            var str = Utils.ReadConfig($"Y21D19-{other.BeaconNumber}-{isReal}", "none");
+            if (str != "none")
+                savedOffset = Point3D.Parse(str);
 
-            for (var i = 0; i < allBeacons.Count(); i++)
+            foreach (var rot in Rotation3D.AllRotations())
             {
-                for (var j = 0; j < other.Beacons.Count(); j++)
+                var otherBeacons = other.Beacons.Select(s => rot.Apply(s)).ToList();
+                var rotated = new Region19(otherBeacons, 0);
+                var max = 0;
+                for (var i = 0; i < allBeacons.Count(); i++)
                 {
-                    var offset = other.Beacons[j].Offset(allBeacons[i]);
-                    var offsetted = new Region19(other, offset);
-                    var count = offsetted.CountMatch(allBeacons);
-                    if (count >= 12)
+                    for (var j = 0; j < rotated.Beacons.Count(); j++)
                     {
-                        Add(offsetted);
-                        return;
+                        var offset = rotated.Beacons[j].Offset(allBeacons[i]);
+                        if (savedOffset != null)
+                            offset = savedOffset;
+                        var offsetted = new Region19(rotated, offset);
+                        var overlap = offsetted.Beacons.Where(b => allBeacons.Contains(b)).ToList();
+                        var count = offsetted.Beacons.Count(b => allBeacons.Contains(b));
+                        if (count >= 12)
+                        {
+                            Utils.WriteConfig($"Y21D19-{other.BeaconNumber}-{isReal}", offset.ToString());
+                            ElfHelper.DayLogPlus($"Merged {other} o:{offset}");
+                            Add(offsetted);
+                            return true;
+                        }
+                        if (count > max)
+                            max = count;
+                        if (savedOffset != null)
+                            break;
                     }
-                    if (count > 1)
-                        continue;
+                    if (savedOffset != null)
+                        break;
                 }
+
+            }
+            return false;
+        }
+
+        internal void MergeAll(List<Region19> regions, bool isReal)
+        {
+            while (regions.Any())
+            {
+                ElfHelper.DayLogPlus("Checking " + regions.Count() + " more scanners");
+                var removes = new List<Region19>();
+                for (int i = 0; i < regions.Count(); i++)
+                {
+                    if (Merge(regions[i], isReal))
+                        removes.Add(regions[i]);
+                }
+                if (!removes.Any())
+                    break;
+                foreach (var remove in removes)
+                    regions.Remove(remove);
             }
         }
     }
@@ -144,64 +136,17 @@ internal class Day19 : IRunner
     {
         public List<Point3D> Beacons { get; } = [];
         public Point3D Scanner { get; }
-        public Square19 Square { get; }
-        string _name;
+        public int BeaconNumber { get; }
         public Region19(List<Point3D> beacons, int iBeacon)
         {
-            _name = "R:" + iBeacon;
+            BeaconNumber = iBeacon;
             // normalize
-            var square = new Square19(beacons);
-            var zeroPt = new Point3D(0, 0, 0);
-            square.Include(zeroPt);
-            var newBeacons = new List<Point3D>();
-            foreach (var beacon in beacons)
-                newBeacons.Add(beacon.Subtract(square.Min));
-
-            Beacons = newBeacons.OrderBy(b => b.Distance(new Point3D(0, 0, 0))).ToList();
-            Scanner = zeroPt.Subtract(square.Min);
-            Square = new Square19(beacons);
-            Square.Include(Scanner);
+            Beacons = beacons;
+            Scanner = new Point3D(0, 0, 0);
         }
         public override string ToString()
         {
-            return _name + " s:" + Scanner;
-        }
-        internal int CountMatch(List<Point3D> allBeacons)
-        {
-            var rv = 0;
-            foreach (var beacon in Beacons)
-                rv += allBeacons.Count(b => b.FuzzyMatch(beacon));
-            return rv;
-        }
-        internal List<Region19> Rotations()
-        {
-            var rv = new List<Region19>();
-            rv.Add(this);
-            var beacons = Beacons.Select(b => b.Flip(AxisEnum.X)).ToList();
-            var flipX = Beacons.Select(b => b.Flip(AxisEnum.X));
-            var flipXY = flipX.Select(b => b.Flip(AxisEnum.Y));
-            var flipXZ = flipX.Select(b => b.Flip(AxisEnum.Z));
-            var flipXYZ = flipXY.Select(b => b.Flip(AxisEnum.Z));
-            var flipY = Beacons.Select(b => b.Flip(AxisEnum.Y));
-            var flipYZ = flipY.Select(b => b.Flip(AxisEnum.Z));
-            var flipZ = Beacons.Select(b => b.Flip(AxisEnum.Z));
-            
-            rv.Add(new Region19(flipX.ToList(), Scanner.Flip(AxisEnum.X), _name + " FlipX"));
-            rv.Add(new Region19(flipY.ToList(), Scanner.Flip(AxisEnum.Y), _name + " FlipY"));
-            rv.Add(new Region19(flipZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipZ"));
-            rv.Add(new Region19(flipXY.ToList(), Scanner.Flip(AxisEnum.X), _name + " FlipXY"));
-            rv.Add(new Region19(flipXZ.ToList(), Scanner.Flip(AxisEnum.Y), _name + " FlipXZ"));
-            rv.Add(new Region19(flipYZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipYZ"));
-            rv.Add(new Region19(flipXYZ.ToList(), Scanner.Flip(AxisEnum.Z), _name + " FlipXYZ"));
-
-            return rv;
-        }
-
-        private Region19(List<Point3D> beacons, Point3D scanner, string name)
-        {
-            Beacons = beacons;
-            Scanner = scanner;
-            _name = name;
+            return BeaconNumber.ToString();
         }
 
         public Region19(Region19 other, Point3D offset)
@@ -210,12 +155,32 @@ internal class Day19 : IRunner
             foreach (var beacon in other.Beacons)
                 Beacons.Add(beacon.Add(offset));
             Scanner = other.Scanner.Add(offset);
-            _name = other._name + " o:" + offset;
-            
-            Square = new Square19(Beacons);
-            Square.Include(Scanner);
+            BeaconNumber = other.BeaconNumber;
         }
 
+        static public List<Region19> ReadAll(IEnumerable<string> lines)
+        {
+            var beacons = new List<Point3D>();
+            var regions = new List<Region19>();
+            int iBeacon = 0;
+            foreach (var line in lines)
+            {
+                if (line.StartsWith("--"))
+                    iBeacon = int.Parse(line.Substring(12, 2));
+
+                if (line.StartsWith("--") || string.IsNullOrWhiteSpace(line))
+                {
+                    if (beacons.Count() > 0)
+                        regions.Add(new Region19(beacons, iBeacon));
+                    beacons = new List<Point3D>();
+                }
+                else
+                    beacons.Add(Point3D.Parse(line));
+            }
+            if (beacons.Count() > 0)
+                regions.Add(new Region19(beacons, iBeacon++));
+            return regions;
+        }
     }
 
     public RunnerResult Star2(bool isReal)
@@ -223,15 +188,38 @@ internal class Day19 : IRunner
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 3621L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 10656L);
 
 		var lines = Program.GetLines(key);
 		//var text = Program.GetText(key);
 
 		var rv = 0L;
-		// magic
+        // magic
+        var regions = Region19.ReadAll(lines);
+
+        var main = new MasterRegion19();
+        main.Add(regions[0]);
+        regions.RemoveAt(0);
+
+        main.MergeAll(regions, key.IsReal);
+            
+
+        var allScanners = main.AllScanners();
+        var max = 0L;
+        for(int i = 0; i < allScanners.Count-1; i++)
+            for(int j = i; j < allScanners.Count; j++)
+            {
+                var dist = allScanners[i].ManhattanDistance(allScanners[j]);
+                if (dist > max)
+                {
+                    ElfHelper.DayLogPlus("New Max " + dist);
+                    max = dist;
+                }
+            }    
+
+        rv = max;
 
         res.CheckGuess(rv);
         return res;
