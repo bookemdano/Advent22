@@ -161,11 +161,11 @@ public class ElfHelper
     }
     public static ElfResult? ReadFromFile()
     {
-        var files = Directory.GetFiles(Utils.Dir, $"aoc{ElfHelper.Year}*.json").OrderByDescending(f => f);
+        var files = Directory.GetFiles(Utils.Dir, $"aoc{ElfHelper.Year}*.json");
         if (!files.Any())
             return null;
 
-        var jsonFile = files.First();
+        var jsonFile = files.OrderByDescending(f => File.GetCreationTime(f)).First();
         if (File.Exists(jsonFile))
         {
             var json = File.ReadAllText(jsonFile);
@@ -250,12 +250,16 @@ public class ElfHelper
     }
     public static int NextEmptyDay()
     {
+        var files = Directory.GetFiles(CodeDir(), "Day*.cs", SearchOption.AllDirectories).Select(f => Path.GetFileName(f));
+
         for (int day = 1; day <= TotalDays; day++)
         {
             var dayFile = $"Day{day:00}.cs";
-            if (!File.Exists(Path.Combine(CodeDir(), dayFile)))
+            if (!files.Contains(dayFile))
             {
-                return day;
+                dayFile = $"Day{day:0}.cs";
+                if (!files.Contains(dayFile))
+                    return day;
             }
         }
         return -1;

@@ -25,7 +25,10 @@ namespace AoCLibrary
 		public List<string> HasChanges(ElfResult? last)
         {
 			var rv = new List<string>();
-			var allMembers = AllMembers(false);
+            if (last?.Event != Event)
+                return rv;
+
+            var allMembers = AllMembers(false);
             var lastAllMembers = last?.AllMembers(false);
 			if (lastAllMembers == null)
 				return rv;
