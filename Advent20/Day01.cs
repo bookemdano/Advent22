@@ -1,6 +1,6 @@
 using AoCLibrary;
 namespace Advent20;
-// #working
+
 internal class Day01 : IRunner
 {
 	// Day https://adventofcode.com/2020/day/1
