@@ -12,7 +12,7 @@ internal class Day01 : IRunner
         if (!isReal)
 			res.Check = new StarCheck(key, 514579L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 926464L);
 
 		var lines = RunHelper.GetLines(key);
 		//var text = Program.GetText(key);
@@ -41,15 +41,34 @@ internal class Day01 : IRunner
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 241861950L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 65656536L);
 
 		var lines = RunHelper.GetLines(key);
 		//var text = Program.GetText(key);
 
 		var rv = 0L;
-		// magic
+        // magic
+        var expenses = lines.Select(l => int.Parse(l)).ToList();
+        for (int i = 0; i < expenses.Count() - 2; i++)
+        {
+            for (int j = i + 1; j < expenses.Count() - 1; j++)
+            {
+                for (int k = j + 1; k < expenses.Count(); k++)
+                {
+                    if (expenses[i] + expenses[j] + expenses[k] == 2020)
+                    {
+                        rv = expenses[i] * expenses[j] * expenses[k];
+                        break;
+                    }
+                }
+                if (rv > 0)
+                    break;
+            }
+            if (rv > 0)
+                break;
+        }
 
         res.CheckGuess(rv);
         return res;

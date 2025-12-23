@@ -17,6 +17,8 @@ static public class RunHelper
 
         ElfHelper.MonthLogPlus($"Run() {runner.GetType().Name}");
 
+        LoadFiles();
+
         RunnerResult res;
         res = await RunIt(runner, false, StarEnum.Star1);
         if (res.StarSuccess == true)
@@ -25,6 +27,14 @@ static public class RunHelper
             res = await RunIt(runner, false, StarEnum.Star2);
         if (res.StarSuccess == true)
             await RunIt(runner, true, StarEnum.Star2);
+    }
+
+    private static void LoadFiles()
+    {
+        GetLines(StarEnum.Star1, false, null);
+        GetLines(StarEnum.Star1, true, null);
+        GetLines(StarEnum.Star2, false, null);
+        GetLines(StarEnum.Star2, true, null);
     }
 
     private static async Task<RunnerResult> RunIt(IRunner runner, bool isReal, StarEnum star)
