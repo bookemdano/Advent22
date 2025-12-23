@@ -19,8 +19,9 @@ internal class Day13 : IRunner
 		var rv = 0L;
 		// magic
 		var pts = ParseAndFold(lines, key);
+        rv = pts.Count();
 
-        res.CheckGuess(pts.Count());
+        res.CheckGuess(rv);
         return res;
     }
     List<Point> ParseAndFold(IEnumerable<string> lines, StarCheckKey key)

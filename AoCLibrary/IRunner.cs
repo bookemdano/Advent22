@@ -99,11 +99,11 @@ static public class RunHelper
         return filename;
     }
     static Dictionary<string, string[]> _dictLines = [];
-    static internal string[] GetLines(StarCheckKey key, bool raw = false)
+    static public string[] GetLines(StarCheckKey key, bool raw = false)
     {
         return GetLines(key.Star, key.IsReal, key.Part);
     }
-    static internal string[] GetLines(StarEnum star, bool real, int? part = null, bool raw = false)
+    static public string[] GetLines(StarEnum star, bool real, int? part = null, bool raw = false)
     {
         var filename = InputFile(real, star, part);
         if (!_dictLines.ContainsKey(filename))

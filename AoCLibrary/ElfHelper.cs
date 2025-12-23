@@ -143,6 +143,7 @@ public class ElfHelper
             template = "DayCS.txt";
         var cs = File.ReadAllText(template);
         var dayUrl = DayUrl(day);
+        cs = cs.Replace("|YEAR|", Year2);
         cs = cs.Replace("|URL|", dayUrl);
         cs = cs.Replace("|INPUTURL|", $"{dayUrl}/input");
         cs = cs.Replace("|DD|", strDay);

@@ -1,39 +1,25 @@
 using AoCLibrary;
 namespace Advent20;
 // #working
-internal class Day01 : IRunner
+internal class Day03 : IRunner
 {
-	// Day https://adventofcode.com/2020/day/1
-	// Input https://adventofcode.com/2020/day/1/input
+	// Day https://adventofcode.com/2020/day/3
+	// Input https://adventofcode.com/2020/day/3/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, 514579L);
+			res.Check = new StarCheck(key, -1L);
 		else
 			res.Check = new StarCheck(key, -1L);
 
 		var lines = RunHelper.GetLines(key);
-		//var text = Program.GetText(key);
+		//var text = RunHelper.GetText(key);
 		var rv = 0L;
 		// magic
-		var expenses = lines.Select(l => int.Parse(l)).ToList();
-		for (int i = 0; i < expenses.Count() - 1; i++)
-		{
-			for (int j = i + 1; j < expenses.Count(); j++)
-			{
-				if (expenses[i] + expenses[j] == 2020)
-				{
-					rv = expenses[i] * expenses[j];
-					break;
-				}
-            }
-			if (rv > 0)
-				break;
-		}
 
-		res.CheckGuess(rv);
+        res.CheckGuess(rv);
         return res;
     }
     public RunnerResult Star2(bool isReal)
@@ -46,7 +32,7 @@ internal class Day01 : IRunner
 			res.Check = new StarCheck(key, -1L);
 
 		var lines = RunHelper.GetLines(key);
-		//var text = Program.GetText(key);
+		//var text = RunHelper.GetText(key);
 
 		var rv = 0L;
 		// magic
