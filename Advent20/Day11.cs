@@ -1,7 +1,7 @@
 using AoCLibrary;
-using System.Data.Common;
+
 namespace Advent20;
-// #working
+
 internal class Day11 : IRunner
 {
 	// Day https://adventofcode.com/2020/day/11
@@ -107,7 +107,7 @@ internal class Day11 : IRunner
         if (!isReal)
 			res.Check = new StarCheck(key, 26L);
 		else
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 2027L);
 
 		var lines = RunHelper.GetLines(key);
 		//var text = RunHelper.GetText(key);

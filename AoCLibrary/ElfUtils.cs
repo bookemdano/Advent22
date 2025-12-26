@@ -463,6 +463,19 @@ public class Loc
     {
 		return new Loc(Row + rows, Col + cols);
     }
+
+    public static DirEnum? ParseDir(char c)
+    {
+        if (c == 'N')
+            return DirEnum.N;
+        else if (c == 'E')
+            return DirEnum.E;
+        if (c == 'W')
+            return DirEnum.W;
+        if (c == 'S')
+            return DirEnum.S;
+		return null;
+    }
 }
 public enum MoveEnum
 {
