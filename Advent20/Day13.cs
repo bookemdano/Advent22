@@ -1,7 +1,7 @@
 using AoCLibrary;
-using System.Reflection.Metadata;
+
 namespace Advent20;
-// #working
+
 internal class Day13 : IRunner
 {
 	// Day https://adventofcode.com/2020/day/13
@@ -45,30 +45,44 @@ internal class Day13 : IRunner
         res.CheckGuess(rv);
         return res;
     }
-    public RunnerResult Star2(bool isReal)
-    {
-        var key = new StarCheckKey(StarEnum.Star2, isReal, null);
-        var res = new RunnerResult();
+	public RunnerResult Star2(bool isReal)
+	{
+		var key = new StarCheckKey(StarEnum.Star2, isReal, null);
+		var res = new RunnerResult();
 		if (!isReal)
-			res.Check = new StarCheck(key, 0L);	// 1068781L);
+			res.Check = new StarCheck(key, 1068781L);
 		else
-			res.Check = new StarCheck(key, 0L);	// skipping
+			res.Check = new StarCheck(key, 0L); // skipping
 
 		var lines = RunHelper.GetLines(key);
 		//var text = RunHelper.GetText(key);
 
 		var rv = 0L;
-        // magic
-        var parts = lines[1].Split(',');
-        var buses = new List<long>();
-		foreach (var part in parts)
+		// magic
+		var parts = lines[1].Split(',');
+		var buses = new Dictionary<int, long>();
+		for(int i = 0; i < parts.Length; i++)
 		{
-			if (long.TryParse(part, out long interval))
-				buses.Add(interval);
-			else
-				buses.Add(0);
+            if (long.TryParse(parts[i], out long interval))
+				buses.Add(i, interval);
+        }
+
+        var timestamp = buses.First().Value;
+        var period = timestamp;
+
+        foreach (var bus in buses)
+        {
+			if (bus.Value == period)
+				continue;
+            var i = bus.Key;
+            var id = bus.Value;
+			while((timestamp + i)%id != 0)
+			{
+				timestamp += period;
+			}
+			period = period * id;
 		}
-        var i = 0L;
+		rv = timestamp;
 
         res.CheckGuess(rv);
         return res;
