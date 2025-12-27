@@ -52,7 +52,7 @@ internal class Day13 : IRunner
 		if (!isReal)
 			res.Check = new StarCheck(key, 1068781L);
 		else
-			res.Check = new StarCheck(key, 0L); // skipping
+			res.Check = new StarCheck(key, 554865447501099L); // skipping
 
 		var lines = RunHelper.GetLines(key);
 		//var text = RunHelper.GetText(key);
