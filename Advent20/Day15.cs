@@ -1,7 +1,7 @@
 using AoCLibrary;
-using System.Runtime;
+
 namespace Advent20;
-// #working
+
 internal class Day15 : IRunner
 {
 	// Day https://adventofcode.com/2020/day/15
