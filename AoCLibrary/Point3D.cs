@@ -1,5 +1,3 @@
-using System.Net.NetworkInformation;
-using System.Reflection.Metadata;
 
 namespace AoCLibrary;
 
@@ -94,14 +92,29 @@ public class Point3D(long x, long y, long z) : IEquatable<Point3D>
     {
         return Math.Abs(X - other.X) + Math.Abs(Y - other.Y) + Math.Abs(Z - other.Z);
     }
+
+    public List<Point3D> GetNeighbors()
+    {
+        List<Point3D> rv = [];
+        for (int x = -1; x <= 1; x++)
+            for (int y = -1; y <= 1; y++)
+                for (int z = -1; z <= 1; z++)
+                {
+                    if (x == 0 && y == 0 && z == 0)
+                        continue;
+                    rv.Add(new Point3D(x + X, y + Y, z + Z));
+                }
+
+        return rv;
+    }
     /*
 public bool FuzzyMatch(Point3D other)
 {
 var ints = GetInts().Select(i => Math.Abs(i));
 var others = other.GetInts().Select(i => Math.Abs(i)).ToList();
 foreach (var i in ints)
-  if (!others.Remove(i))
-      return false;
+if (!others.Remove(i))
+ return false;
 
 return (others.Any() == false);
 }*/
@@ -162,5 +175,62 @@ public class Rotation3D
         var y = _matrix[1, 0] * pt.X + _matrix[1, 1] * pt.Y + _matrix[1, 2] * pt.Z;
         var z = _matrix[2, 0] * pt.X + _matrix[2, 1] * pt.Y + _matrix[2, 2] * pt.Z;
         return new Point3D(x, y, z);
+    }
+}
+public class Point4D(long x, long y, long z, long w) : IEquatable<Point4D>
+{
+    static public Point4D Parse(string str)
+    {
+        var parts = Utils.SplitLongs(',', str.Trim('(').Trim(')'));
+
+        return new Point4D(parts[0], parts[1], parts[2], parts[3]);
+    }
+
+    public Point4D(Point4D other) : this(other.X, other.Y, other.Z, other.W)
+    {
+
+    }
+    public long X { get; set; } = x;
+    public long Y { get; set; } = y;
+    public long Z { get; set; } = z;
+    public long W { get; set; } = w;
+    public bool Equals(Point4D? other)
+    {
+        return other?.X == X && other?.Y == Y && other?.Z == Z && other?.W == W;
+    }
+    public override int GetHashCode()
+    {
+        return ToString().GetHashCode();
+        //return (int)((X * 1E6) + (Y * 1E3) + Z);
+    }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Point3D other)
+            return false;
+
+        return Equals(other);
+    }
+    public override string ToString()
+    {
+        return $"({X}, {Y}, {Z}, {W})";
+    }
+    static Dictionary<string, List<Point4D>> _neighbors = [];
+    public List<Point4D> GetNeighbors()
+    {
+        if (_neighbors.ContainsKey(ToString()))
+            return _neighbors[ToString()];
+        List<Point4D> rv = [];
+        for (int x = -1; x <= 1; x++)
+            for (int y = -1; y <= 1; y++)
+                for (int z = -1; z <= 1; z++)
+                    for (int w = -1; w <= 1; w++)
+                    {
+                        if (x == 0 && y == 0 && z == 0 && w == 0)
+                            continue;
+                        rv.Add(new Point4D(x + X, y + Y, z + Z, w + W));
+                    }
+        // should be 80
+        _neighbors[ToString()] = rv;
+        return rv;
     }
 }
