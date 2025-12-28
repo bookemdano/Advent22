@@ -1,7 +1,7 @@
 using AoCLibrary;
-using System.Transactions;
+
 namespace Advent20;
-// #working
+
 internal class Day18 : IRunner
 {
 	// Day https://adventofcode.com/2020/day/18
