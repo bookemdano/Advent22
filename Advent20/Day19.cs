@@ -122,16 +122,16 @@ internal class Day19 : IRunner
         }
 
         internal bool HasTarget => Target != '-';
-        static int _maxLen;
+        //static int _maxLen;
         internal bool Matches(string msg)
         {
             var targetStrings = GetRuleStrings();
-            var maxLen = targetStrings.Max(s => s.Length);
-            if (maxLen > _maxLen)
-                _maxLen = maxLen;
+            //var maxLen = targetStrings.Max(s => s.Length);
+            //if (maxLen > _maxLen)
+            //   _maxLen = maxLen;
             //Utils.Assert(targetStrings.Distinct().Count() == targetStrings.Count(), "Just enough");
 
-            return (targetStrings.Any(t => msg == t));
+            return targetStrings.Contains(msg);
         }
         HashSet<string>? _ruleStrings;
         internal HashSet<string> GetRuleStrings()
