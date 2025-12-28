@@ -4,34 +4,32 @@ namespace Advent20;
 // #working
 internal class Day19 : IRunner
 {
-	// Day https://adventofcode.com/2020/day/19
-	// Input https://adventofcode.com/2020/day/19/input
+    // Day https://adventofcode.com/2020/day/19
+    // Input https://adventofcode.com/2020/day/19/input
     public RunnerResult Star1(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star1, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, 2L);
-		else
-			res.Check = new StarCheck(key, 111L);
+            res.Check = new StarCheck(key, 2L);
+        else
+            res.Check = new StarCheck(key, 111L);
 
-		var lines = RunHelper.GetLines(key);
-		//var text = RunHelper.GetText(key);
-		var rv = 0L;
-		// magic
-
-        var rules = new List<Rule19>();
+        var lines = RunHelper.GetLines(key);
+        //var text = RunHelper.GetText(key);
+        var rv = 0L;
+        // magic
+        RuleSet19.Clear();
         var msgs = new List<string>();
         foreach (var line in lines)
         {
             if (line.Contains(':'))
-                rules.Add(new(line));
+                RuleSet19.Add(new(line));
             else if (string.IsNullOrWhiteSpace(line))
                 continue;
-            else 
+            else
                 msgs.Add(line);
         }
-        Rule19.AllRules = rules;
         /*var r1 = new Rule19("6: 4 5");
         var sz1 = r1.GetRuleStrings();
         var r2 = new Rule19("7: 4 5 | 5 4");
@@ -39,7 +37,7 @@ internal class Day19 : IRunner
         var sz3 = rules[0].GetRuleStrings();
         */
 
-        var rule0 = Rule19.GetRule(0);
+        var rule0 = RuleSet19.GetRule(0);
         foreach (var msg in msgs)
             if (rule0.Matches(msg))
                 rv++;
@@ -48,10 +46,10 @@ internal class Day19 : IRunner
         res.CheckGuess(rv);
         return res;
     }
-    class SubRulesSet
+    class SubRuleIdSet
     {
         int[] _ruleIds;
-        public SubRulesSet(string subPart)
+        public SubRuleIdSet(string subPart)
         {
             _ruleIds = subPart.Split(' ', StringSplitOptions.RemoveEmptyEntries).Select(s => int.Parse(s)).ToArray();
         }
@@ -67,24 +65,40 @@ internal class Day19 : IRunner
         internal List<Rule19> GetRules()
         {
             var rv = new List<Rule19>();
-            foreach(var ruleId in _ruleIds)
-                rv.Add(Rule19.GetRule(ruleId));
+            foreach (var ruleId in _ruleIds)
+                rv.Add(RuleSet19.GetRule(ruleId));
             return rv;
+        }
+    }
+    static class RuleSet19
+    {
+        static Dictionary<int, Rule19> _dict = [];
+        static public void Add(string line)
+        {
+            var parts = line.Split(": ");
+            var key = int.Parse(parts[0]);
+            var val = new Rule19(parts[1]);
+            _dict.Add(key, val);
+        }
+
+        internal static void Clear()
+        {
+            _dict.Clear();
+        }
+        static public Rule19 GetRule(int ruleId)
+        {
+            return _dict[ruleId];
         }
     }
 
     class Rule19
 	{
-        public int Id { get; }
         public char Target { get; } = '-';
-        public List<SubRulesSet> SubRuleIds { get; } = [];
+        public List<SubRuleIdSet> SubRuleIds { get; } = [];
 
 
-        public Rule19(string line)
+        public Rule19(string rule)
         {
-            var parts = line.Split(": ");            
-            Id = int.Parse(parts[0]);
-            var rule = parts[1];
             if (rule.Contains('\"'))
             {
                 var subParts = rule.Split('\"', StringSplitOptions.RemoveEmptyEntries).ToList();
@@ -102,71 +116,70 @@ internal class Day19 : IRunner
         public override string ToString()
         {
             if (HasTarget)
-                return $"{Id}: {Target}";
+                return $"{Target}";
             else
-                return $"{Id}: {string.Join("|| ", SubRuleIds)}";
+                return $"{string.Join("|| ", SubRuleIds)}";
         }
 
         internal bool HasTarget => Target != '-';
-
+        static int _maxLen;
         internal bool Matches(string msg)
         {
             var targetStrings = GetRuleStrings();
+            var maxLen = targetStrings.Max(s => s.Length);
+            if (maxLen > _maxLen)
+                _maxLen = maxLen;
+            //Utils.Assert(targetStrings.Distinct().Count() == targetStrings.Count(), "Just enough");
+
             return (targetStrings.Any(t => msg == t));
         }
-        List<string>? _ruleStrings;
-        internal List<string> GetRuleStrings()
+        HashSet<string>? _ruleStrings;
+        internal HashSet<string> GetRuleStrings()
         {
-            if (_ruleStrings != null)
-                return _ruleStrings;
-
-            if (HasTarget)
+            if (_ruleStrings == null)
             {
-
-                _ruleStrings = new List<string> { Target.ToString() };
-                return _ruleStrings;
-            }
-
-            var rv = new List<string>();
-            foreach (var orRule in SubRuleIds)
-            {
-                var strs = new List<string>() { string.Empty };
-                foreach (var andRule in orRule.GetRules())
+                if (HasTarget)
                 {
-                    var ruleStrings = andRule.GetRuleStrings();
-                    strs = AddToAll(strs, ruleStrings);
+                    _ruleStrings = new HashSet<string> { Target.ToString() };
                 }
-                rv.AddRange(strs);
-            }
-            _ruleStrings = rv;
-            return rv;
-        }
+                else
+                {
+                    var rv = new List<string>();
+                    foreach (var orRule in SubRuleIds)
+                    {
+                        var strs = new HashSet<string>() { string.Empty };
+                        foreach (var andRule in orRule.GetRules())
+                        {
+                            var ruleStrings = andRule.GetRuleStrings();
+                            strs = AddToAll(strs, ruleStrings);
+                        }
+                        rv.AddRange(strs);
+                    }
+                    Utils.Assert(rv.Distinct().Count() == rv.Count(), "Just enough");
 
-        List<string> AddToAll(List<string> strs, string added)
-        {
-            return strs.Select(s => s + added).ToList();
+                    _ruleStrings = rv.ToHashSet();
+                }
+            }
+            return _ruleStrings;
         }
-        List<string> AddToAll(List<string> strs, List<string> addeds)
+        HashSet<string> AddToAll(HashSet<string> strs, string added)
+        {
+            return strs.Select(s => s + added).ToHashSet();
+        }
+        HashSet<string> AddToAll(HashSet<string> strs, HashSet<string> addeds)
         {
             var rv = new List<string>();
             foreach (var added in addeds)
                 rv.AddRange(AddToAll(strs, added));
-            return rv;
+            return rv.ToHashSet();
         }
-        public static List<Rule19> AllRules { get; internal set; }
-
-        static public Rule19 GetRule(int ruleId)
-        {
-            return AllRules.Single(r => r.Id == ruleId);
-        }
-
     }
     public RunnerResult Star2(bool isReal)
     {
         var key = new StarCheckKey(StarEnum.Star2, isReal, null);
         var res = new RunnerResult();
         if (!isReal)
-			res.Check = new StarCheck(key, -1L);
+			res.Check = new StarCheck(key, 12L);
 		else
 			res.Check = new StarCheck(key, -1L);
 
@@ -174,8 +187,26 @@ internal class Day19 : IRunner
 		//var text = RunHelper.GetText(key);
 
 		var rv = 0L;
-		// magic
+        // magic
+        RuleSet19.Clear();
+        var msgs = new List<string>();
+        foreach (var line in lines)
+        {
+            if (line.Contains(':'))
+                RuleSet19.Add(new(line));
+            else if (string.IsNullOrWhiteSpace(line))
+                continue;
+            else
+                msgs.Add(line);
+        }
+        var rule8 = RuleSet19.GetRule(8);
+        //rules.Remove(rule8);
 
+
+        var rule0 = RuleSet19.GetRule(0);
+        foreach (var msg in msgs)
+            if (rule0.Matches(msg))
+                rv++;
         res.CheckGuess(rv);
         return res;
 	}
