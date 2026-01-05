@@ -170,7 +170,7 @@ namespace Leaders
 
 		private async void AddNext_Click(object sender, RoutedEventArgs e)
 		{
-			if (MessageBox.Show("Are you sure?", "Sure?", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
+			//if (MessageBox.Show("Are you sure?", "Sure?", MessageBoxButton.YesNoCancel) == MessageBoxResult.Yes)
 			{
 				var day = (int)mnuAddNext.Tag;
 				await ElfHelper.WriteStubFilesAsync(day, true);
